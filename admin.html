@@ -29,14 +29,20 @@ button{
  border:0;border-radius:7px;font-weight:bold;
  cursor:pointer;
 }
+button:disabled{opacity:.6}
 #dashboard{display:none}
-#message{text-align:center;color:#ffd700;overflow-wrap:anywhere}
+#message{
+ text-align:center;color:#ffd700;
+ overflow-wrap:anywhere;
+}
 .stats{
  background:#292929;padding:18px;margin:12px 0;
  border:1px solid #d4af37;border-radius:10px;
  text-align:center;
 }
-.number{font-size:30px;color:#ffd700;font-weight:bold}
+.number{
+ font-size:30px;color:#ffd700;font-weight:bold;
+}
 .user,.details{
  background:#292929;border:1px solid #555;
  padding:12px;margin:10px 0;border-radius:8px;
@@ -60,8 +66,13 @@ button{
 
 <div id="loginBox">
 <h3>ADMIN LOGIN</h3>
-<input type="email" id="adminEmail" placeholder="Admin Email">
-<input type="password" id="adminPassword" placeholder="Admin Password">
+
+<input type="email" id="adminEmail"
+placeholder="Admin Email" autocomplete="username">
+
+<input type="password" id="adminPassword"
+placeholder="Admin Password" autocomplete="current-password">
+
 <button id="loginBtn">ADMIN LOGIN</button>
 </div>
 
@@ -91,7 +102,8 @@ TOTAL DEMO POINTS
 </div>
 
 <h3>🔎 SEARCH USER</h3>
-<input type="search" id="searchUser" placeholder="Search user email...">
+<input type="search" id="searchUser"
+placeholder="Search user email...">
 
 <h3>👥 REGISTERED USER LIST</h3>
 <div id="userList">Loading users...</div>
@@ -99,7 +111,7 @@ TOTAL DEMO POINTS
 <div id="userDetails"></div>
 
 <button id="refreshBtn">REFRESH USERS</button>
-<button id="logoutBtn">LOGOUT</button>
+<button id="logoutBtn" class="secondary">LOGOUT</button>
 
 </div>
 
@@ -108,7 +120,8 @@ TOTAL DEMO POINTS
 
 <script type="module">
 
-import { auth, db } from "./firebase.js";
+// CORRECT FIREBASE FILE
+import { auth, db } from "./firebase-config.js";
 
 import {
  signInWithEmailAndPassword,
@@ -128,26 +141,35 @@ const loginBox = document.getElementById("loginBox");
 const dashboard = document.getElementById("dashboard");
 const message = document.getElementById("message");
 const userList = document.getElementById("userList");
+
 const totalUsers = document.getElementById("totalUsers");
 const todayUsers = document.getElementById("todayUsers");
 const totalGames = document.getElementById("totalGames");
 const totalPoints = document.getElementById("totalPoints");
+
 const searchUser = document.getElementById("searchUser");
 const userDetails = document.getElementById("userDetails");
+const loginBtn = document.getElementById("loginBtn");
 
 let adminVerified = false;
 let allUsers = [];
+let loginInProgress = false;
 
 // ADMIN LOGIN
-document.getElementById("loginBtn").onclick = async function(){
+loginBtn.addEventListener("click", async function(){
 
- if(!email.value || !password.value){
+ if(loginInProgress) return;
+
+ if(!email.value.trim() || !password.value){
   message.textContent = "Enter Email and Password";
   return;
  }
 
+ loginInProgress = true;
+ loginBtn.disabled = true;
+ message.textContent = "Checking Admin Access...";
+
  try{
-  message.textContent = "Checking Admin Access...";
 
   await signInWithEmailAndPassword(
    auth,
@@ -155,29 +177,46 @@ document.getElementById("loginBtn").onclick = async function(){
    password.value
   );
 
- }catch(error){
-  message.textContent = error.message;
- }
-};
+  message.textContent = "Login Successful. Verifying Admin...";
 
-// CHECK ADMIN
-onAuthStateChanged(auth,async(user)=>{
+ }catch(error){
+
+  message.textContent =
+   "Login Error: " + error.message;
+
+ }finally{
+
+  loginInProgress = false;
+  loginBtn.disabled = false;
+
+ }
+
+});
+
+// CHECK ADMIN LOGIN
+onAuthStateChanged(auth, async(user)=>{
 
  adminVerified = false;
 
  if(!user){
+
   loginBox.style.display = "block";
   dashboard.style.display = "none";
   message.textContent = "Please Admin Login";
+
   return;
  }
 
+ message.textContent = "Verifying Admin Permission...";
+
  try{
+
   const token = await getIdTokenResult(user,true);
 
   if(token.claims.admin === true){
 
    adminVerified = true;
+
    loginBox.style.display = "none";
    dashboard.style.display = "block";
 
@@ -189,29 +228,45 @@ onAuthStateChanged(auth,async(user)=>{
    await loadUsers();
 
   }else{
+
    await signOut(auth);
+
+   loginBox.style.display = "block";
+   dashboard.style.display = "none";
+
    message.textContent =
     "Access Denied: Admin permission not assigned.";
+
   }
 
  }catch(error){
-  await signOut(auth);
-  message.textContent = error.message;
+
+  adminVerified = false;
+
+  loginBox.style.display = "block";
+  dashboard.style.display = "none";
+
+  message.textContent =
+   "Admin Verification Error: " + error.message;
+
  }
+
 });
 
-// LOAD USERS AND ACTIVITY
+// LOAD USERS
 async function loadUsers(){
 
  if(!adminVerified) return;
 
  userList.textContent = "Loading users...";
+
  totalUsers.textContent = "...";
  todayUsers.textContent = "...";
  totalGames.textContent = "...";
  totalPoints.textContent = "...";
 
  try{
+
   const snapshot = await get(ref(db,"users"));
 
   if(!adminVerified) return;
@@ -219,17 +274,21 @@ async function loadUsers(){
   allUsers = [];
 
   if(snapshot.exists()){
+
    const users = snapshot.val();
 
    allUsers = Object.entries(users).map(([uid,data])=>({
+
     uid:uid,
     email:data.email || "No Email",
-    createdAt:data.createdAt || 0,
-    lastLoginAt:data.lastLoginAt || 0,
+    createdAt:Number(data.createdAt || 0),
+    lastLoginAt:Number(data.lastLoginAt || 0),
     gamePlayed:Number(data.gamePlayed || 0),
     demoPoints:Number(data.demoPoints || 0),
-    lastGameActivity:data.lastGameActivity || 0
+    lastGameActivity:Number(data.lastGameActivity || 0)
+
    }));
+
   }
 
   totalUsers.textContent = allUsers.length;
@@ -265,14 +324,18 @@ async function loadUsers(){
 
   userList.textContent =
    "Error loading users: " + error.message;
+
  }
+
 }
 
 // FORMAT DATE
 function formatDate(timestamp){
+
  return timestamp
   ? new Date(timestamp).toLocaleString()
   : "Not recorded";
+
 }
 
 // SHOW USER LIST
@@ -289,8 +352,10 @@ function renderUsers(query=""){
  );
 
  if(filtered.length === 0){
+
   userList.textContent = "No matching users found.";
   return;
+
  }
 
  filtered.forEach((user,index)=>{
@@ -327,7 +392,9 @@ function renderUsers(query=""){
   );
 
   userList.appendChild(card);
+
  });
+
 }
 
 // USER DETAILS
@@ -403,6 +470,7 @@ function showDetails(user){
  );
 
  userDetails.appendChild(card);
+
 }
 
 // COPY TEXT
@@ -411,24 +479,33 @@ async function copyText(value){
  if(!adminVerified) return;
 
  try{
+
   await navigator.clipboard.writeText(value);
   message.textContent = "Copied Successfully!";
+
  }catch(error){
+
   message.textContent =
-   "Copy failed. Please use a secure HTTPS page.";
+   "Copy failed. Please use HTTPS page.";
+
  }
+
 }
 
 // SEARCH
 searchUser.addEventListener("input",()=>{
+
  renderUsers(searchUser.value);
  userDetails.replaceChildren();
+
 });
 
 // REFRESH
 document.getElementById("refreshBtn").onclick =
 async function(){
+
  await loadUsers();
+
 };
 
 // LOGOUT
@@ -437,9 +514,11 @@ async function(){
 
  adminVerified = false;
  allUsers = [];
+
  userDetails.replaceChildren();
 
  await signOut(auth);
+
 };
 
 </script>

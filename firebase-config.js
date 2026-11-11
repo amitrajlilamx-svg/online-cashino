@@ -6,7 +6,7 @@ import { getAuth } from "https://www.gstatic.com/firebasejs/13.2.0/firebase-auth
 import { getDatabase } from "https://www.gstatic.com/firebasejs/13.2.0/firebase-database.js";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyCxWyQiqPbatAg6OmVqFwiIG5_SZ5aaIE",
+  apiKey: "AIzaSyCxWyQiqPbatAg6OmVfqFwiIG5_SZ5aaIE",
   authDomain: "online-cashino-11c83.firebaseapp.com",
   databaseURL: "https://online-cashino-11c83-default-rtdb.asia-southeast1.firebasedatabase.app",
   projectId: "online-cashino-11c83",
@@ -19,7 +19,6 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 
 export const auth = getAuth(app);
-
 export const db = getDatabase(app);
 
 console.log("ONLINE CASHINO FIREBASE CONNECTED!");

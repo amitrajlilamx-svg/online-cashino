@@ -31,6 +31,12 @@
     <p id="message">Please Login or Create Account</p>
   </div>
 
+  <div id="userMenu" hidden>
+    <h3>👤 USER MENU</h3>
+    <button id="profileBtn">👤 MY PROFILE</button>
+    <button id="walletBtn">🎁 MY WALLET</button>
+  </div>
+
   <div class="game-box">
     <h3>🎁 बाबाको खजाना</h3>
     <p>Free Demo Entertainment Game</p>
@@ -63,6 +69,26 @@
 
 <script type="module" src="auth.js"></script>
 <script type="module" src="game.js"></script>
+
+<script type="module">
+import { auth } from "./firebase-config.js";
+import { onAuthStateChanged } from
+"https://www.gstatic.com/firebasejs/13.2.0/firebase-auth.js";
+
+const userMenu = document.getElementById("userMenu");
+
+onAuthStateChanged(auth, user => {
+  userMenu.hidden = !user;
+});
+
+document.getElementById("profileBtn").addEventListener("click", () => {
+  window.location.href = "profile.html";
+});
+
+document.getElementById("walletBtn").addEventListener("click", () => {
+  window.location.href = "wallet.html";
+});
+</script>
 
 </body>
 </html>

@@ -1,0 +1,683 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ONLINE CASHINO - Admin Panel</title>
+
+<style>
+*{box-sizing:border-box}
+body{
+ margin:0;padding:16px;background:#101010;
+ color:white;font-family:Arial,sans-serif;
+}
+.container{
+ max-width:650px;margin:25px auto;padding:20px;
+ background:#1d1d1d;border:1px solid #d4af37;
+ border-radius:15px;
+}
+h1,h2{text-align:center;color:#ffd700}
+input{
+ width:100%;padding:13px;margin:10px 0;
+ border:1px solid #d4af37;border-radius:7px;
+ background:#101010;color:white;
+}
+button{
+ width:100%;padding:13px;margin-top:10px;
+ background:linear-gradient(45deg,#b8860b,#ffd700);
+ border:0;border-radius:7px;font-weight:bold;
+ cursor:pointer;
+}
+button:disabled{opacity:.6}
+#dashboard{display:none}
+#message{
+ text-align:center;color:#ffd700;
+ overflow-wrap:anywhere;
+}
+.stats{
+ background:#292929;padding:18px;margin:12px 0;
+ border:1px solid #d4af37;border-radius:10px;
+ text-align:center;
+}
+.number{
+ font-size:30px;color:#ffd700;font-weight:bold;
+}
+.user,.details{
+ background:#292929;border:1px solid #555;
+ padding:12px;margin:10px 0;border-radius:8px;
+ overflow-wrap:anywhere;
+}
+.details{border-color:#d4af37}
+.user small,.details small{
+ display:block;color:#bbb;margin-top:7px;
+}
+.status{color:#70e090;font-weight:bold}
+.secondary{background:#444;color:white}
+.addPoints{background:#168c45;color:white}
+.historyItem{
+ background:#171717;border:1px solid #555;
+ padding:10px;margin:8px 0;border-radius:7px;
+ line-height:1.6;
+}
+#userList{margin-top:15px}
+</style>
+</head>
+
+<body>
+<div class="container">
+
+<h1>🎰 ONLINE CASHINO</h1>
+<h2>ADMIN PANEL</h2>
+
+<div id="loginBox">
+<h3>ADMIN LOGIN</h3>
+
+<input type="email" id="adminEmail"
+placeholder="Admin Email" autocomplete="username">
+
+<input type="password" id="adminPassword"
+placeholder="Admin Password" autocomplete="current-password">
+
+<button id="loginBtn">ADMIN LOGIN</button>
+</div>
+
+<div id="dashboard">
+
+<h2>ADMIN DASHBOARD</h2>
+<p id="adminInfo"></p>
+
+<div class="stats">
+TOTAL REGISTERED USERS
+<div class="number" id="totalUsers">0</div>
+</div>
+
+<div class="stats">
+NEW USERS TODAY
+<div class="number" id="todayUsers">0</div>
+</div>
+
+<div class="stats">
+TOTAL GAMES PLAYED
+<div class="number" id="totalGames">0</div>
+</div>
+
+<div class="stats">
+TOTAL DEMO POINTS
+<div class="number" id="totalPoints">0</div>
+</div>
+
+<h3>🔎 SEARCH USER</h3>
+<input type="search" id="searchUser"
+placeholder="Search user email...">
+
+<h3>👥 REGISTERED USER LIST</h3>
+<div id="userList">Loading users...</div>
+
+<div id="userDetails"></div>
+
+<button id="refreshBtn">REFRESH USERS</button>
+<button id="logoutBtn" class="secondary">LOGOUT</button>
+
+</div>
+
+<p id="message">Secure Admin Access</p>
+</div>
+
+<script type="module">
+
+import { auth, db } from "./firebase-config.js";
+
+import {
+ signInWithEmailAndPassword,
+ signOut,
+ onAuthStateChanged,
+ getIdTokenResult
+} from "https://www.gstatic.com/firebasejs/13.2.0/firebase-auth.js";
+
+import {
+ ref,
+ get,
+ update,
+ push
+} from "https://www.gstatic.com/firebasejs/13.2.0/firebase-database.js";
+
+const $ = id => document.getElementById(id);
+
+let adminVerified=false;
+let allUsers=[];
+let loginInProgress=false;
+
+function formatDate(timestamp){
+ return timestamp
+  ? new Date(timestamp).toLocaleString()
+  : "Not recorded";
+}
+
+// ADMIN LOGIN
+$("loginBtn").addEventListener("click",async()=>{
+
+ if(loginInProgress)return;
+
+ if(!$("adminEmail").value.trim() ||
+    !$("adminPassword").value){
+  $("message").textContent="Enter Email and Password";
+  return;
+ }
+
+ loginInProgress=true;
+ $("loginBtn").disabled=true;
+ $("message").textContent="Checking Admin Access...";
+
+ try{
+
+  await signInWithEmailAndPassword(
+   auth,
+   $("adminEmail").value.trim(),
+   $("adminPassword").value
+  );
+
+ }catch(error){
+
+  $("message").textContent=
+   "Login Error: "+error.code+" - "+error.message;
+
+ }finally{
+
+  loginInProgress=false;
+  $("loginBtn").disabled=false;
+
+ }
+
+});
+
+// VERIFY ADMIN
+onAuthStateChanged(auth,async user=>{
+
+ adminVerified=false;
+
+ if(!user){
+
+  $("loginBox").style.display="block";
+  $("dashboard").style.display="none";
+  $("message").textContent="Please Admin Login";
+  return;
+
+ }
+
+ $("message").textContent="Verifying Admin Permission...";
+
+ try{
+
+  const token=await getIdTokenResult(user,true);
+
+  if(token.claims.admin===true){
+
+   adminVerified=true;
+
+   $("loginBox").style.display="none";
+   $("dashboard").style.display="block";
+
+   $("adminInfo").textContent="Admin: "+user.email;
+   $("message").textContent="Admin Verified";
+
+   await loadUsers();
+
+  }else{
+
+   await signOut(auth);
+
+   $("loginBox").style.display="block";
+   $("dashboard").style.display="none";
+
+   $("message").textContent=
+    "Access Denied: Admin permission not assigned.";
+
+  }
+
+ }catch(error){
+
+  adminVerified=false;
+
+  $("loginBox").style.display="block";
+  $("dashboard").style.display="none";
+
+  $("message").textContent=
+   "Admin Error: "+error.code+" - "+error.message;
+
+ }
+
+});
+
+// LOAD USERS
+async function loadUsers(){
+
+ if(!adminVerified)return;
+
+ $("userList").textContent="Loading users...";
+
+ try{
+
+  const snapshot=await get(ref(db,"users"));
+
+  if(!adminVerified)return;
+
+  allUsers=[];
+
+  if(snapshot.exists()){
+
+   const users=snapshot.val();
+
+   allUsers=Object.entries(users).map(([uid,data])=>({
+
+    uid,
+    email:data.email||"No Email",
+    createdAt:Number(data.createdAt)||0,
+    lastLoginAt:Number(data.lastLoginAt)||0,
+    gamePlayed:Number(data.gamePlayed)||0,
+    demoPoints:Number(data.demoPoints)||0,
+    lastGameActivity:Number(data.lastGameActivity)||0
+
+   }));
+
+  }
+
+  $("totalUsers").textContent=allUsers.length;
+
+  const start=new Date();
+  start.setHours(0,0,0,0);
+
+  $("todayUsers").textContent=allUsers.filter(
+   u=>u.createdAt>=start.getTime()
+  ).length;
+
+  $("totalGames").textContent=allUsers.reduce(
+   (sum,u)=>sum+u.gamePlayed,0
+  );
+
+  $("totalPoints").textContent=allUsers.reduce(
+   (sum,u)=>sum+u.demoPoints,0
+  );
+
+  renderUsers($("searchUser").value);
+
+ }catch(error){
+
+  $("userList").textContent=
+   "Load Error: "+error.code+" - "+error.message;
+
+  $("message").textContent=
+   "Database Error: "+error.code+" - "+error.message;
+
+  console.error(error);
+
+ }
+
+}
+
+// DISPLAY USERS
+function renderUsers(query=""){
+
+ if(!adminVerified)return;
+
+ $("userList").replaceChildren();
+
+ const filtered=allUsers.filter(u=>
+  u.email.toLowerCase().includes(query.trim().toLowerCase())
+ );
+
+ if(filtered.length===0){
+  $("userList").textContent="No matching users found.";
+  return;
+ }
+
+ filtered.forEach((user,index)=>{
+
+  const card=document.createElement("div");
+  card.className="user";
+
+  const heading=document.createElement("strong");
+  heading.textContent=(index+1)+". "+user.email;
+
+  const date=document.createElement("small");
+  date.textContent="Created: "+formatDate(user.createdAt);
+
+  const points=document.createElement("small");
+  points.textContent="Demo Points: "+user.demoPoints;
+
+  const games=document.createElement("small");
+  games.textContent="Games Played: "+user.gamePlayed;
+
+  const activity=document.createElement("small");
+  activity.textContent="Last Game: "+formatDate(user.lastGameActivity);
+
+  const view=document.createElement("button");
+  view.textContent="VIEW DETAILS";
+
+  view.addEventListener("click",()=>{
+   showDetails(user);
+  });
+
+  card.append(heading,date,points,games,activity,view);
+  $("userList").appendChild(card);
+
+ });
+
+}
+
+// ADD DEMO POINTS
+async function addDemoPoints(user){
+
+ if(!adminVerified||!auth.currentUser){
+  alert("Admin verification required.");
+  return;
+ }
+
+ const amountText=prompt(
+  "Enter Demo Points for "+user.email+
+  "\nCurrent Balance: "+user.demoPoints
+ );
+
+ if(amountText===null)return;
+
+ if(!/^[0-9]+$/.test(amountText.trim())){
+  alert("Enter a positive whole number.");
+  return;
+ }
+
+ const amount=Number(amountText);
+
+ if(!Number.isSafeInteger(amount)||amount<=0){
+  alert("Invalid points amount.");
+  return;
+ }
+
+ if(!confirm(
+  "Add "+amount+" Demo Points to "+user.email+"?"
+ ))return;
+
+ $("message").textContent="Checking User Balance...";
+
+ try{
+
+  // Read latest user record
+  const userRef=ref(db,"users/"+user.uid);
+  const userSnapshot=await get(userRef);
+
+  if(!userSnapshot.exists()){
+   throw new Error("User record does not exist in Database.");
+  }
+
+  const current=userSnapshot.val();
+
+  const oldBalance=Number(current.demoPoints)||0;
+  const newBalance=oldBalance+amount;
+
+  if(!Number.isSafeInteger(newBalance)){
+   throw new Error("Balance is too large.");
+  }
+
+  // Create unique history ID
+  const historyRef=push(
+   ref(db,"users/"+user.uid+"/transactions")
+  );
+
+  const transactionKey=historyRef.key;
+
+  if(!transactionKey){
+   throw new Error("Could not create history ID.");
+  }
+
+  const now=Date.now();
+
+  // Update balance and history together
+  const changes={};
+
+  changes["demoPoints"]=newBalance;
+
+  changes["transactions/"+transactionKey]={
+   type:"ADMIN_CREDIT",
+   pointsChange:amount,
+   balanceAfter:newBalance,
+   createdAt:now,
+   adminEmail:auth.currentUser.email||"Admin"
+  };
+
+  $("message").textContent="Updating User Balance...";
+
+  await update(userRef,changes);
+
+  alert(
+   "SUCCESS!\n\n"+
+   amount+" Demo Points added to "+user.email+
+   "\nNew Balance: "+newBalance
+  );
+
+  $("message").textContent="Demo Points Updated Successfully!";
+
+  await loadUsers();
+
+  const updatedUser=allUsers.find(
+   u=>u.uid===user.uid
+  );
+
+  if(updatedUser){
+   showDetails(updatedUser);
+  }
+
+ }catch(error){
+
+  console.error("ADD POINTS ERROR:",error);
+
+  $("message").textContent=
+   "Add Points Error: "+(error.code||"UNKNOWN")+
+   " - "+error.message;
+
+  alert(
+   "ADD POINTS FAILED\n\n"+
+   "Error Code: "+(error.code||"UNKNOWN")+
+   "\nMessage: "+error.message+
+   "\n\nSend this error to ChatGPT."
+  );
+
+ }
+
+}
+
+// VIEW HISTORY
+async function showPointsHistory(uid){
+
+ const box=$("pointsHistory");
+
+ if(!box||!adminVerified)return;
+
+ box.textContent="Loading Points History...";
+
+ try{
+
+  const snapshot=await get(
+   ref(db,"users/"+uid+"/transactions")
+  );
+
+  if(!adminVerified)return;
+
+  box.replaceChildren();
+
+  if(!snapshot.exists()){
+   box.textContent="No Points History Found.";
+   return;
+  }
+
+  const entries=Object.entries(snapshot.val())
+   .map(([id,item])=>({id,...item}))
+   .sort((a,b)=>
+    (Number(b.createdAt)||0)-(Number(a.createdAt)||0)
+   );
+
+  entries.forEach(item=>{
+
+   const div=document.createElement("div");
+   div.className="historyItem";
+
+   const type=document.createElement("strong");
+   type.textContent=item.type||"TRANSACTION";
+
+   const change=document.createElement("small");
+   change.textContent=
+    "Points Change: "+(Number(item.pointsChange)||0);
+
+   const balance=document.createElement("small");
+   balance.textContent=
+    "Balance After: "+(Number(item.balanceAfter)||0);
+
+   const date=document.createElement("small");
+   date.textContent=
+    "Date: "+formatDate(Number(item.createdAt)||0);
+
+   div.append(type,change,balance,date);
+
+   if(item.winningNumber!==undefined){
+    const win=document.createElement("small");
+    win.textContent="Winning Number: "+item.winningNumber;
+    div.appendChild(win);
+   }
+
+   if(item.adminEmail){
+    const admin=document.createElement("small");
+    admin.textContent="Admin: "+item.adminEmail;
+    div.appendChild(admin);
+   }
+
+   box.appendChild(div);
+
+  });
+
+ }catch(error){
+
+  console.error(error);
+
+  box.textContent=
+   "History Error: "+(error.code||"UNKNOWN")+
+   " - "+error.message;
+
+ }
+
+}
+
+// USER DETAILS
+function showDetails(user){
+
+ if(!adminVerified)return;
+
+ $("userDetails").replaceChildren();
+
+ const card=document.createElement("div");
+ card.className="details";
+
+ const title=document.createElement("h3");
+ title.textContent="👤 USER DETAILS";
+
+ const fields=[
+  "Email: "+user.email,
+  "UID: "+user.uid,
+  "Created: "+formatDate(user.createdAt),
+  "Last Login: "+formatDate(user.lastLoginAt),
+  "🎁 Demo Points: "+user.demoPoints,
+  "🎮 Games Played: "+user.gamePlayed,
+  "Last Game Activity: "+formatDate(user.lastGameActivity)
+ ];
+
+ card.appendChild(title);
+
+ fields.forEach(value=>{
+  const line=document.createElement("small");
+  line.textContent=value;
+  card.appendChild(line);
+ });
+
+ const status=document.createElement("p");
+ status.className="status";
+ status.textContent="Account Status: REGISTERED";
+
+ const add=document.createElement("button");
+ add.className="addPoints";
+ add.textContent="🎁 ADD DEMO POINTS";
+ add.onclick=()=>addDemoPoints(user);
+
+ const history=document.createElement("button");
+ history.textContent="📜 VIEW POINTS HISTORY";
+ history.onclick=()=>showPointsHistory(user.uid);
+
+ const historyTitle=document.createElement("h3");
+ historyTitle.textContent="📜 USER POINTS HISTORY";
+
+ const historyBox=document.createElement("div");
+ historyBox.id="pointsHistory";
+ historyBox.textContent="Press VIEW POINTS HISTORY.";
+
+ const copyEmail=document.createElement("button");
+ copyEmail.textContent="COPY EMAIL";
+ copyEmail.onclick=()=>copyText(user.email);
+
+ const copyUID=document.createElement("button");
+ copyUID.textContent="COPY UID";
+ copyUID.onclick=()=>copyText(user.uid);
+
+ const close=document.createElement("button");
+ close.className="secondary";
+ close.textContent="CLOSE DETAILS";
+ close.onclick=()=>$("userDetails").replaceChildren();
+
+ card.append(
+  status,add,history,historyTitle,historyBox,
+  copyEmail,copyUID,close
+ );
+
+ $("userDetails").appendChild(card);
+
+}
+
+// COPY
+async function copyText(value){
+
+ if(!adminVerified)return;
+
+ try{
+
+  await navigator.clipboard.writeText(value);
+  $("message").textContent="Copied Successfully!";
+
+ }catch(error){
+
+  $("message").textContent="Copy failed. Use HTTPS page.";
+
+ }
+
+}
+
+// SEARCH
+$("searchUser").addEventListener("input",()=>{
+ renderUsers($("searchUser").value);
+ $("userDetails").replaceChildren();
+});
+
+// REFRESH
+$("refreshBtn").onclick=async()=>{
+ await loadUsers();
+ $("userDetails").replaceChildren();
+};
+
+// LOGOUT
+$("logoutBtn").onclick=async()=>{
+
+ adminVerified=false;
+ allUsers=[];
+ $("userDetails").replaceChildren();
+
+ await signOut(auth);
+
+};
+
+</script>
+</body>
+</html>

@@ -1,0 +1,831 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ONLINE CASHINO - Roulette</title>
+
+<style>
+*{box-sizing:border-box}
+body{margin:0;padding:12px;background:#101010;color:white;font-family:Arial,sans-serif}
+.container{max-width:550px;margin:auto;padding:16px;background:#1c1c1c;border-radius:15px;text-align:center}
+h1,h3{color:#ffc107}
+.balance{padding:14px;background:#292929;color:#ffc107;border-radius:10px;font-size:20px;font-weight:bold}
+.auto-status{margin-top:12px;padding:12px;background:#12351e;color:#00e676;border-radius:8px;font-weight:bold}
+.countdown{margin-top:10px;padding:12px;background:#12351e;color:#00e676;border-radius:8px;font-size:30px;font-weight:bold}
+.countdown.locked{background:#421b1b;color:#ff5252}
+.betting-status{font-size:13px;margin-top:7px;color:#00e676;font-weight:bold}
+.wheel-area{width:min(88vw,340px);aspect-ratio:1;margin:28px auto;position:relative}
+.wheel{position:absolute;inset:0;border:9px solid #d5ad55;border-radius:50%;transition:transform 5.2s cubic-bezier(.12,.7,.12,1);box-shadow:0 0 20px #000,inset 0 0 12px #000}
+.wheel-number{position:absolute;width:27px;height:27px;margin:0;display:flex;align-items:center;justify-content:center;border-radius:50%;border:1px solid #d9bd78;color:white;font-size:11px;font-weight:bold;z-index:2;text-shadow:0 1px 3px black}
+.pointer{position:absolute;top:-19px;left:50%;transform:translateX(-50%);z-index:6;color:#ffc107;font-size:30px}
+.section{background:#292929;padding:13px;border-radius:10px;margin-top:16px}
+.number-board,.options{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin-top:12px}
+.options{grid-template-columns:repeat(2,minmax(0,1fr))}
+button{border-radius:8px;padding:11px;font-weight:bold;cursor:pointer}
+button:disabled{opacity:.4;cursor:not-allowed}
+.number{border:2px solid #555;min-height:45px;color:white}
+.red{background:#c62828}
+.black{background:#111}
+.green{background:#008000}
+.zero{grid-column:1/4}
+.number.active,.option.active{outline:3px solid #ffc107}
+.number.winner{outline:4px solid #00e676}
+.option{background:#444;color:white;border:2px solid #555}
+.stake-input{width:100%;padding:13px;font-size:18px;background:#111;color:white;border:2px solid #ffc107;border-radius:8px;text-align:center}
+.summary,.result,.history-item{background:#171717;padding:12px;border-radius:8px;margin-top:12px;text-align:left;line-height:1.8;overflow-wrap:anywhere}
+.result{text-align:center}
+.result-number{font-size:38px;font-weight:bold}
+.history-item{margin-bottom:8px;border-left:3px solid #ffc107}
+.history-top{font-weight:bold;color:#ffc107}
+.back{width:100%;padding:14px;margin-top:12px;background:#2196f3;color:white;border:0;font-size:16px}
+.notice{font-size:12px;color:#aaa;margin-top:20px}
+</style>
+</head>
+
+<body>
+<div class="container">
+
+<h1>🎰 ONLINE CASHINO</h1>
+<h2>🎡 ROULETTE GAME</h2>
+<p>DEMO POINTS ROULETTE</p>
+
+<div class="balance">
+MY DEMO POINTS: <span id="balance">Loading...</span>
+</div>
+
+<div class="auto-status" id="autoStatus">🟢 AUTO SPIN READY</div>
+<div class="countdown" id="countdown">20.2</div>
+<div class="betting-status" id="bettingStatus">LOGIN REQUIRED</div>
+
+<div class="wheel-area">
+ <div class="pointer">▼</div>
+ <div class="wheel" id="wheel"></div>
+</div>
+
+<div class="section">
+<h3>🎯 SELECT NUMBERS (0–36)</h3>
+<div class="options">
+<button class="option" data-action="all">ALL NUMBERS</button>
+<button class="option" data-action="clear">CLEAR NUMBERS</button>
+</div>
+<div class="number-board" id="numberBoard"></div>
+</div>
+
+<div class="section">
+<h3>🎨 OUTSIDE BETS</h3>
+<div class="options">
+<button class="option" data-bet="even">EVEN (2×)</button>
+<button class="option" data-bet="odd">ODD (2×)</button>
+<button class="option" data-bet="red">RED (2×)</button>
+<button class="option" data-bet="black">BLACK (2×)</button>
+<button class="option" data-bet="low">1–18 (2×)</button>
+<button class="option" data-bet="high">19–36 (2×)</button>
+<button class="option" data-bet="dozen1">1–12 (3×)</button>
+<button class="option" data-bet="dozen2">13–24 (3×)</button>
+<button class="option" data-bet="dozen3">25–36 (3×)</button>
+</div>
+</div>
+
+<div class="section">
+<h3>💎 POINTS PER SELECTION</h3>
+<input class="stake-input" id="stakeInput" type="number" min="1" step="1" value="1">
+<div class="summary">
+Selected bets: <b id="selectedCount">0</b><br>
+Selected: <span id="selectedList">None</span><br>
+Points per selection: <b id="stakeDisplay">1</b><br>
+Total points: <b id="totalStake">0</b>
+</div>
+</div>
+
+<div class="result" id="result">Please login first!</div>
+
+<div class="history">
+<h3>📜 LAST 50 SPIN HISTORY</h3>
+<div id="historyList">No spins yet.</div>
+</div>
+
+<button class="back" id="backBtn">🏠 BACK TO HOME</button>
+
+<div class="notice">
+Demo points have no cash value. No deposits, withdrawals or cash prizes.
+</div>
+
+</div>
+
+<script type="module">
+
+import {auth,db} from "./firebase-config.js";
+
+import {
+onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/13.2.0/firebase-auth.js";
+
+import {
+ref,get,push,runTransaction,query,orderByChild,limitToLast
+} from "https://www.gstatic.com/firebasejs/13.2.0/firebase-database.js";
+
+const $=id=>document.getElementById(id);
+const wheel=$("wheel");
+const board=$("numberBoard");
+
+/* AUTO SPIN TIMING */
+const SPIN_INTERVAL=20200;
+const SPIN_DURATION=5200;
+const LOCK_SECONDS=3000;
+
+const numbers=[
+0,32,15,19,4,21,2,25,17,34,6,27,13,36,11,30,8,23,
+10,5,24,16,33,1,20,14,31,9,22,18,29,7,28,12,35,3,26
+];
+
+const redNumbers=new Set([
+1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36
+]);
+
+const betInfo={
+even:["EVEN",2],
+odd:["ODD",2],
+red:["RED",2],
+black:["BLACK",2],
+low:["1-18",2],
+high:["19-36",2],
+dozen1:["1-12",3],
+dozen2:["13-24",3],
+dozen3:["25-36",3]
+};
+
+let currentUser=null;
+let userRecordCache=null;
+let balance=0;
+let spinning=false;
+let rotation=0;
+let countdown=20.2;
+let bettingOpen=false;
+let countdownTimer=null;
+let selectedNumbers=new Set();
+let selectedBets=new Set();
+
+function colorOf(n){
+ return n===0?"GREEN":redNumbers.has(n)?"RED":"BLACK";
+}
+
+function colorClass(n){
+ return n===0?"green":redNumbers.has(n)?"red":"black";
+}
+
+/* NUMBER BOARD */
+
+function createBoard(){
+
+ board.innerHTML="";
+
+ for(let n=0;n<=36;n++){
+
+  const b=document.createElement("button");
+  b.className="number "+(n===0?"zero ":"")+colorClass(n);
+  b.dataset.number=n;
+  b.textContent=n;
+  board.appendChild(b);
+ }
+}
+
+/* WHEEL */
+
+function createWheel(){
+
+ const segment=360/numbers.length;
+
+ const colors=numbers.map(n=>
+  n===0?"#008000":redNumbers.has(n)?"#c62828":"#111"
+ );
+
+ wheel.style.background=
+ "conic-gradient("+colors.map((c,i)=>
+  `${c} ${i*segment}deg ${(i+1)*segment}deg`
+ ).join(",")+")";
+
+ wheel.innerHTML="";
+
+ const radius=(wheel.clientWidth/2)-15;
+
+ numbers.forEach((n,i)=>{
+
+  const angle=i*segment+segment/2;
+  const rad=(angle-90)*Math.PI/180;
+  const x=Math.cos(rad)*radius;
+  const y=Math.sin(rad)*radius;
+
+  const label=document.createElement("div");
+  label.className="wheel-number";
+  label.textContent=n;
+  label.style.background=colors[i];
+  label.style.left=`calc(50% + ${x}px)`;
+  label.style.top=`calc(50% + ${y}px)`;
+  label.style.transform="translate(-50%,-50%)";
+  wheel.appendChild(label);
+ });
+}
+
+/* BETTING UI */
+
+function updateBettingUI(){
+
+ $("countdown").textContent=countdown;
+
+ const locked=!bettingOpen||spinning||!currentUser;
+
+ $("countdown").classList.toggle("locked",locked);
+
+ if(!currentUser){
+
+  $("autoStatus").textContent="🔴 LOGIN REQUIRED";
+  $("bettingStatus").textContent="Please login first.";
+
+ }else if(spinning){
+
+  $("autoStatus").textContent="🎡 SPINNING...";
+  $("bettingStatus").textContent="🔒 BETTING CLOSED";
+
+ }else if(bettingOpen){
+
+  $("autoStatus").textContent="🟢 AUTO SPIN ACTIVE";
+  $("bettingStatus").textContent="🟢 BETTING OPEN";
+
+ }else{
+
+  $("autoStatus").textContent="🔴 BETTING CLOSED";
+  $("bettingStatus").textContent="🔒 LAST 3 SECONDS - BETTING LOCKED";
+ }
+
+ document.querySelectorAll("[data-number],[data-bet],[data-action]").forEach(b=>{
+  b.disabled=locked;
+ });
+
+ $("stakeInput").disabled=locked;
+
+ updateSummary();
+}
+
+/* COUNTDOWN */
+
+function stopCountdown(){
+
+ if(countdownTimer){
+  clearInterval(countdownTimer);
+  countdownTimer=null;
+ }
+}
+
+function startCountdown(duration=SPIN_INTERVAL){
+
+ stopCountdown();
+
+ if(!currentUser||spinning)return;
+
+ const endTime=Date.now()+Math.max(0,duration);
+
+ function tick(){
+
+  if(!currentUser||spinning){
+   stopCountdown();
+   return;
+  }
+
+  const remaining=Math.max(0,endTime-Date.now());
+
+  countdown=(remaining/1000).toFixed(1);
+
+  bettingOpen=remaining>LOCK_SECONDS;
+
+  updateBettingUI();
+
+  if(remaining<=0){
+
+   stopCountdown();
+   bettingOpen=false;
+   countdown="0.0";
+   updateBettingUI();
+
+   startSpin();
+  }
+ }
+
+ tick();
+
+ if(endTime>Date.now()){
+  countdownTimer=setInterval(tick,100);
+ }
+}
+
+/* BETS */
+
+function getBets(){
+
+ const stake=Number($("stakeInput").value);
+ const bets=[];
+
+ selectedNumbers.forEach(n=>{
+
+  bets.push({
+   id:"number_"+n,
+   label:"NUMBER "+n,
+   number:n,
+   multiplier:36,
+   stake
+  });
+ });
+
+ selectedBets.forEach(k=>{
+
+  bets.push({
+   id:k,
+   label:betInfo[k][0],
+   multiplier:betInfo[k][1],
+   stake
+  });
+ });
+
+ return bets;
+}
+
+function updateSummary(){
+
+ const bets=getBets();
+ const total=bets.reduce((s,b)=>s+b.stake,0);
+
+ $("selectedCount").textContent=bets.length;
+ $("selectedList").textContent=
+  bets.map(b=>b.label).join(", ")||"None";
+
+ $("stakeDisplay").textContent=$("stakeInput").value||0;
+ $("totalStake").textContent=total;
+}
+
+function refresh(){
+
+ document.querySelectorAll("[data-number]").forEach(b=>{
+  b.classList.toggle(
+   "active",
+   selectedNumbers.has(Number(b.dataset.number))
+  );
+ });
+
+ document.querySelectorAll("[data-bet]").forEach(b=>{
+  b.classList.toggle(
+   "active",
+   selectedBets.has(b.dataset.bet)
+  );
+ });
+
+ updateBettingUI();
+}
+
+/* BET SELECTION */
+
+board.addEventListener("click",e=>{
+
+ const b=e.target.closest("[data-number]");
+
+ if(!b||!currentUser||!bettingOpen||spinning)return;
+
+ const n=Number(b.dataset.number);
+
+ if(selectedNumbers.has(n)){
+  selectedNumbers.delete(n);
+ }else{
+  selectedNumbers.add(n);
+ }
+
+ refresh();
+});
+
+document.querySelectorAll("[data-bet]").forEach(b=>{
+
+ b.addEventListener("click",()=>{
+
+  if(!currentUser||!bettingOpen||spinning)return;
+
+  const k=b.dataset.bet;
+
+  if(selectedBets.has(k)){
+   selectedBets.delete(k);
+  }else{
+   selectedBets.add(k);
+  }
+
+  refresh();
+ });
+});
+
+document.querySelector('[data-action="all"]').addEventListener("click",()=>{
+
+ if(!currentUser||!bettingOpen||spinning)return;
+
+ selectedNumbers=new Set(Array.from({length:37},(_,i)=>i));
+ refresh();
+});
+
+document.querySelector('[data-action="clear"]').addEventListener("click",()=>{
+
+ if(!currentUser||!bettingOpen||spinning)return;
+
+ selectedNumbers.clear();
+ selectedBets.clear();
+ refresh();
+});
+
+$("stakeInput").addEventListener("input",()=>{
+
+ if(bettingOpen&&!spinning)updateSummary();
+});
+
+/* BALANCE */
+
+async function loadBalance(){
+
+ if(!currentUser)throw new Error("Please login first.");
+
+ const snap=await get(ref(db,"users/"+currentUser.uid));
+
+ if(!snap.exists()){
+  throw new Error("USER RECORD NOT FOUND IN FIREBASE");
+ }
+
+ userRecordCache=snap.val();
+
+ const points=Number(userRecordCache.demoPoints);
+
+ if(!Number.isFinite(points)||points<0){
+  throw new Error("Invalid demoPoints in Firebase.");
+ }
+
+ balance=points;
+ $("balance").textContent=balance;
+ updateSummary();
+}
+
+/* HISTORY */
+
+async function loadHistory(){
+
+ if(!currentUser)return;
+
+ const r=ref(db,"users/"+currentUser.uid+"/transactions");
+
+ const snap=await get(query(
+  r,
+  orderByChild("createdAt"),
+  limitToLast(50)
+ ));
+
+ $("historyList").innerHTML="";
+
+ const entries=Object.entries(snap.val()||{})
+ .filter(x=>x[1].type==="ROULETTE_RESULT")
+ .sort((a,b)=>
+  (Number(b[1].createdAt)||0)-
+  (Number(a[1].createdAt)||0)
+ );
+
+ if(!entries.length){
+
+  $("historyList").textContent="No spins yet.";
+  return;
+ }
+
+ entries.slice(0,50).forEach(([key,x])=>{
+
+  const d=document.createElement("div");
+  d.className="history-item";
+
+  const date=x.createdAt?
+   new Date(x.createdAt).toLocaleString():"";
+
+  const top=document.createElement("div");
+  top.className="history-top";
+  top.textContent=
+   `#${x.winningNumber} - ${x.winningColor} | ${x.mode||"AUTO"}`;
+
+  const details=document.createElement("div");
+  details.textContent=
+   `Used: ${x.stakeTotal||0} | Won: ${x.payoutTotal||0} | Net: ${x.pointsChange||0}`;
+
+  const balanceLine=document.createElement("div");
+  balanceLine.textContent=
+   `Balance: ${x.balanceAfter??"-"} | ${date}`;
+
+  d.append(top,details,balanceLine);
+  $("historyList").appendChild(d);
+ });
+}
+
+/* SAVE SPIN */
+
+async function saveSpin(
+ win,bets,total,payout,mode,spinNumbers,spinOutsideBets
+){
+
+ const uid=currentUser.uid;
+ const now=Date.now();
+ const userRef=ref(db,"users/"+uid);
+
+ const freshSnap=await get(userRef);
+
+ const baseRecord=freshSnap.exists()
+  ? freshSnap.val()
+  : userRecordCache;
+
+ if(!baseRecord){
+  throw new Error("USER RECORD NOT FOUND. Please login again.");
+ }
+
+ const transactionKey=push(
+  ref(db,"users/"+uid+"/transactions")
+ ).key;
+
+ const resultTx=await runTransaction(userRef,current=>{
+
+  if(current===null){
+   current=JSON.parse(JSON.stringify(baseRecord));
+  }
+
+  const old=Number(current.demoPoints);
+
+  if(!Number.isFinite(old)||old<total){
+   return;
+  }
+
+  current.demoPoints=old+(payout-total);
+  current.gamePlayed=(Number(current.gamePlayed)||0)+1;
+  current.lastGameActivity=now;
+
+  current.transactions=current.transactions||{};
+
+  current.transactions[transactionKey]={
+   type:"ROULETTE_RESULT",
+   mode:mode,
+   uid:uid,
+   email:currentUser.email||"",
+   winningNumber:win,
+   winningColor:colorOf(win),
+   selectedNumbers:spinNumbers,
+   selectedBets:spinOutsideBets,
+   bets:bets.map(b=>({
+    label:b.label,
+    stake:b.stake,
+    multiplier:b.multiplier
+   })),
+   stakeTotal:total,
+   payoutTotal:payout,
+   pointsChange:payout-total,
+   balanceAfter:old+(payout-total),
+   createdAt:now
+  };
+
+  return current;
+
+ },{applyLocally:false});
+
+ if(!resultTx.committed){
+  throw new Error("Transaction cancelled. Check balance or Firebase Rules.");
+ }
+
+ userRecordCache=resultTx.snapshot.val();
+
+ balance=Number(userRecordCache.demoPoints)||0;
+ $("balance").textContent=balance;
+}
+
+/* PAYOUT */
+
+function calculatePayout(win,bets){
+
+ return bets.reduce((sum,b)=>{
+
+  let won=false;
+  const n=win;
+
+  if(b.number!==undefined){
+
+   won=n===b.number;
+
+  }else{
+
+   switch(b.id){
+
+    case "even": won=n!==0&&n%2===0; break;
+    case "odd": won=n%2===1; break;
+    case "red": won=redNumbers.has(n); break;
+    case "black": won=n!==0&&!redNumbers.has(n); break;
+    case "low": won=n>=1&&n<=18; break;
+    case "high": won=n>=19&&n<=36; break;
+    case "dozen1": won=n>=1&&n<=12; break;
+    case "dozen2": won=n>=13&&n<=24; break;
+    case "dozen3": won=n>=25&&n<=36; break;
+   }
+  }
+
+  return sum+(won?b.stake*b.multiplier:0);
+
+ },0);
+}
+
+/* RESULT */
+
+function showResult(n,total,payout,mode){
+
+ $("result").innerHTML="";
+
+ const title=document.createElement("div");
+ title.textContent="🎉 WINNING NUMBER";
+
+ const number=document.createElement("div");
+ number.className="result-number";
+ number.textContent=n;
+
+ const color=document.createElement("div");
+ color.textContent=colorOf(n);
+
+ const modeLine=document.createElement("div");
+ modeLine.textContent=mode+" SPIN";
+
+ const info=document.createElement("div");
+ info.textContent=
+  `Used: ${total} | Payout: ${payout} | Net: ${payout-total}`;
+
+ $("result").append(title,number,color,modeLine,info);
+}
+
+function highlight(n){
+
+ document.querySelectorAll("[data-number]").forEach(b=>{
+  b.classList.toggle("winner",Number(b.dataset.number)===n);
+ });
+}
+
+/* AUTOMATIC SPIN */
+
+async function startSpin(){
+
+ if(!currentUser||spinning)return;
+
+ const spinStartedAt=Date.now();
+
+ stopCountdown();
+ bettingOpen=false;
+
+ let bets=getBets();
+ let total=bets.reduce((s,b)=>s+b.stake,0);
+ const stake=Number($("stakeInput").value);
+
+ if(bets.length&&(
+  !Number.isSafeInteger(stake)||
+  stake<1||
+  !Number.isSafeInteger(total)||
+  total<1
+ )){
+
+  bets=[];
+  total=0;
+ }
+
+ if(total>balance){
+
+  $("result").textContent=
+   "Not enough Demo Points. Spin will run without bets.";
+
+  bets=[];
+  total=0;
+ }
+
+ const spinNumbers=bets
+  .filter(b=>b.number!==undefined)
+  .map(b=>b.number);
+
+ const spinOutsideBets=bets
+  .filter(b=>b.number===undefined)
+  .map(b=>b.id);
+
+ spinning=true;
+ updateBettingUI();
+
+ const mode="AUTO";
+
+ $("result").textContent="AUTO SPINNING...";
+ highlight(-1);
+
+ const index=Math.floor(Math.random()*numbers.length);
+ const win=numbers[index];
+ const segment=360/numbers.length;
+ const target=360-(index+0.5)*segment;
+
+ rotation+=360*6+((target-rotation%360+360)%360);
+ wheel.style.transform=`rotate(${rotation}deg)`;
+
+ try{
+
+  await new Promise(resolve=>setTimeout(resolve,SPIN_DURATION));
+
+  const payout=calculatePayout(win,bets);
+
+  await saveSpin(
+   win,bets,total,payout,mode,spinNumbers,spinOutsideBets
+  );
+
+  highlight(win);
+  showResult(win,total,payout,mode);
+
+  await loadHistory();
+
+ }catch(e){
+
+  console.error("ROULETTE ERROR:",e);
+  $("result").textContent="❌ ERROR: "+e.message;
+
+ }finally{
+
+  spinning=false;
+
+  selectedNumbers.clear();
+  selectedBets.clear();
+
+  refresh();
+
+  /*
+  Next spin target:
+  20.2 seconds from the previous spin start.
+  */
+
+  const elapsed=Date.now()-spinStartedAt;
+  const remaining=Math.max(0,SPIN_INTERVAL-elapsed);
+
+  startCountdown(remaining);
+ }
+}
+
+/* AUTHENTICATION */
+
+onAuthStateChanged(auth,async user=>{
+
+ currentUser=user;
+
+ if(!user){
+
+  stopCountdown();
+  spinning=false;
+  bettingOpen=false;
+  countdown="20.2";
+  balance=0;
+  userRecordCache=null;
+
+  selectedNumbers.clear();
+  selectedBets.clear();
+
+  $("balance").textContent="Login Required";
+  $("result").textContent="Please login first.";
+
+  updateBettingUI();
+  return;
+ }
+
+ stopCountdown();
+ bettingOpen=false;
+ $("result").textContent="Loading wallet...";
+
+ try{
+
+  await loadBalance();
+  await loadHistory();
+
+  $("result").textContent=
+   "Place your bets. Auto Spin starts in 20.2 seconds.";
+
+  startCountdown(SPIN_INTERVAL);
+
+ }catch(e){
+
+  console.error("WALLET ERROR:",e);
+  $("result").textContent="Wallet Error: "+e.message;
+  updateBettingUI();
+ }
+});
+
+/* BACK BUTTON */
+
+$("backBtn").addEventListener("click",()=>{
+ window.location.href="index.html";
+});
+
+/* START */
+
+createBoard();
+createWheel();
+updateBettingUI();
+
+window.addEventListener("resize",createWheel);
+
+</script>
+</body>
+</html>

@@ -1,0 +1,280 @@
+
+<!DOCTYPE html>
+<html lang="ne">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ONLINE CASHINO - बाबाको खजाना</title>
+  <link rel="stylesheet" href="style.css">
+
+  <style>
+    *{
+      box-sizing:border-box;
+    }
+
+    .game-box{
+      background:#292929;
+      color:white;
+      padding:16px;
+      margin:15px 0;
+      border-radius:12px;
+      text-align:center;
+    }
+
+    .game-box button{
+      width:100%;
+      padding:13px;
+      background:#ffc107;
+      color:#111;
+      border:0;
+      border-radius:8px;
+      font-weight:bold;
+      font-size:16px;
+      cursor:pointer;
+    }
+
+    .new-games{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:12px;
+      margin:15px 0;
+    }
+
+    .new-game-card{
+      background:#292929;
+      color:white;
+      border:2px solid #ffc107;
+      border-radius:12px;
+      padding:18px 8px;
+      text-align:center;
+    }
+
+    .new-game-card .emoji{
+      font-size:35px;
+      display:block;
+      margin-bottom:10px;
+    }
+
+    .new-game-card h3{
+      font-size:15px;
+      margin:5px 0;
+      color:#ffc107;
+    }
+
+    .new-game-card p{
+      font-size:12px;
+      color:#ccc;
+      min-height:30px;
+    }
+
+    .new-game-card button{
+      width:100%;
+      padding:11px 5px;
+      background:#ffc107;
+      color:#111;
+      border:0;
+      border-radius:7px;
+      font-weight:bold;
+      cursor:pointer;
+    }
+
+    .new-game-card button:disabled{
+      opacity:.4;
+      cursor:not-allowed;
+    }
+
+    .treasure-boxes{
+      display:flex;
+      justify-content:center;
+      gap:15px;
+    }
+
+    .chest{
+      font-size:35px;
+      padding:15px;
+    }
+
+    footer{
+      text-align:center;
+    }
+  </style>
+</head>
+
+<body>
+
+<header>
+  <h1>🎰 ONLINE CASHINO</h1>
+  <h2>बाबाको खजाना</h2>
+</header>
+
+<main>
+
+  <h2>स्वागत छ!</h2>
+  <p>तपाईंको मनोरञ्जन संसारमा स्वागत छ।</p>
+
+  <!-- USER ACCOUNT -->
+  <div class="account">
+    <h3>USER ACCOUNT</h3>
+
+    <input type="email" id="email" placeholder="Enter Email">
+    <input type="password" id="password" placeholder="Enter Password">
+
+    <button id="registerBtn">CREATE ACCOUNT</button>
+    <button id="loginBtn">LOGIN</button>
+    <button id="logoutBtn" hidden>LOGOUT</button>
+
+    <p id="message">Please Login or Create Account</p>
+  </div>
+
+  <!-- USER MENU -->
+  <div id="userMenu" hidden>
+    <h3>👤 USER MENU</h3>
+
+    <button id="profileBtn">👤 MY PROFILE</button>
+    <button id="walletBtn">🎁 MY WALLET</button>
+  </div>
+
+  <!-- BABAKO KHAJANA -->
+  <div class="game-box">
+    <h3>🎁 बाबाको खजाना</h3>
+    <p>Free Demo Entertainment Game</p>
+    <button id="playBtn" disabled>PLAY NOW</button>
+  </div>
+
+  <!-- ROULETTE -->
+  <div class="game-box" id="rouletteBox" hidden>
+    <h3>🎡 ROULETTE GAME</h3>
+    <p>Free Demo Points Roulette</p>
+    <button id="rouletteBtn">🎡 PLAY ROULETTE</button>
+  </div>
+
+  <!-- BACCARAT AND DRAGON TIGER -->
+  <div id="cardGames" hidden>
+
+    <h2>🃏 CARD GAMES</h2>
+
+    <div class="new-games">
+
+      <!-- BACCARAT -->
+      <div class="new-game-card">
+        <span class="emoji">🃏</span>
+        <h3>BACCARAT</h3>
+        <p>Free Demo Points Baccarat</p>
+        <button id="baccaratBtn">
+          PLAY BACCARAT
+        </button>
+      </div>
+
+      <!-- DRAGON TIGER -->
+      <div class="new-game-card">
+        <span class="emoji">🐉🐯</span>
+        <h3>DRAGON TIGER</h3>
+        <p>Free Demo Points Dragon Tiger</p>
+        <button id="dragonTigerBtn">
+          PLAY DRAGON TIGER
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- TREASURE GAME SCREEN -->
+  <section id="gameScreen" hidden>
+
+    <h2>🎁 बाबाको खजाना</h2>
+    <p>आफ्नो मनपर्ने खजाना बाकस छान्नुहोस्!</p>
+
+    <div class="treasure-boxes">
+      <button class="chest" data-chest="1">🎁</button>
+      <button class="chest" data-chest="2">🎁</button>
+      <button class="chest" data-chest="3">🎁</button>
+    </div>
+
+    <h3 id="gameMessage">एउटा बाकस छान्नुहोस्!</h3>
+    <p id="demoPoints">Demo Points: 0</p>
+
+    <button id="againBtn">PLAY AGAIN</button>
+
+  </section>
+
+</main>
+
+<footer>
+  ONLINE CASHINO © 2026
+  <p>बाबाको खजाना</p>
+  <p>Free demo only. No real money or cash prizes.</p>
+</footer>
+
+<!-- EXISTING PROJECT SCRIPTS -->
+<script type="module" src="auth.js"></script>
+<script type="module" src="game.js"></script>
+
+<!-- GAME NAVIGATION AND AUTH -->
+<script type="module">
+
+import {auth} from "./firebase-config.js";
+
+import {
+  onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/13.2.0/firebase-auth.js";
+
+const userMenu = document.getElementById("userMenu");
+const rouletteBox = document.getElementById("rouletteBox");
+const cardGames = document.getElementById("cardGames");
+
+const profileBtn = document.getElementById("profileBtn");
+const walletBtn = document.getElementById("walletBtn");
+
+const rouletteBtn = document.getElementById("rouletteBtn");
+const baccaratBtn = document.getElementById("baccaratBtn");
+const dragonTigerBtn = document.getElementById("dragonTigerBtn");
+
+function openGame(filename){
+  if(!auth.currentUser){
+    alert("Please Login First");
+    return;
+  }
+
+  window.location.href = filename;
+}
+
+// USER LOGIN STATUS
+onAuthStateChanged(auth, user => {
+
+  const loggedIn = !!user;
+
+  userMenu.hidden = !loggedIn;
+  rouletteBox.hidden = !loggedIn;
+  cardGames.hidden = !loggedIn;
+
+});
+
+// PROFILE
+profileBtn.addEventListener("click", () => {
+  openGame("profile.html");
+});
+
+// WALLET
+walletBtn.addEventListener("click", () => {
+  openGame("wallet.html");
+});
+
+// ROULETTE
+rouletteBtn.addEventListener("click", () => {
+  openGame("roulette.html");
+});
+
+// BACCARAT
+baccaratBtn.addEventListener("click", () => {
+  openGame("baccarat.html");
+});
+
+// DRAGON TIGER
+dragonTigerBtn.addEventListener("click", () => {
+  openGame("dragon-tiger.html");
+});
+
+</script>
+
+</body>
+</html>

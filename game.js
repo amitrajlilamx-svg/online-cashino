@@ -1,4 +1,3 @@
-
 import { auth, db } from "./firebase-config.js";
 
 import {
@@ -73,11 +72,12 @@ if (!playBtn || !gameScreen || !gameMessage || !demoPoints || !againBtn || chest
 
       try {
         await update(ref(db, "users/" + user.uid), {
+          demoPoints: increment(reward),
           gamePlayed: increment(1),
           lastGameActivity: Date.now()
         });
 
-        console.log("Game Activity Saved!");
+        console.log("Demo Points and Game Activity Saved!");
 
       } catch (error) {
         console.error("Game Activity Error:", error);
@@ -92,3 +92,4 @@ if (!playBtn || !gameScreen || !gameMessage || !demoPoints || !againBtn || chest
 }
 
 console.log("ONLINE CASHINO GAME READY!");
+

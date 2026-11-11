@@ -8,103 +8,51 @@
 
 <style>
 *{box-sizing:border-box}
-
 body{
- margin:0;
- padding:16px;
- background:#101010;
- color:white;
- font-family:Arial,sans-serif;
+ margin:0;padding:16px;background:#101010;
+ color:white;font-family:Arial,sans-serif;
 }
-
 .container{
- max-width:650px;
- margin:25px auto;
- padding:20px;
- background:#1d1d1d;
- border:1px solid #d4af37;
+ max-width:650px;margin:25px auto;padding:20px;
+ background:#1d1d1d;border:1px solid #d4af37;
  border-radius:15px;
 }
-
 h1,h2{text-align:center;color:#ffd700}
-
 input{
- width:100%;
- padding:13px;
- margin:10px 0;
- border:1px solid #d4af37;
- border-radius:7px;
- background:#101010;
- color:white;
+ width:100%;padding:13px;margin:10px 0;
+ border:1px solid #d4af37;border-radius:7px;
+ background:#101010;color:white;
 }
-
 button{
- width:100%;
- padding:13px;
- margin-top:10px;
+ width:100%;padding:13px;margin-top:10px;
  background:linear-gradient(45deg,#b8860b,#ffd700);
- border:0;
- border-radius:7px;
- font-weight:bold;
+ border:0;border-radius:7px;font-weight:bold;
  cursor:pointer;
 }
-
 #dashboard{display:none}
-
-#message{
- text-align:center;
- color:#ffd700;
- overflow-wrap:anywhere;
-}
-
+#message{text-align:center;color:#ffd700;overflow-wrap:anywhere}
 .stats{
- background:#292929;
- padding:18px;
- margin:12px 0;
- border:1px solid #d4af37;
- border-radius:10px;
+ background:#292929;padding:18px;margin:12px 0;
+ border:1px solid #d4af37;border-radius:10px;
  text-align:center;
 }
-
-.number{
- font-size:30px;
- color:#ffd700;
- font-weight:bold;
-}
-
+.number{font-size:30px;color:#ffd700;font-weight:bold}
 .user,.details{
- background:#292929;
- border:1px solid #555;
- padding:12px;
- margin:10px 0;
- border-radius:8px;
+ background:#292929;border:1px solid #555;
+ padding:12px;margin:10px 0;border-radius:8px;
  overflow-wrap:anywhere;
 }
-
 .details{border-color:#d4af37}
-
 .user small,.details small{
- display:block;
- color:#bbb;
- margin-top:7px;
+ display:block;color:#bbb;margin-top:7px;
 }
-
-.status{
- color:#70e090;
- font-weight:bold;
-}
-
-.secondary{
- background:#444;
- color:white;
-}
-
+.status{color:#70e090;font-weight:bold}
+.secondary{background:#444;color:white}
 #userList{margin-top:15px}
 </style>
 </head>
 
 <body>
-
 <div class="container">
 
 <h1>🎰 ONLINE CASHINO</h1>
@@ -112,20 +60,14 @@ button{
 
 <div id="loginBox">
 <h3>ADMIN LOGIN</h3>
-
-<input type="email" id="adminEmail"
-placeholder="Admin Email">
-
-<input type="password" id="adminPassword"
-placeholder="Admin Password">
-
+<input type="email" id="adminEmail" placeholder="Admin Email">
+<input type="password" id="adminPassword" placeholder="Admin Password">
 <button id="loginBtn">ADMIN LOGIN</button>
 </div>
 
 <div id="dashboard">
 
 <h2>ADMIN DASHBOARD</h2>
-
 <p id="adminInfo"></p>
 
 <div class="stats">
@@ -143,13 +85,15 @@ TOTAL GAMES PLAYED
 <div class="number" id="totalGames">0</div>
 </div>
 
-<h3>🔎 SEARCH USER</h3>
+<div class="stats">
+TOTAL DEMO POINTS
+<div class="number" id="totalPoints">0</div>
+</div>
 
-<input type="search" id="searchUser"
-placeholder="Search user email...">
+<h3>🔎 SEARCH USER</h3>
+<input type="search" id="searchUser" placeholder="Search user email...">
 
 <h3>👥 REGISTERED USER LIST</h3>
-
 <div id="userList">Loading users...</div>
 
 <div id="userDetails"></div>
@@ -160,7 +104,6 @@ placeholder="Search user email...">
 </div>
 
 <p id="message">Secure Admin Access</p>
-
 </div>
 
 <script type="module">
@@ -188,6 +131,7 @@ const userList = document.getElementById("userList");
 const totalUsers = document.getElementById("totalUsers");
 const todayUsers = document.getElementById("todayUsers");
 const totalGames = document.getElementById("totalGames");
+const totalPoints = document.getElementById("totalPoints");
 const searchUser = document.getElementById("searchUser");
 const userDetails = document.getElementById("userDetails");
 
@@ -203,7 +147,6 @@ document.getElementById("loginBtn").onclick = async function(){
  }
 
  try{
-
   message.textContent = "Checking Admin Access...";
 
   await signInWithEmailAndPassword(
@@ -213,9 +156,7 @@ document.getElementById("loginBtn").onclick = async function(){
   );
 
  }catch(error){
-
   message.textContent = error.message;
-
  }
 };
 
@@ -225,22 +166,18 @@ onAuthStateChanged(auth,async(user)=>{
  adminVerified = false;
 
  if(!user){
-
   loginBox.style.display = "block";
   dashboard.style.display = "none";
   message.textContent = "Please Admin Login";
-
   return;
  }
 
  try{
-
   const token = await getIdTokenResult(user,true);
 
   if(token.claims.admin === true){
 
    adminVerified = true;
-
    loginBox.style.display = "none";
    dashboard.style.display = "block";
 
@@ -252,22 +189,15 @@ onAuthStateChanged(auth,async(user)=>{
    await loadUsers();
 
   }else{
-
    await signOut(auth);
-
    message.textContent =
     "Access Denied: Admin permission not assigned.";
-
   }
 
  }catch(error){
-
   await signOut(auth);
-
   message.textContent = error.message;
-
  }
-
 });
 
 // LOAD USERS AND ACTIVITY
@@ -279,9 +209,9 @@ async function loadUsers(){
  totalUsers.textContent = "...";
  todayUsers.textContent = "...";
  totalGames.textContent = "...";
+ totalPoints.textContent = "...";
 
  try{
-
   const snapshot = await get(ref(db,"users"));
 
   if(!adminVerified) return;
@@ -289,20 +219,17 @@ async function loadUsers(){
   allUsers = [];
 
   if(snapshot.exists()){
-
    const users = snapshot.val();
 
    allUsers = Object.entries(users).map(([uid,data])=>({
-
     uid:uid,
     email:data.email || "No Email",
     createdAt:data.createdAt || 0,
     lastLoginAt:data.lastLoginAt || 0,
     gamePlayed:Number(data.gamePlayed || 0),
+    demoPoints:Number(data.demoPoints || 0),
     lastGameActivity:data.lastGameActivity || 0
-
    }));
-
   }
 
   totalUsers.textContent = allUsers.length;
@@ -320,7 +247,12 @@ async function loadUsers(){
    (sum,user)=>sum + user.gamePlayed,0
   );
 
+  const points = allUsers.reduce(
+   (sum,user)=>sum + user.demoPoints,0
+  );
+
   totalGames.textContent = games;
+  totalPoints.textContent = points;
 
   renderUsers(searchUser.value);
 
@@ -329,21 +261,18 @@ async function loadUsers(){
   totalUsers.textContent = "—";
   todayUsers.textContent = "—";
   totalGames.textContent = "—";
+  totalPoints.textContent = "—";
 
   userList.textContent =
    "Error loading users: " + error.message;
-
  }
-
 }
 
 // FORMAT DATE
 function formatDate(timestamp){
-
  return timestamp
   ? new Date(timestamp).toLocaleString()
   : "Not recorded";
-
 }
 
 // SHOW USER LIST
@@ -360,10 +289,8 @@ function renderUsers(query=""){
  );
 
  if(filtered.length === 0){
-
   userList.textContent = "No matching users found.";
   return;
-
  }
 
  filtered.forEach((user,index)=>{
@@ -379,9 +306,13 @@ function renderUsers(query=""){
   date.textContent =
    "Created: " + formatDate(user.createdAt);
 
+  const points = document.createElement("small");
+  points.textContent =
+   "Demo Points: " + user.demoPoints;
+
   const games = document.createElement("small");
   games.textContent =
-   "Game Played: " + user.gamePlayed;
+   "Games Played: " + user.gamePlayed;
 
   const activity = document.createElement("small");
   activity.textContent =
@@ -391,12 +322,12 @@ function renderUsers(query=""){
   view.textContent = "VIEW DETAILS";
   view.onclick = ()=>showDetails(user);
 
-  card.append(heading,date,games,activity,view);
+  card.append(
+   heading,date,points,games,activity,view
+  );
 
   userList.appendChild(card);
-
  });
-
 }
 
 // USER DETAILS
@@ -426,9 +357,13 @@ function showDetails(user){
  loginLine.textContent =
   "Last Login: " + formatDate(user.lastLoginAt);
 
+ const pointsLine = document.createElement("small");
+ pointsLine.textContent =
+  "🎁 Demo Points: " + user.demoPoints;
+
  const gamesLine = document.createElement("small");
  gamesLine.textContent =
-  "Game Played: " + user.gamePlayed;
+  "🎮 Games Played: " + user.gamePlayed;
 
  const activityLine = document.createElement("small");
  activityLine.textContent =
@@ -458,6 +393,7 @@ function showDetails(user){
   uidLine,
   dateLine,
   loginLine,
+  pointsLine,
   gamesLine,
   activityLine,
   status,
@@ -467,7 +403,6 @@ function showDetails(user){
  );
 
  userDetails.appendChild(card);
-
 }
 
 // COPY TEXT
@@ -476,33 +411,24 @@ async function copyText(value){
  if(!adminVerified) return;
 
  try{
-
   await navigator.clipboard.writeText(value);
   message.textContent = "Copied Successfully!";
-
  }catch(error){
-
   message.textContent =
    "Copy failed. Please use a secure HTTPS page.";
-
  }
-
 }
 
 // SEARCH
 searchUser.addEventListener("input",()=>{
-
  renderUsers(searchUser.value);
  userDetails.replaceChildren();
-
 });
 
 // REFRESH
 document.getElementById("refreshBtn").onclick =
 async function(){
-
  await loadUsers();
-
 };
 
 // LOGOUT
@@ -511,14 +437,11 @@ async function(){
 
  adminVerified = false;
  allUsers = [];
-
  userDetails.replaceChildren();
 
  await signOut(auth);
-
 };
 
 </script>
-
 </body>
 </html>

@@ -1,0 +1,242 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ONLINE CASHINO - Demo Wallet</title>
+
+<style>
+*{box-sizing:border-box}
+body{
+ margin:0;
+ padding:16px;
+ background:#101010;
+ color:white;
+ font-family:Arial,sans-serif;
+}
+.container{
+ max-width:550px;
+ margin:25px auto;
+ padding:20px;
+ background:#1d1d1d;
+ border:1px solid #d4af37;
+ border-radius:15px;
+}
+h1,h2{text-align:center;color:#ffd700}
+.wallet{
+ margin:20px 0;
+ padding:25px 15px;
+ text-align:center;
+ background:linear-gradient(135deg,#654500,#bd8b16,#654500);
+ border-radius:15px;
+ border:1px solid #ffd700;
+}
+.wallet small{font-size:14px}
+.balance{
+ font-size:42px;
+ font-weight:bold;
+ color:white;
+ margin:12px 0;
+ overflow-wrap:anywhere;
+}
+.info{
+ background:#292929;
+ border:1px solid #555;
+ border-radius:10px;
+ padding:15px;
+ margin:12px 0;
+}
+.info p{
+ color:#ccc;
+ overflow-wrap:anywhere;
+}
+.value{
+ color:#ffd700;
+ font-weight:bold;
+}
+button{
+ width:100%;
+ padding:14px;
+ margin-top:12px;
+ border:0;
+ border-radius:8px;
+ background:linear-gradient(45deg,#b8860b,#ffd700);
+ font-weight:bold;
+ cursor:pointer;
+}
+.secondary{
+ background:#444;
+ color:white;
+}
+#message{
+ text-align:center;
+ color:#ffd700;
+ overflow-wrap:anywhere;
+}
+.note{
+ color:#aaa;
+ font-size:12px;
+ text-align:center;
+ line-height:1.6;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>🎰 ONLINE CASHINO</h1>
+<h2>🎁 DEMO WALLET</h2>
+
+<div class="wallet">
+<small>YOUR DEMO POINTS BALANCE</small>
+<div class="balance" id="balance">0</div>
+<small>FREE ENTERTAINMENT POINTS</small>
+</div>
+
+<div class="info">
+<p>👤 USER EMAIL</p>
+<div class="value" id="userEmail">Loading...</div>
+</div>
+
+<div class="info">
+<p>🎮 TOTAL GAMES PLAYED</p>
+<div class="value" id="gamesPlayed">0</div>
+</div>
+
+<div class="info">
+<p>🕒 LAST GAME ACTIVITY</p>
+<div class="value" id="lastActivity">Not recorded</div>
+</div>
+
+<div class="info">
+<h3>📜 WALLET HISTORY</h3>
+<p id="history">
+Transaction history is not available yet.
+</p>
+</div>
+
+<button id="refreshBtn">🔄 REFRESH WALLET</button>
+<button id="gameBtn">🎮 BACK TO GAME</button>
+<button id="logoutBtn" class="secondary">LOGOUT</button>
+
+<p id="message">Checking Account...</p>
+
+<p class="note">
+This is a demo wallet for free entertainment only.
+Points have no cash value. No deposits or withdrawals.
+</p>
+
+</div>
+
+<script type="module">
+
+import {auth,db} from "./firebase-config.js";
+
+import {
+ onAuthStateChanged,
+ signOut
+} from "https://www.gstatic.com/firebasejs/13.2.0/firebase-auth.js";
+
+import {
+ ref,
+ get
+} from "https://www.gstatic.com/firebasejs/13.2.0/firebase-database.js";
+
+const balance = document.getElementById("balance");
+const userEmail = document.getElementById("userEmail");
+const gamesPlayed = document.getElementById("gamesPlayed");
+const lastActivity = document.getElementById("lastActivity");
+const message = document.getElementById("message");
+
+let currentUID = null;
+
+function formatDate(value){
+ return value
+  ? new Date(Number(value)).toLocaleString()
+  : "Not recorded";
+}
+
+async function loadWallet(){
+
+ if(!currentUID) return;
+
+ message.textContent = "Loading Wallet...";
+
+ try{
+
+  const snapshot = await get(
+   ref(db,"users/" + currentUID)
+  );
+
+  if(!snapshot.exists()){
+   message.textContent = "User wallet data not found.";
+   return;
+  }
+
+  const data = snapshot.val();
+
+  balance.textContent =
+   Number(data.demoPoints || 0).toLocaleString();
+
+  userEmail.textContent =
+   data.email || auth.currentUser.email || "No Email";
+
+  gamesPlayed.textContent =
+   Number(data.gamePlayed || 0);
+
+  lastActivity.textContent =
+   formatDate(data.lastGameActivity);
+
+  message.textContent = "Wallet Updated Successfully!";
+
+ }catch(error){
+
+  message.textContent =
+   "Wallet Error: " + error.message;
+
+ }
+
+}
+
+onAuthStateChanged(auth,async(user)=>{
+
+ if(!user){
+
+  message.textContent = "Please Login First.";
+
+  setTimeout(()=>{
+   window.location.href = "./index.html";
+  },1500);
+
+  return;
+ }
+
+ currentUID = user.uid;
+
+ await loadWallet();
+
+});
+
+document.getElementById("refreshBtn").onclick =
+loadWallet;
+
+document.getElementById("gameBtn").onclick = ()=>{
+ window.location.href = "./index.html";
+};
+
+document.getElementById("logoutBtn").onclick =
+async()=>{
+
+ await signOut(auth);
+
+ window.location.href = "./index.html";
+
+};
+
+</script>
+
+</body>
+</html>

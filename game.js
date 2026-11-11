@@ -2,8 +2,7 @@ import { auth, db } from "./firebase-config.js";
 
 import {
   ref,
-  update,
-  increment
+  runTransaction
 } from "https://www.gstatic.com/firebasejs/13.2.0/firebase-database.js";
 
 const playBtn = document.getElementById("playBtn");
@@ -16,7 +15,14 @@ const chests = document.querySelectorAll(".chest");
 let points = 0;
 let played = false;
 
-if (!playBtn || !gameScreen || !gameMessage || !demoPoints || !againBtn || chests.length === 0) {
+if (
+  !playBtn ||
+  !gameScreen ||
+  !gameMessage ||
+  !demoPoints ||
+  !againBtn ||
+  chests.length === 0
+) {
   console.error("Game HTML elements missing!");
 } else {
 
@@ -53,35 +59,66 @@ if (!playBtn || !gameScreen || !gameMessage || !demoPoints || !againBtn || chest
 
       played = true;
 
-      const rewards = [0, 5, 10, 20, 50];
-      const reward = rewards[Math.floor(Math.random() * rewards.length)];
-
-      points += reward;
-
-      chest.textContent = "💎";
-
       chests.forEach(item => {
         item.disabled = true;
       });
 
-      gameMessage.textContent = reward > 0
-        ? "🎉 बधाई छ! तपाईंले " + reward + " Demo Points जित्नुभयो!"
-        : "😊 यसपटक कुनै Demo Points आएनन्।";
+      const rewards = [0, 5, 10, 20, 50];
+      const reward =
+        rewards[Math.floor(Math.random() * rewards.length)];
 
-      demoPoints.textContent = "Demo Points: " + points;
+      chest.textContent = "💎";
+      gameMessage.textContent = "Saving Demo Points...";
 
       try {
-        await update(ref(db, "users/" + user.uid), {
-          demoPoints: increment(reward),
-          gamePlayed: increment(1),
-          lastGameActivity: Date.now()
+        const userRef = ref(db, "users/" + user.uid);
+
+        const result = await runTransaction(userRef, current => {
+          if (current === null) {
+            current = {
+              email: user.email,
+              createdAt: Date.now()
+            };
+          }
+
+          current.demoPoints =
+            (Number(current.demoPoints) || 0) + reward;
+
+          current.gamePlayed =
+            (Number(current.gamePlayed) || 0) + 1;
+
+          current.lastGameActivity = Date.now();
+
+          return current;
         });
 
-        console.log("Demo Points and Game Activity Saved!");
+        if (!result.committed) {
+          throw new Error("Database transaction was not committed.");
+        }
+
+        const savedData = result.snapshot.val();
+
+        points = Number(savedData.demoPoints) || 0;
+
+        demoPoints.textContent = "Demo Points: " + points;
+
+        gameMessage.textContent = reward > 0
+          ? "🎉 बधाई छ! तपाईंले " + reward + " Demo Points जित्नुभयो!"
+          : "😊 यसपटक कुनै Demo Points आएनन्।";
+
+        console.log("Firebase Saved:", savedData);
 
       } catch (error) {
-        console.error("Game Activity Error:", error);
-        gameMessage.textContent += " Activity save हुन सकेन।";
+        console.error("Firebase Save Error:", error);
+
+        gameMessage.textContent =
+          "Points save हुन सकेन: " + error.message;
+
+        played = false;
+
+        chests.forEach(item => {
+          item.disabled = false;
+        });
       }
     });
   });
@@ -92,4 +129,3 @@ if (!playBtn || !gameScreen || !gameMessage || !demoPoints || !againBtn || chest
 }
 
 console.log("ONLINE CASHINO GAME READY!");
-

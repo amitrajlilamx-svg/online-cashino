@@ -1,5 +1,5 @@
 
-import { auth, db } from "./firebase.js";
+import { auth, db } from "./firebase-config.js";
 
 import {
   ref,
@@ -17,77 +17,78 @@ const chests = document.querySelectorAll(".chest");
 let points = 0;
 let played = false;
 
-playBtn.addEventListener("click", () => {
-  if (!auth.currentUser) {
-    alert("पहिले Login गर्नुहोस्!");
-    return;
-  }
+if (!playBtn || !gameScreen || !gameMessage || !demoPoints || !againBtn || chests.length === 0) {
+  console.error("Game HTML elements missing!");
+} else {
 
-  gameScreen.hidden = false;
-  gameScreen.scrollIntoView({ behavior: "smooth" });
-});
-
-function resetGame() {
-  played = false;
-
-  gameMessage.textContent = "एउटा बाकस छान्नुहोस्!";
-
-  chests.forEach(chest => {
-    chest.textContent = "🎁";
-    chest.disabled = false;
-  });
-}
-
-chests.forEach(chest => {
-  chest.addEventListener("click", async () => {
-    if (played) return;
-
-    const user = auth.currentUser;
-
-    if (!user) {
-      gameMessage.textContent = "पहिले Login गर्नुहोस्!";
+  playBtn.addEventListener("click", () => {
+    if (!auth.currentUser) {
+      alert("पहिले Login गर्नुहोस्!");
       return;
     }
 
-    played = true;
+    gameScreen.hidden = false;
+    gameScreen.scrollIntoView({ behavior: "smooth" });
+  });
 
-    const rewards = [0, 5, 10, 20, 50];
+  function resetGame() {
+    played = false;
+    gameMessage.textContent = "एउटा बाकस छान्नुहोस्!";
 
-    const reward = rewards[
-      Math.floor(Math.random() * rewards.length)
-    ];
-
-    points += reward;
-
-    chest.textContent = "💎";
-
-    chests.forEach(item => {
-      item.disabled = true;
+    chests.forEach(chest => {
+      chest.textContent = "🎁";
+      chest.disabled = false;
     });
+  }
 
-    gameMessage.textContent =
-      reward > 0
-        ? "🎉 बधाई छ! तपाईंले " + reward + " Demo Points जित्नुभयो!"
-        : "😊 यसपटक कुनै Demo Points आएनन्। फेरि प्रयास गर्नुहोस्!";
+  chests.forEach(chest => {
+    chest.addEventListener("click", async () => {
+      if (played) return;
 
-    demoPoints.textContent = "Demo Points: " + points;
+      const user = auth.currentUser;
 
-    // SAVE GAME ACTIVITY
-    try {
-      await update(ref(db, "users/" + user.uid), {
-        gamePlayed: increment(1),
-        lastGameActivity: Date.now()
+      if (!user) {
+        gameMessage.textContent = "पहिले Login गर्नुहोस्!";
+        return;
+      }
+
+      played = true;
+
+      const rewards = [0, 5, 10, 20, 50];
+      const reward = rewards[Math.floor(Math.random() * rewards.length)];
+
+      points += reward;
+
+      chest.textContent = "💎";
+
+      chests.forEach(item => {
+        item.disabled = true;
       });
 
-      console.log("Game Activity Saved!");
+      gameMessage.textContent = reward > 0
+        ? "🎉 बधाई छ! तपाईंले " + reward + " Demo Points जित्नुभयो!"
+        : "😊 यसपटक कुनै Demo Points आएनन्।";
 
-    } catch (error) {
-      console.error("Game Activity Save Error:", error);
-      gameMessage.textContent += " (Activity save हुन सकेन)";
-    }
+      demoPoints.textContent = "Demo Points: " + points;
+
+      try {
+        await update(ref(db, "users/" + user.uid), {
+          gamePlayed: increment(1),
+          lastGameActivity: Date.now()
+        });
+
+        console.log("Game Activity Saved!");
+
+      } catch (error) {
+        console.error("Game Activity Error:", error);
+        gameMessage.textContent += " Activity save हुन सकेन।";
+      }
+    });
   });
-});
 
-againBtn.addEventListener("click", resetGame);
+  againBtn.addEventListener("click", resetGame);
 
-console.log("BABA KA KHAJANA GAME READY!");
+  resetGame();
+}
+
+console.log("ONLINE CASHINO GAME READY!");

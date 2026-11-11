@@ -1,8 +1,10 @@
+
 import { auth, db } from "./firebase-config.js";
 
 import {
   ref,
-  runTransaction
+  runTransaction,
+  push
 } from "https://www.gstatic.com/firebasejs/13.2.0/firebase-database.js";
 
 const playBtn = document.getElementById("playBtn");
@@ -64,6 +66,7 @@ if (
       });
 
       const rewards = [0, 5, 10, 20, 50];
+
       const reward =
         rewards[Math.floor(Math.random() * rewards.length)];
 
@@ -73,6 +76,19 @@ if (
       try {
         const userRef = ref(db, "users/" + user.uid);
 
+        // Create one unique history ID for this game
+        const historyRef = push(
+          ref(db, "users/" + user.uid + "/transactions")
+        );
+
+        const historyKey = historyRef.key;
+        const gameTime = Date.now();
+
+        if (!historyKey) {
+          throw new Error("History ID could not be created.");
+        }
+
+        // Save points and history together atomically
         const result = await runTransaction(userRef, current => {
           if (current === null) {
             current = {
@@ -87,7 +103,21 @@ if (
           current.gamePlayed =
             (Number(current.gamePlayed) || 0) + 1;
 
-          current.lastGameActivity = Date.now();
+          current.lastGameActivity = gameTime;
+
+          if (
+            !current.transactions ||
+            typeof current.transactions !== "object"
+          ) {
+            current.transactions = {};
+          }
+
+          current.transactions[historyKey] = {
+            type: "GAME_RESULT",
+            pointsChange: reward,
+            balanceAfter: current.demoPoints,
+            createdAt: gameTime
+          };
 
           return current;
         });
@@ -107,6 +137,7 @@ if (
           : "😊 यसपटक कुनै Demo Points आएनन्।";
 
         console.log("Firebase Saved:", savedData);
+        console.log("Wallet History Saved:", savedData.transactions);
 
       } catch (error) {
         console.error("Firebase Save Error:", error);

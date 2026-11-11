@@ -54,6 +54,12 @@ button:disabled{opacity:.6}
 }
 .status{color:#70e090;font-weight:bold}
 .secondary{background:#444;color:white}
+.addPoints{background:#168c45;color:white}
+.historyItem{
+ background:#171717;border:1px solid #555;
+ padding:10px;margin:8px 0;border-radius:7px;
+ line-height:1.6;
+}
 #userList{margin-top:15px}
 </style>
 </head>
@@ -120,7 +126,6 @@ placeholder="Search user email...">
 
 <script type="module">
 
-// CORRECT FIREBASE FILE
 import { auth, db } from "./firebase-config.js";
 
 import {
@@ -132,7 +137,9 @@ import {
 
 import {
  ref,
- get
+ get,
+ runTransaction,
+ push
 } from "https://www.gstatic.com/firebasejs/13.2.0/firebase-database.js";
 
 const email = document.getElementById("adminEmail");
@@ -181,8 +188,7 @@ loginBtn.addEventListener("click", async function(){
 
  }catch(error){
 
-  message.textContent =
-   "Login Error: " + error.message;
+  message.textContent = "Login Error: " + error.message;
 
  }finally{
 
@@ -199,11 +205,9 @@ onAuthStateChanged(auth, async(user)=>{
  adminVerified = false;
 
  if(!user){
-
   loginBox.style.display = "block";
   dashboard.style.display = "none";
   message.textContent = "Please Admin Login";
-
   return;
  }
 
@@ -242,7 +246,6 @@ onAuthStateChanged(auth, async(user)=>{
  }catch(error){
 
   adminVerified = false;
-
   loginBox.style.display = "block";
   dashboard.style.display = "none";
 
@@ -302,16 +305,13 @@ async function loadUsers(){
 
   todayUsers.textContent = todayCount;
 
-  const games = allUsers.reduce(
-   (sum,user)=>sum + user.gamePlayed,0
+  totalGames.textContent = allUsers.reduce(
+   (sum,user)=>sum+user.gamePlayed,0
   );
 
-  const points = allUsers.reduce(
-   (sum,user)=>sum + user.demoPoints,0
+  totalPoints.textContent = allUsers.reduce(
+   (sum,user)=>sum+user.demoPoints,0
   );
-
-  totalGames.textContent = games;
-  totalPoints.textContent = points;
 
   renderUsers(searchUser.value);
 
@@ -351,49 +351,210 @@ function renderUsers(query=""){
   )
  );
 
- if(filtered.length === 0){
-
-  userList.textContent = "No matching users found.";
+ if(filtered.length===0){
+  userList.textContent="No matching users found.";
   return;
-
  }
 
  filtered.forEach((user,index)=>{
 
-  const card = document.createElement("div");
-  card.className = "user";
+  const card=document.createElement("div");
+  card.className="user";
 
-  const heading = document.createElement("strong");
-  heading.textContent =
-   (index+1) + ". " + user.email;
+  const heading=document.createElement("strong");
+  heading.textContent=(index+1)+". "+user.email;
 
-  const date = document.createElement("small");
-  date.textContent =
-   "Created: " + formatDate(user.createdAt);
+  const date=document.createElement("small");
+  date.textContent="Created: "+formatDate(user.createdAt);
 
-  const points = document.createElement("small");
-  points.textContent =
-   "Demo Points: " + user.demoPoints;
+  const points=document.createElement("small");
+  points.textContent="Demo Points: "+user.demoPoints;
 
-  const games = document.createElement("small");
-  games.textContent =
-   "Games Played: " + user.gamePlayed;
+  const games=document.createElement("small");
+  games.textContent="Games Played: "+user.gamePlayed;
 
-  const activity = document.createElement("small");
-  activity.textContent =
-   "Last Game: " + formatDate(user.lastGameActivity);
+  const activity=document.createElement("small");
+  activity.textContent="Last Game: "+formatDate(user.lastGameActivity);
 
-  const view = document.createElement("button");
-  view.textContent = "VIEW DETAILS";
-  view.onclick = ()=>showDetails(user);
+  const view=document.createElement("button");
+  view.textContent="VIEW DETAILS";
+  view.onclick=()=>showDetails(user);
 
-  card.append(
-   heading,date,points,games,activity,view
-  );
-
+  card.append(heading,date,points,games,activity,view);
   userList.appendChild(card);
 
  });
+
+}
+
+// ADD DEMO POINTS
+async function addDemoPoints(user){
+
+ if(!adminVerified || !auth.currentUser) return;
+
+ const amountText=prompt(
+  "Enter Demo Points to add for "+user.email+
+  "\nCurrent Balance: "+user.demoPoints
+ );
+
+ if(amountText===null) return;
+
+ const amount=Number(amountText);
+
+ if(!Number.isSafeInteger(amount)||amount<=0){
+  alert("Please enter a valid positive whole number.");
+  return;
+ }
+
+ if(!confirm(
+  "Add "+amount+" Demo Points to "+user.email+"?"
+  )){
+  return;
+ }
+
+ message.textContent="Adding Demo Points...";
+
+ try{
+
+  const transactionKey=push(
+   ref(db,"users/"+user.uid+"/transactions")
+  ).key;
+
+  const transaction=await runTransaction(
+   ref(db,"users/"+user.uid),
+   current=>{
+
+    if(!current) return;
+
+    const oldBalance=Number(current.demoPoints)||0;
+    const newBalance=oldBalance+amount;
+
+    if(!Number.isSafeInteger(newBalance)) return;
+
+    current.demoPoints=newBalance;
+
+    if(!current.transactions){
+     current.transactions={};
+    }
+
+    current.transactions[transactionKey]={
+     type:"ADMIN_CREDIT",
+     pointsChange:amount,
+     balanceAfter:newBalance,
+     createdAt:Date.now(),
+     adminEmail:auth.currentUser.email || "Admin"
+    };
+
+    return current;
+
+   },
+   {applyLocally:false}
+  );
+
+  if(!transaction.committed){
+   throw new Error("Could not update user balance.");
+  }
+
+  message.textContent=
+   amount+" Demo Points added successfully!";
+
+  alert(
+   "SUCCESS!\n"+
+   amount+" Demo Points added to "+user.email
+  );
+
+  await loadUsers();
+
+  const updatedUser=allUsers.find(u=>u.uid===user.uid);
+
+  if(updatedUser){
+   showDetails(updatedUser);
+  }
+
+ }catch(error){
+
+  console.error(error);
+
+  message.textContent=
+   "Add Points Error: "+error.message;
+
+  alert("ERROR: "+error.message);
+
+ }
+
+}
+
+// SHOW POINTS HISTORY
+async function showPointsHistory(uid){
+
+ const historyBox=document.getElementById("pointsHistory");
+
+ if(!historyBox || !adminVerified) return;
+
+ historyBox.textContent="Loading Points History...";
+
+ try{
+
+  const snapshot=await get(
+   ref(db,"users/"+uid+"/transactions")
+  );
+
+  if(!adminVerified) return;
+
+  historyBox.replaceChildren();
+
+  if(!snapshot.exists()){
+   historyBox.textContent="No Points History Found.";
+   return;
+  }
+
+  const entries=Object.entries(snapshot.val())
+   .map(([id,item])=>({id,...item}))
+   .sort((a,b)=>(Number(b.createdAt)||0)-(Number(a.createdAt)||0));
+
+  entries.forEach(item=>{
+
+   const div=document.createElement("div");
+   div.className="historyItem";
+
+   const type=document.createElement("strong");
+   type.textContent=item.type || "TRANSACTION";
+
+   const change=document.createElement("small");
+   change.textContent=
+    "Points Change: "+(Number(item.pointsChange)||0);
+
+   const after=document.createElement("small");
+   after.textContent=
+    "Balance After: "+(Number(item.balanceAfter)||0);
+
+   const date=document.createElement("small");
+   date.textContent="Date: "+formatDate(Number(item.createdAt)||0);
+
+   div.append(type,change,after,date);
+
+   if(item.winningNumber!==undefined){
+    const win=document.createElement("small");
+    win.textContent="Winning Number: "+item.winningNumber;
+    div.appendChild(win);
+   }
+
+   if(item.adminEmail){
+    const admin=document.createElement("small");
+    admin.textContent="Admin: "+item.adminEmail;
+    div.appendChild(admin);
+   }
+
+   historyBox.appendChild(div);
+
+  });
+
+ }catch(error){
+
+  historyBox.textContent=
+   "History Error: "+error.message;
+
+ }
 
 }
 
@@ -404,69 +565,72 @@ function showDetails(user){
 
  userDetails.replaceChildren();
 
- const card = document.createElement("div");
- card.className = "details";
+ const card=document.createElement("div");
+ card.className="details";
 
- const title = document.createElement("h3");
- title.textContent = "👤 USER DETAILS";
+ const title=document.createElement("h3");
+ title.textContent="👤 USER DETAILS";
 
- const emailLine = document.createElement("small");
- emailLine.textContent = "Email: " + user.email;
+ const emailLine=document.createElement("small");
+ emailLine.textContent="Email: "+user.email;
 
- const uidLine = document.createElement("small");
- uidLine.textContent = "UID: " + user.uid;
+ const uidLine=document.createElement("small");
+ uidLine.textContent="UID: "+user.uid;
 
- const dateLine = document.createElement("small");
- dateLine.textContent =
-  "Created: " + formatDate(user.createdAt);
+ const dateLine=document.createElement("small");
+ dateLine.textContent="Created: "+formatDate(user.createdAt);
 
- const loginLine = document.createElement("small");
- loginLine.textContent =
-  "Last Login: " + formatDate(user.lastLoginAt);
+ const loginLine=document.createElement("small");
+ loginLine.textContent="Last Login: "+formatDate(user.lastLoginAt);
 
- const pointsLine = document.createElement("small");
- pointsLine.textContent =
-  "🎁 Demo Points: " + user.demoPoints;
+ const pointsLine=document.createElement("small");
+ pointsLine.textContent="🎁 Demo Points: "+user.demoPoints;
 
- const gamesLine = document.createElement("small");
- gamesLine.textContent =
-  "🎮 Games Played: " + user.gamePlayed;
+ const gamesLine=document.createElement("small");
+ gamesLine.textContent="🎮 Games Played: "+user.gamePlayed;
 
- const activityLine = document.createElement("small");
- activityLine.textContent =
-  "Last Game Activity: " +
-  formatDate(user.lastGameActivity);
+ const activityLine=document.createElement("small");
+ activityLine.textContent=
+  "Last Game Activity: "+formatDate(user.lastGameActivity);
 
- const status = document.createElement("p");
- status.className = "status";
- status.textContent = "Account Status: REGISTERED";
+ const status=document.createElement("p");
+ status.className="status";
+ status.textContent="Account Status: REGISTERED";
 
- const copyEmail = document.createElement("button");
- copyEmail.textContent = "COPY EMAIL";
- copyEmail.onclick = ()=>copyText(user.email);
+ const addButton=document.createElement("button");
+ addButton.className="addPoints";
+ addButton.textContent="🎁 ADD DEMO POINTS";
+ addButton.onclick=()=>addDemoPoints(user);
 
- const copyUID = document.createElement("button");
- copyUID.textContent = "COPY UID";
- copyUID.onclick = ()=>copyText(user.uid);
+ const historyButton=document.createElement("button");
+ historyButton.textContent="📜 VIEW POINTS HISTORY";
+ historyButton.onclick=()=>showPointsHistory(user.uid);
 
- const close = document.createElement("button");
- close.className = "secondary";
- close.textContent = "CLOSE DETAILS";
- close.onclick = ()=>userDetails.replaceChildren();
+ const historyTitle=document.createElement("h3");
+ historyTitle.textContent="📜 USER POINTS HISTORY";
+
+ const historyBox=document.createElement("div");
+ historyBox.id="pointsHistory";
+ historyBox.textContent="Press VIEW POINTS HISTORY.";
+
+ const copyEmail=document.createElement("button");
+ copyEmail.textContent="COPY EMAIL";
+ copyEmail.onclick=()=>copyText(user.email);
+
+ const copyUID=document.createElement("button");
+ copyUID.textContent="COPY UID";
+ copyUID.onclick=()=>copyText(user.uid);
+
+ const close=document.createElement("button");
+ close.className="secondary";
+ close.textContent="CLOSE DETAILS";
+ close.onclick=()=>userDetails.replaceChildren();
 
  card.append(
-  title,
-  emailLine,
-  uidLine,
-  dateLine,
-  loginLine,
-  pointsLine,
-  gamesLine,
-  activityLine,
-  status,
-  copyEmail,
-  copyUID,
-  close
+  title,emailLine,uidLine,dateLine,loginLine,
+  pointsLine,gamesLine,activityLine,status,
+  addButton,historyButton,historyTitle,historyBox,
+  copyEmail,copyUID,close
  );
 
  userDetails.appendChild(card);
@@ -481,12 +645,11 @@ async function copyText(value){
  try{
 
   await navigator.clipboard.writeText(value);
-  message.textContent = "Copied Successfully!";
+  message.textContent="Copied Successfully!";
 
  }catch(error){
 
-  message.textContent =
-   "Copy failed. Please use HTTPS page.";
+  message.textContent="Copy failed. Please use HTTPS page.";
 
  }
 
@@ -494,27 +657,21 @@ async function copyText(value){
 
 // SEARCH
 searchUser.addEventListener("input",()=>{
-
  renderUsers(searchUser.value);
  userDetails.replaceChildren();
-
 });
 
 // REFRESH
-document.getElementById("refreshBtn").onclick =
-async function(){
-
+document.getElementById("refreshBtn").onclick=async()=>{
  await loadUsers();
-
+ userDetails.replaceChildren();
 };
 
 // LOGOUT
-document.getElementById("logoutBtn").onclick =
-async function(){
+document.getElementById("logoutBtn").onclick=async()=>{
 
- adminVerified = false;
- allUsers = [];
-
+ adminVerified=false;
+ allUsers=[];
  userDetails.replaceChildren();
 
  await signOut(auth);

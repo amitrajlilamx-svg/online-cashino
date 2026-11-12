@@ -226,7 +226,7 @@ body{
  cursor:pointer;
 }
 
-/* LIVE CASINO CATEGORY BUTTON */
+/* LIVE CASINO */
 
 .category-row .live-category{
  background:linear-gradient(90deg,#8b1727,#d49b28);
@@ -394,12 +394,12 @@ footer{
  </div>
 </header>
 
-<!-- BALANCE -->
+<!-- BALANCE MYR -->
 
 <div class="wallet-card" id="walletCard" hidden>
  <div>
-  <div class="wallet-label">BALANCE</div>
-  <div class="wallet-amount" id="walletBalance">0.00 USD</div>
+  <div class="wallet-label">BALANCE (MYR)</div>
+  <div class="wallet-amount" id="walletBalance">RM 0.00</div>
  </div>
 </div>
 
@@ -442,7 +442,7 @@ footer{
   <span>DEMO GAMES</span>
  </div>
 
- <!-- ALL GAMES + LIVE CASINO SAME LINE -->
+ <!-- CATEGORY BUTTONS -->
 
  <div class="category-row">
 
@@ -613,6 +613,12 @@ const gameFrame=document.getElementById("gameFrame");
 
 let walletListener=null;
 
+/* MYR FORMAT */
+
+function formatMYR(amount){
+ return "RM "+Number(amount||0).toFixed(2);
+}
+
 /* LOGIN CHECK */
 
 function checkLogin(){
@@ -657,7 +663,7 @@ onAuthStateChanged(auth,user=>{
    const balance=Number(snapshot.val()||0);
 
    document.getElementById("walletBalance").textContent=
-    balance.toFixed(2)+" USD";
+    formatMYR(balance);
 
   });
 

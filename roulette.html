@@ -49,10 +49,9 @@ button:disabled{opacity:.4;cursor:not-allowed}
 
 <h1>🎰 ONLINE CASHINO</h1>
 <h2>🎡 ROULETTE GAME</h2>
-<p>DEMO POINTS ROULETTE</p>
 
 <div class="balance">
-MY DEMO POINTS: <span id="balance">Loading...</span>
+💰 MYR BALANCE: <span id="balance">Loading...</span>
 </div>
 
 <div class="auto-status" id="autoStatus">🟢 AUTO SPIN READY</div>
@@ -89,13 +88,13 @@ MY DEMO POINTS: <span id="balance">Loading...</span>
 </div>
 
 <div class="section">
-<h3>💎 POINTS PER SELECTION</h3>
+<h3>💎 RM PER SELECTION</h3>
 <input class="stake-input" id="stakeInput" type="number" min="1" step="1" value="1">
 <div class="summary">
 Selected bets: <b id="selectedCount">0</b><br>
 Selected: <span id="selectedList">None</span><br>
-Points per selection: <b id="stakeDisplay">1</b><br>
-Total points: <b id="totalStake">0</b>
+RM per selection: <b id="stakeDisplay">RM 1.00</b><br>
+Total stake: <b id="totalStake">RM 0.00</b>
 </div>
 </div>
 
@@ -109,7 +108,7 @@ Total points: <b id="totalStake">0</b>
 <button class="back" id="backBtn">🏠 BACK TO HOME</button>
 
 <div class="notice">
-Demo points have no cash value. No deposits, withdrawals or cash prizes.
+MYR balance display is for entertainment purposes only. No real-money deposits, withdrawals or cash prizes.
 </div>
 
 </div>
@@ -123,12 +122,19 @@ onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/13.2.0/firebase-auth.js";
 
 import {
-ref,get,push,runTransaction,query,orderByChild,limitToLast
+ref,get,push,runTransaction,query,orderByChild,limitToLast,update
 } from "https://www.gstatic.com/firebasejs/13.2.0/firebase-database.js";
 
 const $=id=>document.getElementById(id);
 const wheel=$("wheel");
 const board=$("numberBoard");
+
+function formatRM(value){
+ return "RM "+Number(value||0).toLocaleString("en-MY",{
+  minimumFractionDigits:2,
+  maximumFractionDigits:2
+ });
+}
 
 /* AUTO SPIN TIMING */
 const SPIN_INTERVAL=20200;
@@ -359,8 +365,8 @@ function updateSummary(){
  $("selectedList").textContent=
   bets.map(b=>b.label).join(", ")||"None";
 
- $("stakeDisplay").textContent=$("stakeInput").value||0;
- $("totalStake").textContent=total;
+ $("stakeDisplay").textContent=formatRM($("stakeInput").value||0);
+ $("totalStake").textContent=formatRM(total);
 }
 
 function refresh(){
@@ -447,7 +453,8 @@ async function loadBalance(){
 
  if(!currentUser)throw new Error("Please login first.");
 
- const snap=await get(ref(db,"users/"+currentUser.uid));
+ const userRef=ref(db,"users/"+currentUser.uid);
+ const snap=await get(userRef);
 
  if(!snap.exists()){
   throw new Error("USER RECORD NOT FOUND IN FIREBASE");
@@ -458,11 +465,17 @@ async function loadBalance(){
  const points=Number(userRecordCache.demoPoints);
 
  if(!Number.isFinite(points)||points<0){
-  throw new Error("Invalid demoPoints in Firebase.");
+  throw new Error("Invalid balance in Firebase.");
+ }
+
+ /* MYR metadata only. Existing numeric balance is unchanged. */
+ if(userRecordCache.currency!=="MYR"){
+  await update(userRef,{currency:"MYR"});
+  userRecordCache.currency="MYR";
  }
 
  balance=points;
- $("balance").textContent=balance;
+ $("balance").textContent=formatRM(balance);
  updateSummary();
 }
 
@@ -510,11 +523,11 @@ async function loadHistory(){
 
   const details=document.createElement("div");
   details.textContent=
-   `Used: ${x.stakeTotal||0} | Won: ${x.payoutTotal||0} | Net: ${x.pointsChange||0}`;
+   `Used: ${formatRM(x.stakeTotal)} | Won: ${formatRM(x.payoutTotal)} | Net: ${formatRM(x.pointsChange)}`;
 
   const balanceLine=document.createElement("div");
   balanceLine.textContent=
-   `Balance: ${x.balanceAfter??"-"} | ${date}`;
+   `Balance: ${x.balanceAfter!=null?formatRM(x.balanceAfter):"-"} | ${date}`;
 
   d.append(top,details,balanceLine);
   $("historyList").appendChild(d);
@@ -558,6 +571,7 @@ async function saveSpin(
   }
 
   current.demoPoints=old+(payout-total);
+  current.currency="MYR";
   current.gamePlayed=(Number(current.gamePlayed)||0)+1;
   current.lastGameActivity=now;
 
@@ -565,6 +579,7 @@ async function saveSpin(
 
   current.transactions[transactionKey]={
    type:"ROULETTE_RESULT",
+   currency:"MYR",
    mode:mode,
    uid:uid,
    email:currentUser.email||"",
@@ -575,7 +590,8 @@ async function saveSpin(
    bets:bets.map(b=>({
     label:b.label,
     stake:b.stake,
-    multiplier:b.multiplier
+    multiplier:b.multiplier,
+    currency:"MYR"
    })),
    stakeTotal:total,
    payoutTotal:payout,
@@ -595,7 +611,7 @@ async function saveSpin(
  userRecordCache=resultTx.snapshot.val();
 
  balance=Number(userRecordCache.demoPoints)||0;
- $("balance").textContent=balance;
+ $("balance").textContent=formatRM(balance);
 }
 
 /* PAYOUT */
@@ -653,7 +669,7 @@ function showResult(n,total,payout,mode){
 
  const info=document.createElement("div");
  info.textContent=
-  `Used: ${total} | Payout: ${payout} | Net: ${payout-total}`;
+  `Used: ${formatRM(total)} | Payout: ${formatRM(payout)} | Net: ${formatRM(payout-total)}`;
 
  $("result").append(title,number,color,modeLine,info);
 }
@@ -694,7 +710,7 @@ async function startSpin(){
  if(total>balance){
 
   $("result").textContent=
-   "Not enough Demo Points. Spin will run without bets.";
+   "Not enough RM balance. Spin will run without bets.";
 
   bets=[];
   total=0;
@@ -752,11 +768,6 @@ async function startSpin(){
   selectedBets.clear();
 
   refresh();
-
-  /*
-  Next spin target:
-  20.2 seconds from the previous spin start.
-  */
 
   const elapsed=Date.now()-spinStartedAt;
   const remaining=Math.max(0,SPIN_INTERVAL-elapsed);

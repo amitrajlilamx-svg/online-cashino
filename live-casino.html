@@ -1,0 +1,427 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ONLINE CASHINO - LIVE CASINO</title>
+
+<style>
+*{box-sizing:border-box}
+
+html,body{
+ margin:0;
+ padding:0;
+ min-height:100%;
+ background:#080f1c;
+ color:white;
+ font-family:Arial,sans-serif;
+}
+
+body{
+ max-width:500px;
+ margin:auto;
+ padding-bottom:25px;
+}
+
+.header{
+ display:flex;
+ justify-content:space-between;
+ align-items:center;
+ padding:14px 12px;
+ background:#101d30;
+ border-bottom:1px solid #344b67;
+}
+
+.logo{
+ color:#ffd34d;
+ font-size:18px;
+ font-weight:900;
+}
+
+.logo small{
+ display:block;
+ color:#aebed0;
+ font-size:9px;
+ letter-spacing:2px;
+ margin-top:4px;
+}
+
+.header button{
+ background:#ffd34d;
+ border:0;
+ padding:10px 13px;
+ border-radius:6px;
+ font-weight:bold;
+ cursor:pointer;
+}
+
+.balance{
+ margin:12px;
+ padding:14px;
+ background:linear-gradient(110deg,#174b37,#102c38);
+ border:1px solid #398a61;
+ border-radius:11px;
+}
+
+.balance small{
+ color:#c5e7d3;
+ font-size:11px;
+}
+
+.balance h2{
+ margin:6px 0 0;
+ color:#ffe16a;
+ font-size:22px;
+}
+
+.banner{
+ margin:12px;
+ padding:22px 15px;
+ text-align:center;
+ border-radius:12px;
+ background:linear-gradient(120deg,#751c2c,#c08a24,#572a18);
+ border:1px solid #ffd34d;
+}
+
+.banner h1{
+ color:#ffe17a;
+ font-size:23px;
+ margin:0 0 8px;
+}
+
+.banner p{
+ color:white;
+ font-size:12px;
+ margin:0;
+}
+
+.section-title{
+ margin:20px 12px 12px;
+ color:#ffd34d;
+ font-size:16px;
+}
+
+.game-grid{
+ display:grid;
+ grid-template-columns:repeat(2,minmax(0,1fr));
+ gap:11px;
+ padding:0 12px;
+}
+
+.game-card{
+ min-width:0;
+ text-align:center;
+ padding:14px 10px;
+ border-radius:11px;
+ background:linear-gradient(145deg,#192b42,#101b2c);
+ border:1px solid #344d69;
+}
+
+.game-icon{
+ height:65px;
+ width:65px;
+ display:flex;
+ justify-content:center;
+ align-items:center;
+ margin:0 auto 10px;
+ background:#263c56;
+ border-radius:13px;
+ font-size:36px;
+}
+
+.game-card h3{
+ font-size:13px;
+ color:#ffdc64;
+ margin:7px 0;
+}
+
+.game-card p{
+ min-height:28px;
+ color:#aebed0;
+ font-size:10px;
+ line-height:1.5;
+}
+
+.game-card button{
+ width:100%;
+ padding:11px 5px;
+ border:0;
+ border-radius:6px;
+ background:linear-gradient(90deg,#ffcf43,#f5a900);
+ color:#171717;
+ font-size:11px;
+ font-weight:bold;
+ cursor:pointer;
+}
+
+.provider-card{
+ grid-column:1/-1;
+ border:1px solid #d7a83e;
+ background:linear-gradient(145deg,#362419,#17263b);
+}
+
+.provider-card .game-icon{
+ background:linear-gradient(135deg,#7e5422,#d7a83e);
+}
+
+.evolution-card button{
+ background:linear-gradient(90deg,#8b1727,#d49b28);
+ color:white;
+ border:1px solid #ffd34d;
+}
+
+.dream-card{
+ border:1px solid #8b65d9;
+ background:linear-gradient(145deg,#26194a,#121d38);
+}
+
+.dream-card .game-icon{
+ background:linear-gradient(135deg,#57369d,#a37be8);
+}
+
+.dream-card h3{
+ color:#d5bdff;
+}
+
+.dream-card button{
+ background:linear-gradient(90deg,#6036ad,#a47be8);
+ color:white;
+}
+
+.notice{
+ margin:18px 12px;
+ padding:12px;
+ background:#142237;
+ border:1px solid #344b67;
+ border-radius:9px;
+ color:#aebed0;
+ font-size:11px;
+ line-height:1.6;
+}
+
+footer{
+ text-align:center;
+ color:#8192a6;
+ font-size:10px;
+ padding:15px;
+}
+</style>
+</head>
+
+<body>
+
+<!-- HEADER -->
+
+<header class="header">
+ <div class="logo">
+  🎰 ONLINE CASHINO
+  <small>LIVE CASINO</small>
+ </div>
+
+ <button onclick="goHome()">HOME</button>
+</header>
+
+<!-- BALANCE -->
+
+<div class="balance">
+ <small>💰 MY DEMO BALANCE</small>
+ <h2 id="balance">0.00 USD</h2>
+</div>
+
+<!-- BANNER -->
+
+<div class="banner">
+ <h1>🎰 LIVE CASINO</h1>
+ <p>Welcome to ONLINE CASHINO Live Casino</p>
+</div>
+
+<h2 class="section-title">🎮 LIVE CASINO GAMES</h2>
+
+<div class="game-grid">
+
+ <!-- ROULETTE -->
+
+ <div class="game-card">
+  <div class="game-icon">🎡</div>
+  <h3>LIVE ROULETTE</h3>
+  <p>Roulette Demo Game</p>
+  <button onclick="openDemo('roulette.html')">
+   PLAY NOW
+  </button>
+ </div>
+
+ <!-- BACCARAT -->
+
+ <div class="game-card">
+  <div class="game-icon">🃏</div>
+  <h3>LIVE BACCARAT</h3>
+  <p>Baccarat Demo Game</p>
+  <button onclick="openDemo('baccarat.html')">
+   PLAY NOW
+  </button>
+ </div>
+
+ <!-- DRAGON TIGER -->
+
+ <div class="game-card">
+  <div class="game-icon">🐉</div>
+  <h3>DRAGON TIGER</h3>
+  <p>Dragon Tiger Demo Game</p>
+  <button onclick="openDemo('dragon-tiger.html')">
+   PLAY NOW
+  </button>
+ </div>
+
+ <!-- CARD GAME -->
+
+ <div class="game-card">
+  <div class="game-icon">🎴</div>
+  <h3>LIVE CARD GAME</h3>
+  <p>Card Game Demo</p>
+  <button onclick="openDemo('baccarat.html')">
+   PLAY NOW
+  </button>
+ </div>
+
+ <!-- EVOLUTION GAMING -->
+
+ <div class="game-card provider-card evolution-card">
+
+  <div class="game-icon">🎰</div>
+
+  <h3>EVOLUTION GAMING</h3>
+
+  <p>Explore Official Evolution Gaming</p>
+
+  <button onclick="openEvolution()">
+   OPEN EVOLUTION
+  </button>
+
+ </div>
+
+ <!-- DREAM GAMING -->
+
+ <div class="game-card provider-card dream-card">
+
+  <div class="game-icon">🎮</div>
+
+  <h3>DREAM GAMING</h3>
+
+  <p>Explore Dream Gaming</p>
+
+  <button onclick="openDreamGaming()">
+   OPEN DREAM GAMING
+  </button>
+
+ </div>
+
+</div>
+
+<!-- NOTICE -->
+
+<div class="notice">
+ <strong>ℹ️ IMPORTANT INFORMATION</strong><br>
+ ONLINE CASHINO demo games use your demo wallet.
+ Evolution and Dream Gaming buttons open their respective
+ external websites. They are not connected to your Firebase
+ wallet. Actual game integration requires authorized
+ operator access and API.
+</div>
+
+<footer>
+ ONLINE CASHINO © 2026<br>
+ Demo Gaming Entertainment
+</footer>
+
+<!-- FIREBASE -->
+
+<script type="module">
+
+import {auth,db} from "./firebase-config.js";
+
+import {
+ onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/13.2.0/firebase-auth.js";
+
+import {
+ ref,onValue
+} from "https://www.gstatic.com/firebasejs/13.2.0/firebase-database.js";
+
+/* AUTH CHECK */
+
+onAuthStateChanged(auth,user=>{
+
+ if(!user){
+  window.location.href="index.html";
+  return;
+ }
+
+ /* FIREBASE BALANCE */
+
+ const balanceRef=ref(
+  db,
+  "users/"+user.uid+"/demoPoints"
+ );
+
+ onValue(balanceRef,snapshot=>{
+
+  const amount=Number(snapshot.val()||0);
+
+  document.getElementById("balance").textContent=
+   amount.toFixed(2)+" USD";
+
+ });
+
+});
+
+/* OPEN DEMO GAME */
+
+window.openDemo=function(page){
+
+ if(!auth.currentUser){
+  alert("Please Login First");
+  window.location.href="index.html";
+  return;
+ }
+
+ window.location.href=page;
+
+};
+
+/* EVOLUTION */
+
+window.openEvolution=function(){
+
+ window.open(
+  "https://www.evolution.com/",
+  "_blank",
+  "noopener,noreferrer"
+ );
+
+};
+
+/* DREAM GAMING */
+
+window.openDreamGaming=function(){
+
+ window.open(
+  "https://dreamgamingmyr.com/",
+  "_blank",
+  "noopener,noreferrer"
+ );
+
+};
+
+/* HOME */
+
+window.goHome=function(){
+
+ window.location.href="index.html";
+
+};
+
+</script>
+
+</body>
+</html>

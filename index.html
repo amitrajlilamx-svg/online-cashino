@@ -1,0 +1,773 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ONLINE CASHINO</title>
+
+<style>
+*{box-sizing:border-box}
+
+html,body{
+ margin:0;
+ padding:0;
+ width:100%;
+ min-height:100%;
+ background:#080f1c;
+ color:white;
+ font-family:Arial,sans-serif;
+ overflow-x:hidden;
+}
+
+body{
+ max-width:500px;
+ margin:auto;
+ padding-bottom:80px;
+}
+
+.topbar{
+ display:flex;
+ align-items:center;
+ padding:13px 12px;
+ background:#101d30;
+ border-bottom:1px solid #263c56;
+ position:sticky;
+ top:0;
+ z-index:20;
+}
+
+.logo{
+ font-size:19px;
+ font-weight:900;
+ color:#ffd34d;
+}
+
+.logo small{
+ display:block;
+ font-size:9px;
+ color:#aab9ca;
+ letter-spacing:2px;
+ margin-top:3px;
+}
+
+/* BALANCE */
+
+.wallet-card{
+ margin:12px;
+ padding:14px;
+ border-radius:12px;
+ background:linear-gradient(110deg,#174b37,#102c38);
+ border:1px solid #398a61;
+}
+
+.wallet-label{
+ font-size:11px;
+ color:#c5e7d3;
+}
+
+.wallet-amount{
+ font-size:22px;
+ color:#ffe16a;
+ font-weight:bold;
+ margin-top:5px;
+}
+
+/* LOGIN */
+
+.account{
+ margin:13px;
+ padding:15px;
+ border-radius:12px;
+ background:#142237;
+ border:1px solid #344a65;
+}
+
+.account h3{
+ color:#ffd34d;
+ margin:0 0 12px;
+}
+
+.account input{
+ width:100%;
+ padding:13px;
+ margin:5px 0;
+ background:#091322;
+ color:white;
+ border:1px solid #40536d;
+ border-radius:7px;
+ font-size:14px;
+}
+
+.account button{
+ padding:11px 12px;
+ margin:5px 3px 0 0;
+ border:0;
+ border-radius:7px;
+ background:#ffd34d;
+ color:#111;
+ font-size:11px;
+ font-weight:bold;
+ cursor:pointer;
+}
+
+#message{
+ font-size:12px;
+ color:#ffe16a;
+}
+
+/* USER */
+
+.user-panel{
+ margin:12px;
+ padding:12px;
+ border-radius:10px;
+ background:#142237;
+ border:1px solid #344a65;
+}
+
+.user-info{
+ font-size:12px;
+ color:#c4d3e5;
+}
+
+.user-info strong{
+ display:block;
+ color:#ffd34d;
+ font-size:14px;
+ margin-bottom:4px;
+}
+
+/* BANNER */
+
+.banner{
+ margin:12px;
+ padding:19px 15px;
+ border-radius:13px;
+ background:linear-gradient(120deg,#703d12,#b57b20,#3c2814);
+ border:1px solid #e4b54c;
+ min-height:125px;
+ position:relative;
+ overflow:hidden;
+}
+
+.banner:after{
+ content:"🎰";
+ position:absolute;
+ right:13px;
+ top:20px;
+ font-size:65px;
+ opacity:.8;
+}
+
+.banner h2{
+ margin:0;
+ color:#ffe17a;
+ font-size:21px;
+}
+
+.banner p{
+ font-size:12px;
+ color:#fff1c4;
+ margin:8px 0;
+}
+
+.banner strong{
+ font-size:10px;
+ color:#fff;
+}
+
+/* GAME SECTION */
+
+.section-head{
+ display:flex;
+ justify-content:space-between;
+ align-items:center;
+ margin:17px 12px 10px;
+}
+
+.section-head h2{
+ font-size:16px;
+ margin:0;
+ color:#ffd34d;
+}
+
+.section-head span{
+ font-size:10px;
+ color:#9db0c6;
+}
+
+/* CATEGORY ROW */
+
+.category-row{
+ display:flex;
+ gap:8px;
+ overflow-x:auto;
+ overflow-y:hidden;
+ padding:4px 12px 12px;
+ white-space:nowrap;
+ scrollbar-width:none;
+ -webkit-overflow-scrolling:touch;
+}
+
+.category-row::-webkit-scrollbar{
+ display:none;
+}
+
+.category-row button{
+ flex:0 0 auto;
+ background:#17273c;
+ color:#dce8f5;
+ border:1px solid #344b67;
+ border-radius:20px;
+ padding:9px 13px;
+ font-size:10px;
+ font-weight:bold;
+ cursor:pointer;
+}
+
+/* LIVE CASINO CATEGORY BUTTON */
+
+.category-row .live-category{
+ background:linear-gradient(90deg,#8b1727,#d49b28);
+ color:white;
+ border:1px solid #ffd34d;
+}
+
+/* GAME GRID */
+
+.game-grid{
+ display:grid;
+ grid-template-columns:repeat(2,minmax(0,1fr));
+ gap:10px;
+ padding:0 12px;
+}
+
+.game-card{
+ background:linear-gradient(145deg,#192b42,#101b2c);
+ border:1px solid #344d69;
+ border-radius:11px;
+ padding:12px 9px;
+ text-align:center;
+ min-width:0;
+}
+
+.game-icon{
+ width:58px;
+ height:58px;
+ margin:0 auto 7px;
+ border-radius:13px;
+ background:#263c56;
+ display:flex;
+ align-items:center;
+ justify-content:center;
+ font-size:34px;
+}
+
+.game-card h3{
+ font-size:13px;
+ color:#ffdc64;
+ margin:7px 0;
+}
+
+.game-card p{
+ color:#aebed0;
+ font-size:10px;
+ margin:5px 0 10px;
+ min-height:23px;
+}
+
+.game-card button{
+ width:100%;
+ padding:11px 3px;
+ border:0;
+ border-radius:6px;
+ background:linear-gradient(90deg,#ffcf43,#f5a900);
+ color:#171717;
+ font-weight:bold;
+ font-size:11px;
+ cursor:pointer;
+}
+
+/* GAME VIEWER */
+
+#gameViewer{
+ margin:12px;
+ padding:9px;
+ background:#142237;
+ border:1px solid #d8a72e;
+ border-radius:10px;
+}
+
+.frame-header{
+ display:flex;
+ align-items:center;
+ justify-content:space-between;
+ margin-bottom:8px;
+ gap:5px;
+}
+
+.frame-header strong{
+ color:#ffd34d;
+ font-size:13px;
+}
+
+.frame-header button{
+ border:0;
+ border-radius:6px;
+ padding:9px;
+ background:#ffd34d;
+ color:#111;
+ font-weight:bold;
+ font-size:11px;
+ cursor:pointer;
+}
+
+#gameFrame{
+ width:100%;
+ height:75vh;
+ min-height:430px;
+ border:0;
+ border-radius:7px;
+ background:#080f1c;
+}
+
+/* BOTTOM NAVIGATION */
+
+.bottom-nav{
+ position:fixed;
+ bottom:0;
+ left:50%;
+ transform:translateX(-50%);
+ width:100%;
+ max-width:500px;
+ height:66px;
+ background:#101d30;
+ border-top:1px solid #344b67;
+ display:grid;
+ grid-template-columns:repeat(4,1fr);
+ z-index:30;
+}
+
+.bottom-nav button{
+ border:0;
+ background:transparent;
+ color:#aebed0;
+ font-size:9px;
+ font-weight:bold;
+ padding:4px 0;
+ cursor:pointer;
+}
+
+.bottom-nav span{
+ display:block;
+ font-size:20px;
+ margin-bottom:3px;
+}
+
+.bottom-nav button.active{
+ color:#ffd34d;
+}
+
+footer{
+ text-align:center;
+ padding:20px 5px;
+ color:#8192a6;
+ font-size:10px;
+ line-height:1.7;
+}
+
+[hidden]{
+ display:none!important;
+}
+</style>
+</head>
+
+<body>
+
+<!-- HEADER -->
+
+<header class="topbar">
+ <div class="logo">
+  🎰 ONLINE CASHINO
+  <small>GAMING ENTERTAINMENT</small>
+ </div>
+</header>
+
+<!-- BALANCE -->
+
+<div class="wallet-card" id="walletCard" hidden>
+ <div>
+  <div class="wallet-label">BALANCE</div>
+  <div class="wallet-amount" id="walletBalance">0.00 USD</div>
+ </div>
+</div>
+
+<!-- LOGIN -->
+
+<div class="account" id="accountBox">
+ <h3>👤 USER LOGIN</h3>
+
+ <input type="email" id="email" placeholder="Enter Email">
+
+ <input type="password" id="password" placeholder="Enter Password">
+
+ <button id="registerBtn">CREATE ACCOUNT</button>
+ <button id="loginBtn">LOGIN</button>
+
+ <p id="message">Please Login or Create Account</p>
+</div>
+
+<!-- USER INFO -->
+
+<div class="user-panel" id="userMenu" hidden>
+ <div class="user-info">
+  <strong>WELCOME TO ONLINE CASHINO</strong>
+  <span id="userEmail">User Account</span>
+ </div>
+</div>
+
+<!-- HOME PAGE -->
+
+<section id="homeContent" hidden>
+
+ <div class="banner">
+  <h2>WELCOME TO CASHINO</h2>
+  <p>Enjoy your favourite demo games!</p>
+  <strong>🎮 PLAY • ENJOY • HAVE FUN</strong>
+ </div>
+
+ <div class="section-head">
+  <h2>🎮 ALL GAMES</h2>
+  <span>DEMO GAMES</span>
+ </div>
+
+ <!-- ALL GAMES + LIVE CASINO SAME LINE -->
+
+ <div class="category-row">
+
+  <button onclick="filterGame('ALL')">
+   ALL GAMES
+  </button>
+
+  <button onclick="filterGame('SPORTS')">
+   SPORTS
+  </button>
+
+  <button onclick="filterGame('CRASH')">
+   CRASH
+  </button>
+
+  <button onclick="filterGame('ARCADE')">
+   ARCADE
+  </button>
+
+  <button class="live-category" onclick="openLiveCasino()">
+   🎰 LIVE CASINO
+  </button>
+
+ </div>
+
+ <!-- GAME CARDS -->
+
+ <div class="game-grid" id="gameGrid">
+
+  <div class="game-card" data-category="ARCADE">
+   <div class="game-icon">🎁</div>
+   <h3>BABAKO KHAJANA</h3>
+   <p>Treasure Demo Game</p>
+   <button onclick="openGame('babako.html','BABAKO KHAJANA')">
+    PLAY NOW
+   </button>
+  </div>
+
+  <div class="game-card" data-category="ARCADE">
+   <div class="game-icon">🎡</div>
+   <h3>ROULETTE</h3>
+   <p>Free Demo Points Roulette</p>
+   <button onclick="openGame('roulette.html','ROULETTE')">
+    PLAY NOW
+   </button>
+  </div>
+
+  <div class="game-card" data-category="ARCADE">
+   <div class="game-icon">🃏</div>
+   <h3>BACCARAT</h3>
+   <p>Card Demo Game</p>
+   <button onclick="openGame('baccarat.html','BACCARAT')">
+    PLAY NOW
+   </button>
+  </div>
+
+  <div class="game-card" data-category="ARCADE">
+   <div class="game-icon">🐉</div>
+   <h3>DRAGON TIGER</h3>
+   <p>Dragon Tiger Demo Game</p>
+   <button onclick="openGame('dragon-tiger.html','DRAGON TIGER')">
+    PLAY NOW
+   </button>
+  </div>
+
+  <div class="game-card" data-category="CRASH">
+   <div class="game-icon">✈️</div>
+   <h3>AVIATOR</h3>
+   <p>Flying Plane Demo Game</p>
+   <button onclick="openGame('aviator.html','AVIATOR')">
+    PLAY NOW
+   </button>
+  </div>
+
+  <div class="game-card" data-category="SPORTS">
+   <div class="game-icon">⚽</div>
+   <h3>GOAL GAME</h3>
+   <p>Football Goal Game</p>
+   <button onclick="openGame('goal.html','GOAL GAME')">
+    PLAY NOW
+   </button>
+  </div>
+
+  <div class="game-card" data-category="ARCADE">
+   <div class="game-icon">💣</div>
+   <h3>BOMB GAME</h3>
+   <p>Find safe boxes Demo Game</p>
+   <button onclick="openGame('bomb.html','BOMB GAME')">
+    PLAY NOW
+   </button>
+  </div>
+
+ </div>
+
+</section>
+
+<!-- GAME VIEWER -->
+
+<section id="gameViewer" hidden>
+
+ <div class="frame-header">
+  <strong id="frameTitle">🎮 GAME</strong>
+  <button onclick="backHome()">✖ BACK HOME</button>
+ </div>
+
+ <iframe
+  id="gameFrame"
+  title="ONLINE CASHINO GAME"
+  allow="fullscreen">
+ </iframe>
+
+</section>
+
+<footer>
+ <b>ONLINE CASHINO © 2026</b><br>
+ Free demo only. No real money or cash prizes.
+</footer>
+
+<!-- BOTTOM NAV -->
+
+<nav class="bottom-nav" id="bottomNav" hidden>
+
+ <button class="active" onclick="backHome()">
+  <span>🏠</span>
+  HOME
+ </button>
+
+ <button onclick="goWallet()">
+  <span>💰</span>
+  WALLET
+ </button>
+
+ <button onclick="goHistory()">
+  <span>📜</span>
+  HISTORY
+ </button>
+
+ <button onclick="goProfile()">
+  <span>👤</span>
+  PROFILE
+ </button>
+
+</nav>
+
+<script type="module" src="auth.js"></script>
+<script type="module" src="game.js"></script>
+
+<script type="module">
+
+import {auth,db} from "./firebase-config.js";
+
+import {
+ onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/13.2.0/firebase-auth.js";
+
+import {
+ ref,onValue
+} from "https://www.gstatic.com/firebasejs/13.2.0/firebase-database.js";
+
+const accountBox=document.getElementById("accountBox");
+const userMenu=document.getElementById("userMenu");
+const homeContent=document.getElementById("homeContent");
+const walletCard=document.getElementById("walletCard");
+const bottomNav=document.getElementById("bottomNav");
+
+const gameViewer=document.getElementById("gameViewer");
+const gameFrame=document.getElementById("gameFrame");
+
+let walletListener=null;
+
+/* LOGIN CHECK */
+
+function checkLogin(){
+
+ if(!auth.currentUser){
+  alert("Please Login First");
+  return false;
+ }
+
+ return true;
+}
+
+/* FIREBASE AUTH */
+
+onAuthStateChanged(auth,user=>{
+
+ const loggedIn=!!user;
+
+ accountBox.hidden=loggedIn;
+ userMenu.hidden=!loggedIn;
+ homeContent.hidden=!loggedIn;
+ walletCard.hidden=!loggedIn;
+ bottomNav.hidden=!loggedIn;
+
+ if(walletListener){
+  walletListener();
+  walletListener=null;
+ }
+
+ if(loggedIn){
+
+  document.getElementById("userEmail").textContent=
+   user.email || "User Account";
+
+  const walletRef=ref(
+   db,
+   "users/"+user.uid+"/demoPoints"
+  );
+
+  walletListener=onValue(walletRef,snapshot=>{
+
+   const balance=Number(snapshot.val()||0);
+
+   document.getElementById("walletBalance").textContent=
+    balance.toFixed(2)+" USD";
+
+  });
+
+ }else{
+
+  gameViewer.hidden=true;
+  gameFrame.src="about:blank";
+
+ }
+
+});
+
+/* OPEN GAME */
+
+window.openGame=function(filename,name){
+
+ if(!checkLogin())return;
+
+ homeContent.hidden=true;
+ gameViewer.hidden=false;
+
+ document.getElementById("frameTitle").textContent=
+  "🎮 "+name;
+
+ gameFrame.src=filename;
+
+ window.scrollTo({
+  top:0,
+  behavior:"smooth"
+ });
+
+};
+
+/* OPEN LIVE CASINO PAGE */
+
+window.openLiveCasino=function(){
+
+ if(!checkLogin())return;
+
+ window.location.href="live-casino.html";
+
+};
+
+/* BACK HOME */
+
+window.backHome=function(){
+
+ gameFrame.src="about:blank";
+ gameViewer.hidden=true;
+ homeContent.hidden=!auth.currentUser;
+
+ window.scrollTo({
+  top:0,
+  behavior:"smooth"
+ });
+
+};
+
+/* FILTER GAMES */
+
+window.filterGame=function(category){
+
+ const cards=document.querySelectorAll(".game-card");
+
+ cards.forEach(card=>{
+
+  if(
+   category==="ALL" ||
+   card.dataset.category===category
+  ){
+   card.style.display="";
+  }else{
+   card.style.display="none";
+  }
+
+ });
+
+};
+
+/* WALLET */
+
+window.goWallet=function(){
+
+ if(!checkLogin())return;
+
+ window.location.href="wallet.html";
+
+};
+
+/* HISTORY */
+
+window.goHistory=function(){
+
+ if(!checkLogin())return;
+
+ window.location.href="history.html";
+
+};
+
+/* PROFILE */
+
+window.goProfile=function(){
+
+ if(!checkLogin())return;
+
+ window.location.href="profile.html";
+
+};
+
+</script>
+
+</body>
+</html>

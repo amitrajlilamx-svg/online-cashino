@@ -1,0 +1,638 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ONLINE CASHINO - Game History</title>
+
+<style>
+*{box-sizing:border-box}
+
+body{
+  margin:0;
+  padding:14px;
+  background:#10131b;
+  color:white;
+  font-family:Arial,sans-serif;
+}
+
+.container{
+  max-width:650px;
+  margin:auto;
+}
+
+.header{
+  background:#1c2433;
+  padding:18px;
+  border-radius:14px;
+  text-align:center;
+  border:1px solid #303c50;
+}
+
+.header h1{
+  color:#ffc107;
+  margin:0 0 8px;
+  font-size:23px;
+}
+
+.header h2{
+  margin:0;
+  font-size:17px;
+}
+
+.summary{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+  margin-top:15px;
+}
+
+.stat{
+  background:#1c2433;
+  border:1px solid #303c50;
+  border-radius:10px;
+  padding:14px;
+  text-align:center;
+  min-width:0;
+}
+
+.stat span{
+  display:block;
+  color:#aaa;
+  font-size:12px;
+  margin-bottom:8px;
+}
+
+.stat strong{
+  font-size:19px;
+  overflow-wrap:anywhere;
+}
+
+.green{color:#00e676}
+.red{color:#ff5252}
+.yellow{color:#ffc107}
+
+.controls{
+  display:flex;
+  gap:8px;
+  margin:16px 0;
+}
+
+select,button{
+  padding:13px;
+  border:0;
+  border-radius:8px;
+  font-weight:bold;
+  font-size:14px;
+}
+
+select{
+  flex:1;
+  min-width:0;
+  background:#252e3e;
+  color:white;
+}
+
+button{cursor:pointer}
+
+.refresh{
+  background:#ffc107;
+  color:black;
+}
+
+.back{
+  width:100%;
+  background:#2196f3;
+  color:white;
+  margin-top:15px;
+}
+
+.list-title{
+  margin:20px 0 12px;
+  color:#ffc107;
+  font-size:17px;
+}
+
+.game-card{
+  background:#1c2433;
+  border:1px solid #303c50;
+  border-radius:12px;
+  padding:15px;
+  margin-bottom:12px;
+}
+
+.game-top{
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+  align-items:center;
+  margin-bottom:12px;
+}
+
+.game-name{
+  font-weight:bold;
+  color:#ffc107;
+  font-size:16px;
+}
+
+.status{
+  padding:5px 9px;
+  border-radius:6px;
+  font-size:11px;
+  font-weight:bold;
+}
+
+.win{background:#064e35;color:#00e676}
+.loss{background:#581d28;color:#ff5252}
+.pending{background:#51400b;color:#ffc107}
+
+.details{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+}
+
+.detail span{
+  display:block;
+  color:#999;
+  font-size:11px;
+  margin-bottom:5px;
+}
+
+.detail strong{
+  font-size:14px;
+  overflow-wrap:anywhere;
+}
+
+.date{
+  color:#aaa;
+  font-size:11px;
+  margin-top:14px;
+  border-top:1px solid #303c50;
+  padding-top:10px;
+}
+
+.empty{
+  background:#1c2433;
+  padding:25px 12px;
+  border-radius:12px;
+  text-align:center;
+  color:#aaa;
+}
+
+.notice{
+  color:#888;
+  text-align:center;
+  font-size:11px;
+  margin:20px 0;
+}
+
+@media(max-width:360px){
+  .details{grid-template-columns:1fr 1fr}
+  .stat strong{font-size:16px}
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<div class="header">
+  <h1>🎰 ONLINE CASHINO</h1>
+  <h2>📜 GAME HISTORY</h2>
+</div>
+
+<div class="summary">
+
+  <div class="stat">
+    <span>TOTAL GAMES</span>
+    <strong id="totalGames">0</strong>
+  </div>
+
+  <div class="stat">
+    <span>WIN GAMES</span>
+    <strong class="green" id="totalWins">0</strong>
+  </div>
+
+  <div class="stat">
+    <span>LOSS GAMES</span>
+    <strong class="red" id="totalLosses">0</strong>
+  </div>
+
+  <div class="stat">
+    <span>NET RESULT</span>
+    <strong id="netResult">0.00</strong>
+  </div>
+
+</div>
+
+<div class="controls">
+  <select id="filter">
+    <option value="ALL">ALL GAMES</option>
+    <option value="GOAL">GOAL GAME</option>
+    <option value="AVIATOR">AVIATOR</option>
+    <option value="BOMB">BOMB GAME</option>
+  </select>
+
+  <button class="refresh" id="refreshBtn">↻ REFRESH</button>
+</div>
+
+<h3 class="list-title">📋 YOUR GAME RECORDS</h3>
+
+<div id="historyList">
+  <div class="empty">Loading History...</div>
+</div>
+
+<button class="back" id="backBtn">🎮 BACK TO GAME</button>
+
+<div class="notice">
+  ONLINE CASHINO - FREE ENTERTAINMENT DEMO
+  <br>
+  Demo Points have no cash value.
+</div>
+
+</div>
+
+<script type="module">
+
+import {auth,db} from "./firebase-config.js";
+
+import {
+  ref,
+  get
+} from "https://www.gstatic.com/firebasejs/13.2.0/firebase-database.js";
+
+import {
+  onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/13.2.0/firebase-auth.js";
+
+
+const historyList = document.getElementById("historyList");
+const filter = document.getElementById("filter");
+
+let allRecords = [];
+let currentUID = null;
+let loading = false;
+
+
+function numberValue(value){
+
+  if(typeof value === "number") return value;
+
+  if(typeof value === "string"){
+    const cleaned = value.replace(/[^0-9.-]/g,"");
+    const result = Number(cleaned);
+    return Number.isFinite(result) ? result : 0;
+  }
+
+  return 0;
+}
+
+
+function getDate(record){
+
+  const value =
+    record.createdAt ??
+    record.timestamp ??
+    record.time ??
+    record.date ??
+    record.playedAt ??
+    record.updatedAt;
+
+  if(!value) return 0;
+
+  if(typeof value === "string" && isNaN(Number(value))){
+    const parsed = Date.parse(value);
+    return isNaN(parsed) ? 0 : parsed;
+  }
+
+  let time = Number(value);
+
+  if(time > 0 && time < 100000000000){
+    time = time * 1000;
+  }
+
+  return time;
+}
+
+
+function formatDate(value){
+
+  if(!value) return "Date not available";
+
+  return new Date(value).toLocaleString();
+}
+
+
+function getRecordStatus(record,net){
+
+  const status = String(
+    record.status ??
+    record.result ??
+    record.outcome ??
+    ""
+  ).toLowerCase();
+
+  if(
+    status.includes("loss") ||
+    status.includes("lose") ||
+    status.includes("boom") ||
+    status.includes("crash")
+  ) return "LOSS";
+
+  if(
+    status.includes("win") ||
+    status.includes("won") ||
+    status.includes("success")
+  ) return "WIN";
+
+  if(net > 0) return "WIN";
+  if(net < 0) return "LOSS";
+
+  return "PENDING";
+}
+
+
+function normalizeRecord(record,game,id){
+
+  if(!record || typeof record !== "object") return null;
+
+  const bet = numberValue(
+    record.betAmount ??
+    record.bet ??
+    record.amount ??
+    record.wager ??
+    record.stake
+  );
+
+  const payout = numberValue(
+    record.payout ??
+    record.winAmount ??
+    record.cashOutAmount ??
+    record.returnAmount ??
+    record.totalWin
+  );
+
+  const explicitNet =
+    record.netProfit ??
+    record.profit ??
+    record.net ??
+    record.profitLoss ??
+    record.winLoss;
+
+  let net = 0;
+
+  if(explicitNet !== undefined && explicitNet !== null){
+    net = numberValue(explicitNet);
+  }else if(payout > 0){
+    net = payout - bet;
+  }else if(
+    String(record.status ?? record.result ?? "").toLowerCase().includes("loss")
+  ){
+    net = -bet;
+  }
+
+  const status = getRecordStatus(record,net);
+
+  return {
+    id,
+    game,
+    bet,
+    payout,
+    net,
+    status,
+    date: getDate(record)
+  };
+}
+
+
+function getRecords(data,game){
+
+  if(!data) return [];
+
+  const records = [];
+
+  if(Array.isArray(data)){
+
+    data.forEach((item,index)=>{
+      const record = normalizeRecord(item,game,String(index));
+      if(record) records.push(record);
+    });
+
+  }else if(typeof data === "object"){
+
+    Object.entries(data).forEach(([key,item])=>{
+
+      const record = normalizeRecord(item,game,key);
+
+      if(record) records.push(record);
+
+    });
+
+  }
+
+  return records;
+}
+
+
+async function loadHistory(){
+
+  if(!currentUID || loading) return;
+
+  loading = true;
+
+  historyList.innerHTML =
+    '<div class="empty">Loading History...</div>';
+
+  try{
+
+    const paths = [
+      {path:"goalHistory",game:"GOAL"},
+      {path:"aviatorHistory",game:"AVIATOR"},
+      {path:"bombHistory",game:"BOMB"}
+    ];
+
+    const results = await Promise.all(
+      paths.map(async item=>{
+
+        const snapshot = await get(
+          ref(db,"users/"+currentUID+"/"+item.path)
+        );
+
+        return snapshot.exists()
+          ? getRecords(snapshot.val(),item.game)
+          : [];
+
+      })
+    );
+
+    allRecords = results.flat();
+
+    allRecords.sort((a,b)=>b.date-a.date);
+
+    updateSummary();
+    renderHistory();
+
+  }catch(error){
+
+    console.error("History Error:",error);
+
+    historyList.innerHTML =
+      '<div class="empty">Unable to load history: '+
+      escapeHTML(error.message)+
+      '</div>';
+
+  }finally{
+
+    loading = false;
+
+  }
+}
+
+
+function updateSummary(){
+
+  const wins = allRecords.filter(r=>r.status==="WIN").length;
+  const losses = allRecords.filter(r=>r.status==="LOSS").length;
+
+  const net = allRecords.reduce((sum,r)=>sum+r.net,0);
+
+  document.getElementById("totalGames").textContent =
+    allRecords.length;
+
+  document.getElementById("totalWins").textContent = wins;
+
+  document.getElementById("totalLosses").textContent = losses;
+
+  const netElement = document.getElementById("netResult");
+
+  netElement.textContent =
+    (net>0?"+":"")+
+    net.toFixed(2);
+
+  netElement.className =
+    net>0 ? "green" : net<0 ? "red" : "yellow";
+}
+
+
+function escapeHTML(value){
+
+  return String(value).replace(/[&<>"']/g,char=>({
+    "&":"&amp;",
+    "<":"&lt;",
+    ">":"&gt;",
+    '"':"&quot;",
+    "'":"&#039;"
+  })[char]);
+}
+
+
+function renderHistory(){
+
+  const selected = filter.value;
+
+  const records = selected==="ALL"
+    ? allRecords
+    : allRecords.filter(r=>r.game===selected);
+
+  if(records.length===0){
+
+    historyList.innerHTML =
+      '<div class="empty">No game history found.</div>';
+
+    return;
+  }
+
+  historyList.innerHTML = records.map(record=>{
+
+    const statusClass =
+      record.status==="WIN" ? "win" :
+      record.status==="LOSS" ? "loss" : "pending";
+
+    const netClass =
+      record.net>0 ? "green" :
+      record.net<0 ? "red" : "yellow";
+
+    return `
+      <div class="game-card">
+
+        <div class="game-top">
+          <div class="game-name">
+            🎮 ${escapeHTML(record.game)} GAME
+          </div>
+
+          <div class="status ${statusClass}">
+            ${escapeHTML(record.status)}
+          </div>
+        </div>
+
+        <div class="details">
+
+          <div class="detail">
+            <span>BET AMOUNT</span>
+            <strong>${record.bet.toFixed(2)}</strong>
+          </div>
+
+          <div class="detail">
+            <span>PAYOUT</span>
+            <strong>${record.payout.toFixed(2)}</strong>
+          </div>
+
+          <div class="detail">
+            <span>WIN / LOSS</span>
+            <strong class="${netClass}">
+              ${record.net>0?"+":""}${record.net.toFixed(2)}
+            </strong>
+          </div>
+
+          <div class="detail">
+            <span>RECORD ID</span>
+            <strong>${escapeHTML(record.id.slice(0,12))}</strong>
+          </div>
+
+        </div>
+
+        <div class="date">
+          🕒 ${escapeHTML(formatDate(record.date))}
+        </div>
+
+      </div>
+    `;
+
+  }).join("");
+
+}
+
+
+filter.addEventListener("change",renderHistory);
+
+document.getElementById("refreshBtn")
+.addEventListener("click",loadHistory);
+
+document.getElementById("backBtn")
+.addEventListener("click",()=>{
+  window.location.href="index.html";
+});
+
+
+onAuthStateChanged(auth,user=>{
+
+  if(!user){
+
+    window.location.replace("index.html");
+    return;
+
+  }
+
+  currentUID = user.uid;
+
+  loadHistory();
+
+});
+
+</script>
+
+</body>
+</html>

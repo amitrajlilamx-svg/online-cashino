@@ -1,0 +1,362 @@
+
+<!DOCTYPE html>
+<html lang="ne">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ONLINE CASHINO - बाबाको खजाना</title>
+
+<style>
+*{box-sizing:border-box}
+
+body{
+ margin:0;
+ background:#102c18;
+ color:white;
+ font-family:Arial,sans-serif;
+ text-align:center;
+}
+
+header{
+ background:#174b08;
+ padding:16px 8px;
+ border-bottom:3px solid #ffc107;
+}
+
+header h1{color:#ffc107;margin:0;font-size:24px}
+header p{margin:6px 0 0}
+
+.container{max-width:480px;margin:auto;padding:12px}
+
+.panel{
+ background:#292929;
+ border:1px solid #ffc107;
+ border-radius:12px;
+ padding:14px;
+ margin:12px 0;
+}
+
+.balance{
+ color:#ffc107;
+ font-size:24px;
+ font-weight:bold;
+}
+
+.bet-buttons{
+ display:grid;
+ grid-template-columns:repeat(5,1fr);
+ gap:6px;
+}
+
+button{
+ cursor:pointer;
+ border:0;
+ border-radius:7px;
+ font-weight:bold;
+}
+
+.bet-buttons button{
+ padding:12px 2px;
+ background:#444;
+ color:white;
+}
+
+.bet-buttons button.active{
+ background:#ffc107;
+ color:#111;
+}
+
+.play-btn{
+ width:100%;
+ padding:13px;
+ background:#ffc107;
+ color:#111;
+ font-size:16px;
+ margin-top:12px;
+}
+
+.boxes{
+ display:grid;
+ grid-template-columns:repeat(3,1fr);
+ gap:10px;
+ margin:20px 0;
+}
+
+.chest{
+ background:linear-gradient(#765019,#422708);
+ border:2px solid #ffc107;
+ border-radius:12px;
+ padding:15px 2px;
+ font-size:40px;
+}
+
+.chest:disabled{opacity:1}
+
+.message{
+ color:#ffc107;
+ font-size:17px;
+ min-height:28px;
+}
+
+.history{text-align:left;font-size:13px}
+.history div{
+ padding:8px;
+ border-bottom:1px solid #444;
+}
+
+.back-btn{
+ background:#555;
+ color:white;
+ padding:11px;
+ width:100%;
+ margin-top:8px;
+}
+
+footer{padding:18px;color:#aaa;font-size:12px}
+
+[hidden]{display:none!important}
+</style>
+</head>
+
+<body>
+
+<header>
+<h1>🎰 ONLINE CASHINO</h1>
+<p>🎁 बाबाको खजाना 🎁</p>
+</header>
+
+<div class="container">
+
+<div class="panel">
+<h3>MY DEMO POINTS</h3>
+<div class="balance" id="balance">1000.00</div>
+</div>
+
+<div class="panel">
+<h3>SELECT BET AMOUNT</h3>
+
+<div class="bet-buttons">
+<button data-bet="1">1</button>
+<button data-bet="5">5</button>
+<button data-bet="25">25</button>
+<button data-bet="100">100</button>
+<button data-bet="500">500</button>
+</div>
+
+<p>BET AMOUNT: <b id="betAmount">10.00</b></p>
+
+<input id="customBet" type="number"
+min="1" step="0.01"
+placeholder="Custom Bet Amount"
+style="width:100%;padding:12px;border-radius:7px;border:0">
+
+<button class="play-btn" id="startBtn">
+🎁 START GAME
+</button>
+</div>
+
+<div class="panel">
+
+<h3>🎁 SELECT ONE TREASURE BOX</h3>
+
+<div class="boxes">
+<button class="chest" data-box="1" disabled>🎁</button>
+<button class="chest" data-box="2" disabled>🎁</button>
+<button class="chest" data-box="3" disabled>🎁</button>
+</div>
+
+<div class="message" id="message">
+START GAME गरेर बाकस छान्नुहोस्!
+</div>
+
+<p id="result"></p>
+
+<button class="play-btn" id="againBtn" hidden>
+PLAY AGAIN
+</button>
+
+<button class="back-btn" onclick="goHome()">
+⌂ BACK HOME
+</button>
+
+</div>
+
+<div class="panel">
+<h3>📜 GAME HISTORY</h3>
+<div class="history" id="history">
+<div>अहिलेसम्म कुनै खेल भएको छैन।</div>
+</div>
+</div>
+
+</div>
+
+<footer>
+ONLINE CASHINO © 2026
+<p>Free Demo Entertainment Only</p>
+</footer>
+
+<script>
+
+let balance=1000;
+let bet=10;
+let active=false;
+let winningBox=0;
+let history=[];
+
+const balanceEl=document.getElementById("balance");
+const betEl=document.getElementById("betAmount");
+const message=document.getElementById("message");
+const result=document.getElementById("result");
+const boxes=document.querySelectorAll(".chest");
+
+function updateBalance(){
+ balanceEl.textContent=balance.toFixed(2);
+}
+
+function setBet(value){
+ value=Number(value);
+
+ if(!Number.isFinite(value)||value<1){
+  alert("Enter valid bet amount");
+  return;
+ }
+
+ bet=value;
+ betEl.textContent=bet.toFixed(2);
+
+ document.getElementById("customBet").value="";
+
+ document.querySelectorAll("[data-bet]").forEach(b=>{
+  b.classList.toggle("active",Number(b.dataset.bet)===bet);
+ });
+}
+
+document.querySelectorAll("[data-bet]").forEach(btn=>{
+ btn.addEventListener("click",()=>{
+  if(active)return;
+  setBet(btn.dataset.bet);
+ });
+});
+
+document.getElementById("customBet").addEventListener("change",e=>{
+ if(active)return;
+ if(e.target.value)setBet(e.target.value);
+});
+
+function resetBoxes(){
+ boxes.forEach(box=>{
+  box.disabled=true;
+  box.textContent="🎁";
+  box.style.borderColor="#ffc107";
+ });
+}
+
+document.getElementById("startBtn").addEventListener("click",()=>{
+
+ if(active)return;
+
+ if(balance<bet){
+  message.textContent="पर्याप्त Demo Points छैन!";
+  return;
+ }
+
+ balance-=bet;
+ updateBalance();
+
+ active=true;
+ winningBox=Math.floor(Math.random()*3)+1;
+
+ resetBoxes();
+
+ boxes.forEach(box=>box.disabled=false);
+
+ message.textContent="एउटा खजाना बाकस छान्नुहोस्!";
+ result.textContent="";
+
+ document.getElementById("startBtn").disabled=true;
+ document.getElementById("againBtn").hidden=true;
+
+});
+
+boxes.forEach(box=>{
+
+ box.addEventListener("click",()=>{
+
+  if(!active)return;
+
+  active=false;
+
+  let choice=Number(box.dataset.box);
+  let won=choice===winningBox;
+
+  boxes.forEach(b=>{
+   b.disabled=true;
+
+   if(Number(b.dataset.box)===winningBox){
+    b.textContent="💎";
+    b.style.borderColor="#00ff88";
+   }else{
+    b.textContent="📦";
+   }
+  });
+
+  if(won){
+
+   let prize=bet*2;
+   balance+=prize;
+
+   message.textContent="🎉 बधाई छ! तपाईंले जित्नुभयो!";
+   result.textContent="WIN: +"+prize.toFixed(2);
+
+  }else{
+
+   message.textContent="😔 यो पटक खजाना भेटिएन!";
+   result.textContent="LOSE: -"+bet.toFixed(2);
+
+  }
+
+  updateBalance();
+
+  history.unshift(
+   "Bet: "+bet.toFixed(2)+
+   " | "+(won?"WIN":"LOSE")+
+   " | Box: "+choice
+  );
+
+  history=history.slice(0,10);
+
+  document.getElementById("history").innerHTML=
+   history.map(item=>"<div>"+item+"</div>").join("");
+
+  document.getElementById("againBtn").hidden=false;
+  document.getElementById("startBtn").disabled=false;
+
+ });
+
+});
+
+document.getElementById("againBtn").addEventListener("click",()=>{
+
+ if(active)return;
+
+ resetBoxes();
+
+ message.textContent="START GAME गरेर बाकस छान्नुहोस्!";
+ result.textContent="";
+
+ document.getElementById("againBtn").hidden=true;
+
+});
+
+function goHome(){
+ window.location.href="index.html";
+}
+
+resetBoxes();
+
+document.querySelector('[data-bet="1"]').classList.remove("active");
+
+</script>
+
+</body>
+</html>

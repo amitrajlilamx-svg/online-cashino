@@ -1,0 +1,718 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ONLINE CASHINO - AVIATOR</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;padding:10px;background:#10131b;color:white;font-family:Arial}
+.container{max-width:550px;margin:auto;background:#1b202b;padding:12px;border-radius:15px}
+.header{text-align:center;padding:12px;background:#101722;border-radius:10px}
+.header h2{margin:0;color:#e84a55}
+.header p{margin:7px 0 0;color:#aaa}
+.balance{text-align:center;background:#293243;padding:12px;margin-top:10px;border-radius:9px}
+.balance strong{display:block;color:#39e78a;font-size:26px;margin-top:5px}
+.game{height:250px;position:relative;overflow:hidden;margin-top:10px;border-radius:12px;background:linear-gradient(160deg,#172d45,#101723 65%);border:2px solid #34475e}
+.stars{position:absolute;inset:0;background-image:radial-gradient(white 1px,transparent 1px);background-size:35px 35px;opacity:.25}
+.multiplier{position:absolute;top:32%;width:100%;text-align:center;font-size:43px;font-weight:bold}
+.plane{position:absolute;left:12%;bottom:24%;font-size:42px;transition:transform .1s}
+.status{position:absolute;bottom:12px;width:100%;text-align:center;color:#b9c6d5;font-size:12px;padding:0 5px}
+.info{display:flex;justify-content:space-between;padding:11px;background:#172330;margin-top:8px;border-radius:7px}
+.info span:last-child{color:#3ce58b;font-weight:bold}
+.controls{margin-top:10px;padding:12px;background:#293243;border-radius:10px}
+h3{text-align:center;margin:5px 0 13px}
+.bets{display:grid;grid-template-columns:repeat(5,1fr);gap:5px}
+button{cursor:pointer}
+.bets button{padding:12px 2px;background:#45536a;color:white;border:0;border-radius:7px;font-weight:bold}
+.bets button.active{background:#f1bb35;color:#111}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+.action{padding:15px 5px;border:0;border-radius:8px;font-weight:bold;font-size:15px}
+.bet{background:#28bb71;color:white}
+.cash{background:#f1b936;color:#111}
+.action:disabled{opacity:.4;cursor:not-allowed}
+.history{margin-top:12px;padding:12px;background:#293243;border-radius:10px}
+.history h3{text-align:left}
+.history-list{display:flex;flex-wrap:wrap;gap:7px}
+.history-item{padding:8px 10px;border-radius:6px;background:#263d35;color:#42e28b;font-weight:bold;font-size:12px}
+.history-item.low{background:#472c37;color:#ff7884}
+.history-item.running{background:#34415b;color:#ffd45c}
+.note{text-align:center;color:#8f9bab;font-size:11px;margin-top:14px}
+</style>
+</head>
+<body>
+<div class="container">
+
+<div class="header">
+<h2>✈ ONLINE CASHINO</h2>
+<p>AVIATOR CRASH GAME</p>
+</div>
+
+<div class="balance">
+MY DEMO POINTS
+<strong id="balance">LOADING...</strong>
+</div>
+
+<div class="game">
+<div class="stars"></div>
+<div class="multiplier" id="multiplier">1.00x</div>
+<div class="plane" id="plane">✈️</div>
+<div class="status" id="status">CONNECTING WALLET...</div>
+</div>
+
+<div class="info"><span>BET AMOUNT</span><span id="betDisplay">1.00</span></div>
+<div class="info"><span>ROUND STATUS</span><span id="roundStatus">CONNECTING</span></div>
+<div class="info"><span>POSSIBLE WIN</span><span id="possibleWin">0.00</span></div>
+
+<div class="controls">
+<h3>💰 SELECT BET</h3>
+<div class="bets">
+<button class="active" data-bet="1">1</button>
+<button data-bet="5">5</button>
+<button data-bet="25">25</button>
+<button data-bet="100">100</button>
+<button data-bet="500">500</button>
+</div>
+<div class="actions">
+<button class="action bet" id="betBtn" disabled>BET</button>
+<button class="action cash" id="cashBtn" disabled>CASH OUT</button>
+</div>
+</div>
+
+<div class="history">
+<h3>📜 AVIATOR GAME HISTORY</h3>
+<div class="history-list" id="history">
+<div class="history-item">Loading history...</div>
+</div>
+</div>
+<div class="note">DEMO POINTS ONLY • NO REAL MONEY</div>
+</div>
+
+<script type="module">
+import {auth,db} from "./firebase-config.js";
+
+import {
+ ref,get,onValue,runTransaction,push,
+ update as dbUpdate
+} from "https://www.gstatic.com/firebasejs/13.2.0/firebase-database.js";
+
+import {onAuthStateChanged} from
+"https://www.gstatic.com/firebasejs/13.2.0/firebase-auth.js";
+
+const $=id=>document.getElementById(id);
+
+let currentUser=null;
+let balance=0;
+let walletReady=false;
+
+let bet=1;
+let multiplier=1;
+
+let playing=false;
+let pending=false;
+let hasBet=false;
+let cashedOut=false;
+
+let roundPhase="WAITING";
+let roundKey=null;
+let roundToken=0;
+let roundStart=0;
+let crashPoint=2;
+
+let flightTimer=null;
+let countdownTimer=null;
+let countdown=5;
+let roundWritePromise=Promise.resolve();
+let crashSaving=false;
+
+// DISPLAY
+function updateDisplay(){
+
+ $("balance").textContent=balance.toFixed(2);
+ $("betDisplay").textContent=bet.toFixed(2);
+ $("multiplier").textContent=multiplier.toFixed(2)+"x";
+
+ $("possibleWin").textContent=
+  hasBet && playing && !cashedOut
+  ? (bet*multiplier).toFixed(2)
+  : cashedOut ? "CASHED OUT" : "0.00";
+
+ // IMPORTANT: CASH OUT is enabled by playing + hasBet.
+ $("cashBtn").disabled=
+  !playing || !hasBet || pending || cashedOut;
+
+ $("betBtn").disabled=
+  !walletReady || !currentUser ||
+  pending || hasBet || roundPhase!=="WAITING";
+
+ document.querySelectorAll(".bets button").forEach(button=>{
+  button.disabled=hasBet || pending;
+ });
+}
+
+// SELECT BET
+document.querySelectorAll(".bets button").forEach(button=>{
+ button.addEventListener("click",()=>{
+  if(hasBet || pending || roundPhase!=="WAITING") return;
+
+  bet=Number(button.dataset.bet);
+
+  document.querySelectorAll(".bets button").forEach(b=>{
+   b.classList.toggle("active",b===button);
+  });
+
+  updateDisplay();
+ });
+});
+
+// WALLET BALANCE
+async function changeBalance(amount){
+
+ const balanceRef=ref(
+  db,"users/"+currentUser.uid+"/demoPoints"
+ );
+
+ const snapshot=await get(balanceRef);
+
+ if(!snapshot.exists()){
+  throw new Error("Wallet balance not found.");
+ }
+
+ const knownBalance=Number(snapshot.val());
+
+ if(!Number.isFinite(knownBalance)){
+  throw new Error("Invalid wallet balance.");
+ }
+
+ const result=await runTransaction(balanceRef,current=>{
+
+  const oldValue=current===null
+   ? knownBalance
+   : Number(current);
+
+  if(!Number.isFinite(oldValue) || oldValue<0) return;
+
+  const newValue=Math.round(
+   (oldValue+amount+Number.EPSILON)*100
+  )/100;
+
+  if(newValue<0) return;
+
+  return newValue;
+
+ },{applyLocally:false});
+
+ if(!result.committed){
+  throw new Error("Wallet update failed.");
+ }
+
+ balance=Number(result.snapshot.val());
+
+ if(!Number.isFinite(balance)){
+  throw new Error("Invalid updated balance.");
+ }
+
+ updateDisplay();
+ return balance;
+}
+
+// SAVE WALLET TRANSACTION
+async function saveWalletTransaction(type,pointsChange,balanceAfter){
+
+ const uid=currentUser.uid;
+ const transactionRef=push(
+  ref(db,"users/"+uid+"/transactions")
+ );
+
+ const now=Date.now();
+
+ const changes={};
+
+ changes["users/"+uid+"/transactions/"+transactionRef.key]={
+  type:type,
+  game:"AVIATOR",
+  pointsChange:pointsChange,
+  balanceAfter:balanceAfter,
+  createdAt:now
+ };
+
+ changes["users/"+uid+"/lastGameActivity"]=now;
+
+ if(currentUser.email){
+  changes["users/"+uid+"/email"]=currentUser.email;
+ }
+
+ await dbUpdate(ref(db),changes);
+}
+
+// SAVE ROUND DATA
+async function saveRoundData(data){
+
+ if(!roundKey) throw new Error("Round ID missing.");
+
+ const uid=currentUser.uid;
+ const changes={};
+
+ Object.entries(data).forEach(([key,value])=>{
+  changes["users/"+uid+"/aviatorHistory/"+roundKey+"/"+key]=value;
+ });
+
+ await dbUpdate(ref(db),changes);
+}
+
+// PLACE BET
+async function placeBet(){
+
+ if(!walletReady || !currentUser) return;
+ if(roundPhase!=="WAITING" || hasBet || pending) return;
+
+ if(balance<bet){
+  $("status").textContent="NOT ENOUGH DEMO POINTS";
+  return;
+ }
+
+ pending=true;
+ updateDisplay();
+
+ let deducted=false;
+ let newRoundKey=null;
+
+ try{
+
+  // Deduct only when user presses BET.
+  await changeBalance(-bet);
+  deducted=true;
+
+  newRoundKey=push(
+   ref(db,"users/"+currentUser.uid+"/aviatorHistory")
+  ).key;
+
+  roundKey=newRoundKey;
+  hasBet=true;
+
+  await saveRoundData({
+   bet:bet,
+   status:"WAITING",
+   result:"BET PLACED",
+   cashedOut:false,
+   cashoutMultiplier:0,
+   crashMultiplier:0,
+   winAmount:0,
+   createdAt:Date.now()
+  });
+
+  await saveWalletTransaction("AVIATOR_BET",-bet,balance);
+
+  $("status").textContent="BET PLACED • WAIT FOR FLIGHT";
+
+ }catch(error){
+
+  console.error("BET ERROR:",error);
+
+  // Try to return the deduction if saving the bet failed.
+  if(deducted){
+   try{
+    await changeBalance(bet);
+    await saveWalletTransaction("AVIATOR_BET_REFUND",bet,balance);
+   }catch(refundError){
+    console.error("BET REFUND ERROR:",refundError);
+    $("status").textContent="BET SAVE FAILED • CHECK WALLET";
+   }
+  }
+
+  hasBet=false;
+  roundKey=null;
+
+  if($("status").textContent!=="BET SAVE FAILED • CHECK WALLET"){
+   $("status").textContent="BET ERROR: "+error.message;
+  }
+
+ }finally{
+
+  pending=false;
+  updateDisplay();
+ }
+}
+
+// START FLIGHT
+function startFlight(){
+
+ if(!walletReady || !currentUser) return;
+
+ clearInterval(countdownTimer);
+
+ roundPhase="FLYING";
+ playing=true;
+ multiplier=1;
+ crashPoint=1.10+Math.random()*8.9;
+ roundStart=Date.now();
+
+ const thisRound=roundToken;
+
+ $("status").textContent="✈️ PLANE FLYING";
+ $("roundStatus").textContent=hasBet?"BET ACTIVE":"NO BET";
+ $("plane").style.transform="translate(0,0)";
+
+ // Set the local flight state immediately.
+ // This makes CASH OUT available as soon as flight begins.
+ updateDisplay();
+
+ // Wait for Firebase status write before allowing cashout claim.
+ if(hasBet && roundKey){
+  roundWritePromise=saveRoundData({
+   status:"RUNNING",
+   result:"RUNNING"
+  }).catch(error=>{
+   console.error("ROUND STATUS ERROR:",error);
+   $("status").textContent="ROUND SAVE ERROR: "+error.message;
+   throw error;
+  });
+ }else{
+  roundWritePromise=Promise.resolve();
+ }
+
+ flightTimer=setInterval(()=>{
+
+  if(thisRound!==roundToken || roundPhase!=="FLYING") return;
+
+  const elapsed=(Date.now()-roundStart)/1000;
+  multiplier=Math.exp(elapsed*.20);
+
+  $("plane").style.transform=
+   "translate("+Math.min(elapsed*18,210)+"px,-"+
+   Math.min(elapsed*13,130)+"px) rotate(-12deg)";
+
+  updateDisplay();
+
+  if(multiplier>=crashPoint){
+   multiplier=crashPoint;
+   updateDisplay();
+   finishCrash(thisRound);
+  }
+
+ },50);
+}
+
+// CASH OUT
+async function cashOut(){
+
+ if(!playing || !hasBet || pending || cashedOut) return;
+ if(roundPhase!=="FLYING") return;
+
+ // If crash has already been reached, do not pay.
+ if(multiplier>=crashPoint){
+  finishCrash(roundToken);
+  return;
+ }
+
+ pending=true;
+
+ const thisRound=roundToken;
+ const cashMultiplier=multiplier;
+
+ const win=Math.round(
+  (bet*cashMultiplier+Number.EPSILON)*100
+ )/100;
+
+ $("status").textContent="SAVING CASH OUT...";
+ updateDisplay();
+
+ try{
+
+  // Ensure RUNNING status has reached Firebase first.
+  await roundWritePromise;
+
+  if(thisRound!==roundToken || roundPhase!=="FLYING"){
+   throw new Error("Round already finished.");
+  }
+
+  const roundRef=ref(
+   db,"users/"+currentUser.uid+"/aviatorHistory/"+roundKey
+  );
+
+  // Atomically claim the cashout once.
+  const claim=await runTransaction(roundRef,current=>{
+
+   if(!current ||
+      current.status!=="RUNNING" ||
+      current.cashedOut===true){
+    return;
+   }
+
+   current.cashedOut=true;
+   current.cashoutMultiplier=cashMultiplier;
+   current.winAmount=win;
+   current.result="CASHED OUT";
+   current.updatedAt=Date.now();
+
+   return current;
+
+  },{applyLocally:false});
+
+  if(!claim.committed){
+   throw new Error("Cash out already used or round ended.");
+  }
+
+  // If crash occurred while Firebase was processing the claim,
+  // do not pay a cashout after the round has ended.
+  if(thisRound!==roundToken || roundPhase!=="FLYING"){
+   throw new Error("Round already ended.");
+  }
+
+  await changeBalance(win);
+
+  await saveWalletTransaction(
+   "AVIATOR_WIN",
+   win,
+   balance
+  );
+
+  cashedOut=true;
+  pending=false;
+
+  $("status").textContent=
+   "💰 CASHED OUT "+cashMultiplier.toFixed(2)+"x • PLANE CONTINUES";
+
+  $("roundStatus").textContent="FLYING • CASHED OUT";
+
+  updateDisplay();
+
+ }catch(error){
+
+  console.error("CASHOUT ERROR:",error);
+
+  pending=false;
+
+  $("status").textContent="CASH OUT ERROR: "+error.message;
+
+  updateDisplay();
+ }
+}
+
+// CRASH
+async function finishCrash(thisRound){
+
+ if(thisRound!==roundToken) return;
+ if(roundPhase!=="FLYING") return;
+
+ // Let an already-started cashout finish first.
+ if(pending) return;
+
+ roundPhase="CRASHED";
+ playing=false;
+
+ clearInterval(flightTimer);
+
+ const finalCrash=multiplier;
+
+ $("status").textContent="💥 CRASHED AT "+finalCrash.toFixed(2)+"x";
+ $("roundStatus").textContent="ROUND FINISHED";
+
+ updateDisplay();
+
+ if(hasBet && roundKey && !crashSaving){
+
+  crashSaving=true;
+
+  try{
+
+   await saveRoundData({
+    status:"CRASHED",
+    result:cashedOut?"CASHED OUT":"LOST",
+    crashMultiplier:finalCrash,
+    completedAt:Date.now()
+   });
+
+   const uid=currentUser.uid;
+   const playedRef=ref(db,"users/"+uid+"/gamePlayed");
+   const playedSnapshot=await get(playedRef);
+   const played=Number(playedSnapshot.val())||0;
+
+   await dbUpdate(ref(db),{
+    ["users/"+uid+"/gamePlayed"]:played+1,
+    ["users/"+uid+"/lastGameActivity"]:Date.now()
+   });
+
+   await saveWalletTransaction("AVIATOR_CRASH",0,balance);
+
+  }catch(error){
+   console.error("CRASH SAVE ERROR:",error);
+   $("status").textContent="HISTORY SAVE ERROR: "+error.message;
+  }
+
+  crashSaving=false;
+ }
+
+ hasBet=false;
+ cashedOut=false;
+ roundKey=null;
+ pending=false;
+
+ updateDisplay();
+
+ setTimeout(()=>{
+  if(thisRound===roundToken){
+   startNewRound();
+  }
+ },1800);
+}
+
+// NEW ROUND
+function startNewRound(){
+
+ if(!walletReady || !currentUser) return;
+
+ clearInterval(flightTimer);
+ clearInterval(countdownTimer);
+
+ roundToken++;
+
+ playing=false;
+ pending=false;
+ hasBet=false;
+ cashedOut=false;
+ roundKey=null;
+
+ multiplier=1;
+ roundPhase="WAITING";
+ countdown=5;
+ crashSaving=false;
+ roundWritePromise=Promise.resolve();
+
+ $("plane").style.transform="translate(0,0)";
+ $("multiplier").textContent="1.00x";
+
+ $("status").textContent="NEXT ROUND IN "+countdown+"s";
+ $("roundStatus").textContent="BETTING OPEN";
+
+ updateDisplay();
+
+ countdownTimer=setInterval(()=>{
+
+  countdown--;
+
+  if(countdown>0){
+   $("status").textContent="NEXT ROUND IN "+countdown+"s";
+  }else{
+   clearInterval(countdownTimer);
+   startFlight();
+  }
+
+ },1000);
+}
+
+// HISTORY
+function showHistory(data){
+
+ const box=$("history");
+ box.innerHTML="";
+
+ if(!data || Object.keys(data).length===0){
+  box.innerHTML='<div class="history-item">No game history yet</div>';
+  return;
+ }
+
+ const records=Object.entries(data)
+  .map(([id,item])=>({id,...item}))
+  .sort((a,b)=>
+   (Number(b.createdAt)||0)-(Number(a.createdAt)||0)
+  )
+  .slice(0,20);
+
+ records.forEach(item=>{
+
+  const card=document.createElement("div");
+
+  let label;
+
+  if(item.status==="RUNNING" || item.status==="WAITING"){
+   card.className="history-item running";
+   label="✈ RUNNING";
+  }else if(item.cashedOut){
+   card.className="history-item";
+   label="✓ WIN";
+  }else{
+   card.className="history-item low";
+   label="✕ LOST";
+  }
+
+  const crashText=Number(item.crashMultiplier)>0
+   ? Number(item.crashMultiplier).toFixed(2)+"x"
+   : "Waiting";
+
+  const cashText=item.cashedOut
+   ? " | Cash Out: "+Number(item.cashoutMultiplier).toFixed(2)+"x"
+   : "";
+
+  card.textContent=
+   label+
+   " | Bet: "+Number(item.bet||0).toFixed(2)+
+   " | Crash: "+crashText+
+   cashText;
+
+  box.appendChild(card);
+ });
+}
+
+// BUTTONS
+$("betBtn").addEventListener("click",placeBet);
+$("cashBtn").addEventListener("click",cashOut);
+
+// LOGIN
+onAuthStateChanged(auth,user=>{
+
+ if(!user){
+  window.location.href="index.html";
+  return;
+ }
+
+ currentUser=user;
+
+ const balanceRef=ref(db,"users/"+user.uid+"/demoPoints");
+
+ onValue(balanceRef,snapshot=>{
+
+  const value=Number(snapshot.val());
+
+  if(!snapshot.exists() || !Number.isFinite(value)){
+   walletReady=false;
+   $("status").textContent="WALLET BALANCE INVALID";
+   updateDisplay();
+   return;
+  }
+
+  balance=value;
+  walletReady=true;
+
+  updateDisplay();
+
+  if(roundPhase==="WAITING" &&
+     !countdownTimer &&
+     !flightTimer){
+   startNewRound();
+  }
+
+ },error=>{
+
+  walletReady=false;
+  $("status").textContent="WALLET ERROR: "+error.message;
+  updateDisplay();
+ });
+
+ const historyRef=ref(
+  db,"users/"+user.uid+"/aviatorHistory"
+ );
+
+ onValue(historyRef,snapshot=>{
+  showHistory(snapshot.val());
+ },error=>{
+  $("history").textContent="HISTORY ERROR: "+error.message;
+ });
+
+});
+
+updateDisplay();
+</script>
+</body>
+</html>

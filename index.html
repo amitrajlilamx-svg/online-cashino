@@ -1,463 +1,393 @@
 
 <!DOCTYPE html>
-<html lang="ne">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ONLINE CASHINO</title>
 
-<link rel="stylesheet" href="style.css">
-
 <style>
 *{box-sizing:border-box}
-
-body{
- margin:0;
- background:#101010;
- color:white;
+html,body{
+ margin:0;padding:0;width:100%;min-height:100%;
+ background:#080f1c;color:white;
  font-family:Arial,sans-serif;
+ overflow-x:hidden;
+}
+body{max-width:500px;margin:auto;padding-bottom:75px}
+
+/* HEADER */
+.topbar{
+ display:flex;align-items:center;justify-content:space-between;
+ padding:13px 12px;
+ background:#101d30;
+ border-bottom:1px solid #263c56;
+ position:sticky;top:0;z-index:20;
+}
+.logo{font-size:19px;font-weight:900;color:#ffd34d}
+.logo small{display:block;font-size:9px;color:#aab9ca;letter-spacing:2px;margin-top:3px}
+.top-actions{display:flex;align-items:center;gap:7px}
+.top-btn{
+ background:#263c56;color:white;border:1px solid #49617c;
+ border-radius:8px;padding:9px;font-size:11px;font-weight:bold;
 }
 
-header{
- background:#174b08;
- text-align:center;
- padding:15px 8px;
- border-bottom:3px solid #ffc107;
+/* WALLET */
+.wallet-card{
+ margin:12px;padding:14px;border-radius:12px;
+ background:linear-gradient(110deg,#174b37,#102c38);
+ border:1px solid #398a61;
+ display:flex;justify-content:space-between;align-items:center;
+}
+.wallet-label{font-size:11px;color:#c5e7d3}
+.wallet-amount{font-size:22px;color:#ffe16a;font-weight:bold;margin-top:5px}
+.wallet-card button{
+ background:#ffd34d;border:0;border-radius:7px;
+ padding:10px 12px;font-weight:bold;color:#171717;
 }
 
-header h1{
- margin:0;
- color:#ffc107;
- font-size:25px;
+/* LOGIN */
+.account{
+ margin:13px;padding:15px;border-radius:12px;
+ background:#142237;border:1px solid #344a65;
 }
-
-header h2{
- margin:5px;
- font-size:17px;
-}
-
-main{
- max-width:650px;
- margin:auto;
- padding:12px;
-}
-
-button{
- cursor:pointer;
-}
-
-.account,.user-panel,.game-card,.game-screen{
- background:#292929;
- border:1px solid #444;
- border-radius:12px;
- padding:14px;
- margin:12px 0;
-}
-
+.account h3{color:#ffd34d;margin:0 0 12px}
 .account input{
- width:100%;
- padding:12px;
- margin:6px 0;
- border:0;
- border-radius:7px;
+ width:100%;padding:13px;margin:5px 0;
+ background:#091322;color:white;border:1px solid #40536d;
+ border-radius:7px;font-size:14px;
 }
-
-.account button,.user-panel button{
- padding:11px;
- border:0;
- border-radius:7px;
- background:#ffc107;
- font-weight:bold;
- margin:4px;
+.account button{
+ padding:11px 12px;margin:5px 3px 0 0;
+ border:0;border-radius:7px;background:#ffd34d;
+ color:#111;font-size:11px;font-weight:bold;
 }
+#message{font-size:12px;color:#ffe16a}
 
-#message{
- color:#ffc107;
- font-size:13px;
-}
-
+/* PROFILE */
 .user-panel{
- text-align:center;
+ margin:12px;padding:12px;border-radius:10px;
+ background:#142237;border:1px solid #344a65;
+ display:flex;justify-content:space-between;align-items:center;
+}
+.user-info{font-size:12px;color:#c4d3e5}
+.user-info strong{display:block;color:#ffd34d;font-size:14px;margin-bottom:4px}
+.user-panel button{
+ border:0;border-radius:7px;padding:10px;
+ background:#263c56;color:white;font-weight:bold;font-size:11px;
 }
 
-.game-heading{
- text-align:center;
- color:#ffc107;
- margin-top:25px;
+/* BANNER */
+.banner{
+ margin:12px;padding:19px 15px;border-radius:13px;
+ background:linear-gradient(120deg,#703d12,#b57b20,#3c2814);
+ border:1px solid #e4b54c;
+ min-height:125px;position:relative;overflow:hidden;
+}
+.banner:after{
+ content:"🎰";position:absolute;right:13px;top:20px;
+ font-size:65px;opacity:.8;
+}
+.banner h2{margin:0;color:#ffe17a;font-size:21px}
+.banner p{font-size:12px;color:#fff1c4;margin:8px 0}
+.banner strong{font-size:10px;color:#fff}
+
+/* CATEGORY */
+.category-row{
+ display:flex;gap:8px;overflow-x:auto;
+ padding:4px 12px 12px;
+}
+.category-row button{
+ flex:0 0 auto;background:#17273c;color:#dce8f5;
+ border:1px solid #344b67;border-radius:20px;
+ padding:9px 15px;font-size:11px;font-weight:bold;
 }
 
+/* GAME LIST */
+.section-head{
+ display:flex;justify-content:space-between;align-items:center;
+ margin:13px 12px 10px;
+}
+.section-head h2{font-size:16px;margin:0;color:#ffd34d}
+.section-head span{font-size:10px;color:#9db0c6}
 .game-grid{
- display:grid;
- grid-template-columns:repeat(2,minmax(0,1fr));
- gap:10px;
+ display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
+ gap:10px;padding:0 12px;
 }
-
 .game-card{
- text-align:center;
- border:2px solid #a67c00;
- margin:0;
- padding:12px 8px;
- min-width:0;
+ background:linear-gradient(145deg,#192b42,#101b2c);
+ border:1px solid #344d69;border-radius:11px;
+ padding:12px 9px;text-align:center;min-width:0;
 }
-
 .game-icon{
- font-size:36px;
- display:block;
- margin-bottom:7px;
+ width:58px;height:58px;margin:0 auto 7px;
+ border-radius:13px;background:#263c56;
+ display:flex;align-items:center;justify-content:center;
+ font-size:34px;
 }
-
-.game-card h3{
- color:#ffc107;
- font-size:15px;
- margin:5px 0;
-}
-
+.game-card h3{font-size:13px;color:#ffdc64;margin:7px 0}
 .game-card p{
- color:#ccc;
- font-size:12px;
- min-height:28px;
+ color:#aebed0;font-size:10px;margin:5px 0 10px;
+ min-height:23px;
 }
-
 .game-card button{
- width:100%;
- padding:10px 3px;
- border:0;
- border-radius:7px;
- font-weight:bold;
- margin-top:5px;
- font-size:12px;
+ width:100%;padding:11px 3px;border:0;border-radius:6px;
+ background:linear-gradient(90deg,#ffcf43,#f5a900);
+ color:#171717;font-weight:bold;font-size:11px;
+}
+.game-card button:active{transform:scale(.97)}
+.game-card .open-btn{
+ margin-top:6px;background:#263e58;color:white;
+ border:1px solid #4d6682;
 }
 
-.inside-btn{
- background:#ffc107;
- color:#111;
+/* QUICK MENU */
+.quick-grid{
+ display:grid;grid-template-columns:repeat(3,1fr);
+ gap:8px;padding:0 12px;
 }
-
-.external-btn{
- background:#237d39;
- color:white;
+.quick-item{
+ background:#15243a;border:1px solid #304760;
+ border-radius:9px;text-align:center;padding:12px 4px;
+ color:white;font-size:11px;font-weight:bold;
 }
+.quick-item span{display:block;font-size:22px;margin-bottom:6px}
 
-.game-screen{
- text-align:center;
-}
-
-.treasure-boxes{
- display:flex;
- justify-content:center;
- gap:10px;
-}
-
-.chest{
- font-size:35px;
- padding:12px;
- background:#444;
- border:1px solid #ffc107;
- border-radius:8px;
-}
-
-#gameFrame{
- width:100%;
- height:75vh;
- min-height:450px;
- border:0;
- border-radius:10px;
- background:#111;
-}
-
-.frame-header{
- display:flex;
- justify-content:space-between;
- align-items:center;
- gap:8px;
- margin-bottom:10px;
-}
-
-.frame-header button{
- background:#ffc107;
- color:#111;
- border:0;
- padding:10px 12px;
- border-radius:7px;
- font-weight:bold;
-}
-
+/* GAME VIEWER */
 #gameViewer{
- background:#202020;
- padding:10px;
- border-radius:12px;
- margin-top:15px;
+ margin:12px;padding:9px;background:#142237;
+ border:1px solid #d8a72e;border-radius:10px;
 }
+.frame-header{
+ display:flex;align-items:center;justify-content:space-between;
+ margin-bottom:8px;gap:5px;
+}
+.frame-header strong{color:#ffd34d;font-size:13px}
+.frame-header button{
+ border:0;border-radius:6px;padding:9px;
+ background:#ffd34d;color:#111;font-weight:bold;font-size:11px;
+}
+#gameFrame{
+ width:100%;height:75vh;min-height:430px;
+ border:0;border-radius:7px;background:#080f1c;
+}
+
+/* BOTTOM NAV */
+.bottom-nav{
+ position:fixed;bottom:0;left:50%;transform:translateX(-50%);
+ width:100%;max-width:500px;height:64px;
+ background:#101d30;border-top:1px solid #344b67;
+ display:grid;grid-template-columns:repeat(4,1fr);
+ z-index:30;
+}
+.bottom-nav button{
+ border:0;background:transparent;color:#aebed0;
+ font-size:10px;font-weight:bold;
+}
+.bottom-nav span{display:block;font-size:21px;margin-bottom:3px}
+.bottom-nav button.active{color:#ffd34d}
 
 footer{
- text-align:center;
- color:#aaa;
- padding:20px 8px;
- font-size:12px;
+ text-align:center;padding:20px 5px;color:#8192a6;
+ font-size:10px;line-height:1.7;
 }
-
 [hidden]{display:none!important}
-
-@media(max-width:350px){
- .game-grid{gap:6px}
- .game-card{padding:9px 5px}
- .game-card h3{font-size:13px}
- .game-card button{font-size:11px}
-}
 </style>
 </head>
 
 <body>
 
-<header>
- <h1>🎰 ONLINE CASHINO</h1>
- <h2>बाबाको खजाना</h2>
+<!-- TOP HEADER -->
+<header class="topbar">
+ <div class="logo">
+  🎰 ONLINE CASHINO
+  <small>GAMING ENTERTAINMENT</small>
+ </div>
+ <div class="top-actions">
+  <button class="top-btn" id="headerProfile">👤 PROFILE</button>
+ </div>
 </header>
 
-<main>
+<!-- WALLET -->
+<div class="wallet-card" id="walletCard" hidden>
+ <div>
+  <div class="wallet-label">MY DEMO WALLET</div>
+  <div class="wallet-amount" id="walletBalance">0.00 USD</div>
+ </div>
+ <button id="walletBtn">MY WALLET ➜</button>
+</div>
 
-<h2>स्वागत छ!</h2>
-<p>तपाईंको मनोरञ्जन संसारमा स्वागत छ।</p>
-
-<!-- ACCOUNT -->
+<!-- LOGIN -->
 <div class="account" id="accountBox">
-
-<h3>USER ACCOUNT</h3>
-
-<input type="email" id="email"
-placeholder="Enter Email">
-
-<input type="password" id="password"
-placeholder="Enter Password">
-
-<button id="registerBtn">CREATE ACCOUNT</button>
-<button id="loginBtn">LOGIN</button>
-<button id="logoutBtn" hidden>LOGOUT</button>
-
-<p id="message">Please Login or Create Account</p>
-
+ <h3>👤 USER LOGIN</h3>
+ <input type="email" id="email" placeholder="Enter Email">
+ <input type="password" id="password" placeholder="Enter Password">
+ <button id="registerBtn">CREATE ACCOUNT</button>
+ <button id="loginBtn">LOGIN</button>
+ <button id="logoutBtn" hidden>LOGOUT</button>
+ <p id="message">Please Login or Create Account</p>
 </div>
 
-<!-- USER MENU -->
+<!-- USER INFO -->
 <div class="user-panel" id="userMenu" hidden>
-
-<h3>👤 USER MENU</h3>
-
-<button id="profileBtn">👤 MY PROFILE</button>
-<button id="walletBtn">🎁 MY WALLET</button>
-<button id="logoutMenuBtn">LOGOUT</button>
-
+ <div class="user-info">
+  <strong>WELCOME TO ONLINE CASHINO</strong>
+  <span id="userEmail">User Account</span>
+ </div>
+ <button id="logoutMenuBtn">LOGOUT</button>
 </div>
 
-<!-- ALL GAMES -->
-<section id="allGames" hidden>
+<!-- HOME CONTENT -->
+<section id="homeContent" hidden>
 
-<h2 class="game-heading">🎮 ALL GAMES</h2>
+ <div class="banner">
+  <h2>WELCOME TO CASHINO</h2>
+  <p>Enjoy your favourite demo games!</p>
+  <strong>🎮 PLAY • ENJOY • HAVE FUN</strong>
+ </div>
 
-<div class="game-grid">
+ <div class="quick-grid">
+  <div class="quick-item" id="quickWallet">
+   <span>💰</span>MY WALLET
+  </div>
+  <div class="quick-item" id="quickProfile">
+   <span>👤</span>MY PROFILE
+  </div>
+  <div class="quick-item" id="quickHistory">
+   <span>📜</span>HISTORY
+  </div>
+ </div>
 
-<!-- BABAKO KHAJANA -->
-<div class="game-card">
- <span class="game-icon">🎁</span>
- <h3>BABAKO KHAJANA</h3>
- <p>Treasure Demo Game</p>
- <button class="inside-btn"
- onclick="playTreasure()">PLAY INSIDE</button>
- <button class="external-btn"
- onclick="openExternal('babako.html')">
- OPEN PAGE
- </button>
-</div>
+ <div class="section-head">
+  <h2>🎮 ALL GAMES</h2>
+  <span>DEMO GAMES</span>
+ </div>
 
-<!-- ROULETTE -->
-<div class="game-card">
- <span class="game-icon">🎡</span>
- <h3>ROULETTE</h3>
- <p>Free Demo Points Roulette</p>
- <button class="inside-btn"
- onclick="playInside('roulette.html','ROULETTE')">
- PLAY INSIDE
- </button>
- <button class="external-btn"
- onclick="openExternal('roulette.html')">
- OPEN PAGE
- </button>
-</div>
+ <div class="category-row">
+  <button onclick="showGames()">ALL GAMES</button>
+  <button onclick="openGame('goal.html','GOAL GAME')">SPORTS</button>
+  <button onclick="openGame('aviator.html','AVIATOR')">CRASH</button>
+  <button onclick="openGame('bomb.html','BOMB GAME')">ARCADE</button>
+ </div>
 
-<!-- BACCARAT -->
-<div class="game-card">
- <span class="game-icon">🃏</span>
- <h3>BACCARAT</h3>
- <p>Card Demo Game</p>
- <button class="inside-btn"
- onclick="playInside('baccarat.html','BACCARAT')">
- PLAY INSIDE
- </button>
- <button class="external-btn"
- onclick="openExternal('baccarat.html')">
- OPEN PAGE
- </button>
-</div>
+ <div class="game-grid" id="gameGrid">
 
-<!-- DRAGON TIGER -->
-<div class="game-card">
- <span class="game-icon">🐉🐯</span>
- <h3>DRAGON TIGER</h3>
- <p>Dragon Tiger Demo Game</p>
- <button class="inside-btn"
- onclick="playInside('dragon-tiger.html','DRAGON TIGER')">
- PLAY INSIDE
- </button>
- <button class="external-btn"
- onclick="openExternal('dragon-tiger.html')">
- OPEN PAGE
- </button>
-</div>
+  <div class="game-card">
+   <div class="game-icon">🎁</div>
+   <h3>BABAKO KHAJANA</h3>
+   <p>Treasure Demo Game</p>
+   <button onclick="openGame('babako.html','BABAKO KHAJANA')">PLAY NOW</button>
+   <button class="open-btn" onclick="openPage('babako.html')">OPEN PAGE</button>
+  </div>
 
-<!-- AVIATOR -->
-<div class="game-card">
- <span class="game-icon">✈️</span>
- <h3>AVIATOR</h3>
- <p>Flying Plane Demo Game</p>
- <button class="inside-btn"
- onclick="playInside('aviator.html','AVIATOR')">
- PLAY INSIDE
- </button>
- <button class="external-btn"
- onclick="openExternal('aviator.html')">
- OPEN PAGE
- </button>
-</div>
+  <div class="game-card">
+   <div class="game-icon">🎡</div>
+   <h3>ROULETTE</h3>
+   <p>Free Demo Points Roulette</p>
+   <button onclick="openGame('roulette.html','ROULETTE')">PLAY NOW</button>
+   <button class="open-btn" onclick="openPage('roulette.html')">OPEN PAGE</button>
+  </div>
 
-<!-- GOAL -->
-<div class="game-card">
- <span class="game-icon">⚽</span>
- <h3>GOAL GAME</h3>
- <p>Football Goal Demo Game</p>
- <button class="inside-btn"
- onclick="playInside('goal.html','GOAL GAME')">
- PLAY INSIDE
- </button>
- <button class="external-btn"
- onclick="openExternal('goal.html')">
- OPEN PAGE
- </button>
-</div>
+  <div class="game-card">
+   <div class="game-icon">🃏</div>
+   <h3>BACCARAT</h3>
+   <p>Card Demo Game</p>
+   <button onclick="openGame('baccarat.html','BACCARAT')">PLAY NOW</button>
+   <button class="open-btn" onclick="openPage('baccarat.html')">OPEN PAGE</button>
+  </div>
 
-<!-- BOMB -->
-<div class="game-card">
- <span class="game-icon">💣</span>
- <h3>BOMB GAME</h3>
- <p>Bomb Demo Game</p>
- <button class="inside-btn"
- onclick="playInside('bomb.html','BOMB GAME')">
- PLAY INSIDE
- </button>
- <button class="external-btn"
- onclick="openExternal('bomb.html')">
- OPEN PAGE
- </button>
-</div>
+  <div class="game-card">
+   <div class="game-icon">🐉</div>
+   <h3>DRAGON TIGER</h3>
+   <p>Dragon Tiger Demo Game</p>
+   <button onclick="openGame('dragon-tiger.html','DRAGON TIGER')">PLAY NOW</button>
+   <button class="open-btn" onclick="openPage('dragon-tiger.html')">OPEN PAGE</button>
+  </div>
 
-</div>
+  <div class="game-card">
+   <div class="game-icon">✈️</div>
+   <h3>AVIATOR</h3>
+   <p>Flying Plane Demo Game</p>
+   <button onclick="openGame('aviator.html','AVIATOR')">PLAY NOW</button>
+   <button class="open-btn" onclick="openPage('aviator.html')">OPEN PAGE</button>
+  </div>
+
+  <div class="game-card">
+   <div class="game-icon">⚽</div>
+   <h3>GOAL GAME</h3>
+   <p>Football Goal Game</p>
+   <button onclick="openGame('goal.html','GOAL GAME')">PLAY NOW</button>
+   <button class="open-btn" onclick="openPage('goal.html')">OPEN PAGE</button>
+  </div>
+
+  <div class="game-card">
+   <div class="game-icon">💣</div>
+   <h3>BOMB GAME</h3>
+   <p>Find safe boxes Demo Game</p>
+   <button onclick="openGame('bomb.html','BOMB GAME')">PLAY NOW</button>
+   <button class="open-btn" onclick="openPage('bomb.html')">OPEN PAGE</button>
+  </div>
+
+ </div>
 </section>
 
-<!-- BABAKO KHAJANA INLINE GAME -->
-<section id="treasureScreen" class="game-screen" hidden>
-
-<h2>🎁 बाबाको खजाना</h2>
-<p>आफ्नो मनपर्ने खजाना बाकस छान्नुहोस्!</p>
-
-<div class="treasure-boxes">
- <button class="chest" data-chest="1">🎁</button>
- <button class="chest" data-chest="2">🎁</button>
- <button class="chest" data-chest="3">🎁</button>
-</div>
-
-<h3 id="gameMessage">एउटा बाकस छान्नुहोस्!</h3>
-<p id="demoPoints">Demo Points: 0</p>
-
-<button id="againBtn"
-style="padding:12px;background:#ffc107;border:0;border-radius:7px">
- PLAY AGAIN
-</button>
-
-<button onclick="backHome()"
-style="padding:12px;background:#555;color:white;border:0;border-radius:7px">
- BACK HOME
-</button>
-
-</section>
-
-<!-- OTHER GAME INSIDE PAGE -->
+<!-- GAME VIEWER -->
 <section id="gameViewer" hidden>
-
-<div class="frame-header">
- <strong id="frameTitle">GAME</strong>
- <button onclick="backHome()">✖ CLOSE GAME</button>
-</div>
-
-<iframe id="gameFrame"
-title="ONLINE CASHINO GAME"
-allow="fullscreen">
-</iframe>
-
+ <div class="frame-header">
+  <strong id="frameTitle">🎮 GAME</strong>
+  <button onclick="backHome()">✖ BACK HOME</button>
+ </div>
+ <iframe id="gameFrame" title="ONLINE CASHINO GAME" allow="fullscreen"></iframe>
 </section>
-
-</main>
 
 <footer>
- ONLINE CASHINO © 2026
- <p>बाबाको खजाना</p>
- <p>Free demo only. No real money or cash prizes.</p>
+ <b>ONLINE CASHINO © 2026</b><br>
+ बाबाको खजाना<br>
+ Free demo only. No real money or cash prizes.
 </footer>
 
-<!-- EXISTING SCRIPTS -->
+<!-- BOTTOM NAV -->
+<nav class="bottom-nav" id="bottomNav" hidden>
+ <button class="active" onclick="backHome()">
+  <span>🏠</span>HOME
+ </button>
+ <button onclick="goWallet()">
+  <span>💰</span>WALLET
+ </button>
+ <button onclick="goHistory()">
+  <span>📜</span>HISTORY
+ </button>
+ <button onclick="goProfile()">
+  <span>👤</span>PROFILE
+ </button>
+</nav>
+
+<!-- EXISTING AUTH AND GAME SCRIPTS -->
 <script type="module" src="auth.js"></script>
 <script type="module" src="game.js"></script>
 
-<!-- NAVIGATION -->
 <script type="module">
-
-import {auth} from "./firebase-config.js";
+import {auth,db} from "./firebase-config.js";
 
 import {
  onAuthStateChanged,
  signOut
 } from "https://www.gstatic.com/firebasejs/13.2.0/firebase-auth.js";
 
-const userMenu=document.getElementById("userMenu");
-const allGames=document.getElementById("allGames");
+import {
+ ref,onValue
+} from "https://www.gstatic.com/firebasejs/13.2.0/firebase-database.js";
+
 const accountBox=document.getElementById("accountBox");
-
-const treasureScreen=document.getElementById("treasureScreen");
+const userMenu=document.getElementById("userMenu");
+const homeContent=document.getElementById("homeContent");
+const walletCard=document.getElementById("walletCard");
+const bottomNav=document.getElementById("bottomNav");
 const gameViewer=document.getElementById("gameViewer");
-
 const gameFrame=document.getElementById("gameFrame");
 const frameTitle=document.getElementById("frameTitle");
 
-let loggedIn=false;
-
-onAuthStateChanged(auth,user=>{
-
- loggedIn=!!user;
-
- userMenu.hidden=!loggedIn;
- allGames.hidden=!loggedIn;
-
- document.getElementById("logoutBtn").hidden=!loggedIn;
- document.getElementById("loginBtn").hidden=loggedIn;
- document.getElementById("registerBtn").hidden=loggedIn;
-
- if(!loggedIn){
-  accountBox.hidden=false;
-  treasureScreen.hidden=true;
-  gameViewer.hidden=true;
- }else{
-  accountBox.hidden=true;
- }
-
-});
+let walletListener=null;
 
 function checkLogin(){
  if(!auth.currentUser){
@@ -467,85 +397,115 @@ function checkLogin(){
  return true;
 }
 
+function showGames(){
+ document.getElementById("gameGrid").scrollIntoView({
+  behavior:"smooth",block:"start"
+ });
+}
+
+window.showGames=showGames;
+
+onAuthStateChanged(auth,user=>{
+
+ const loggedIn=!!user;
+
+ accountBox.hidden=loggedIn;
+ userMenu.hidden=!loggedIn;
+ homeContent.hidden=!loggedIn;
+ walletCard.hidden=!loggedIn;
+ bottomNav.hidden=!loggedIn;
+
+ if(walletListener){
+  walletListener();
+  walletListener=null;
+ }
+
+ if(loggedIn){
+
+  document.getElementById("userEmail").textContent=
+   user.email || "User Account";
+
+  const walletRef=ref(db,"users/"+user.uid+"/demoPoints");
+
+  walletListener=onValue(walletRef,snapshot=>{
+   const balance=Number(snapshot.val()||0);
+   document.getElementById("walletBalance").textContent=
+    balance.toFixed(2)+" USD";
+  });
+
+ }else{
+  gameViewer.hidden=true;
+  gameFrame.src="about:blank";
+ }
+
+});
+
 // PLAY INSIDE
-window.playInside=function(filename,name){
+window.openGame=function(filename,name){
 
  if(!checkLogin())return;
 
- treasureScreen.hidden=true;
  gameViewer.hidden=false;
-
- frameTitle.textContent="🎮 "+name;
  gameFrame.src=filename;
+ frameTitle.textContent="🎮 "+name;
 
  window.scrollTo({top:0,behavior:"smooth"});
 };
 
-// OPEN SEPARATE PAGE
-window.openExternal=function(filename){
+// OPEN PAGE
+window.openPage=function(filename){
 
  if(!checkLogin())return;
 
  window.open(filename,"_blank");
-
-};
-
-// BABAKO KHAJANA INSIDE
-window.playTreasure=function(){
-
- if(!checkLogin())return;
-
- gameViewer.hidden=true;
- gameFrame.src="about:blank";
-
- treasureScreen.hidden=false;
-
- window.scrollTo({top:0,behavior:"smooth"});
 };
 
 // BACK HOME
 window.backHome=function(){
 
- treasureScreen.hidden=true;
  gameViewer.hidden=true;
-
  gameFrame.src="about:blank";
 
  window.scrollTo({top:0,behavior:"smooth"});
 };
 
-// PROFILE
-document.getElementById("profileBtn")
-.addEventListener("click",()=>{
-
- if(checkLogin()){
-  window.location.href="profile.html";
- }
-
-});
-
 // WALLET
-document.getElementById("walletBtn")
-.addEventListener("click",()=>{
+function goWallet(){
+ if(checkLogin())window.location.href="wallet.html";
+}
+window.goWallet=goWallet;
 
- if(checkLogin()){
-  window.location.href="wallet.html";
- }
+document.getElementById("walletBtn").onclick=goWallet;
+document.getElementById("quickWallet").onclick=goWallet;
 
-});
+// PROFILE
+function goProfile(){
+ if(checkLogin())window.location.href="profile.html";
+}
+window.goProfile=goProfile;
+
+document.getElementById("headerProfile").onclick=goProfile;
+document.getElementById("quickProfile").onclick=goProfile;
+
+// HISTORY
+function goHistory(){
+ if(checkLogin())window.location.href="history.html";
+}
+window.goHistory=goHistory;
+
+document.getElementById("quickHistory").onclick=goHistory;
 
 // LOGOUT
-document.getElementById("logoutMenuBtn")
-.addEventListener("click",async()=>{
-
+async function logout(){
  try{
   await signOut(auth);
-  backHome();
+  window.backHome();
  }catch(error){
-  alert(error.message);
+  alert("Logout Error: "+error.message);
  }
+}
 
-});
+document.getElementById("logoutMenuBtn").onclick=logout;
 
 </script>
 

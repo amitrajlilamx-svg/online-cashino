@@ -4,7 +4,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>ONLINE CASHINO - Baccarat</title>
+<title>ONLINE CASHINO - Baccarat MYR</title>
 
 <style>
 *{box-sizing:border-box}
@@ -61,9 +61,12 @@ button:disabled,input:disabled{opacity:.4;cursor:not-allowed}
 </div>
 
 <h2>🃏 BACCARAT GAME</h2>
-<p>DEMO POINTS BACCARAT</p>
 
-<div class="balance">MY DEMO POINTS: <span id="balance">Loading...</span></div>
+<div class="balance">
+ 💰 MYR BALANCE:
+ <span id="balance">Loading...</span>
+</div>
+
 <div class="auto-status" id="autoStatus">🟢 AUTO ROUND READY</div>
 <div class="countdown" id="countdown">20.2</div>
 <div class="betting-status" id="bettingStatus">LOGIN REQUIRED</div>
@@ -71,7 +74,6 @@ button:disabled,input:disabled{opacity:.4;cursor:not-allowed}
 <div class="section">
 <h3>🃏 BACCARAT TABLE</h3>
 
-<!-- SAME DEALER PHOTO INSIDE TABLE -->
 <img class="dealer-inside" src="baccarat-dealer.png" alt="Dealer playing Baccarat cards">
 
 <div class="table">
@@ -92,7 +94,7 @@ button:disabled,input:disabled{opacity:.4;cursor:not-allowed}
 </div>
 
 <div class="section">
-<h3>🎯 SELECT YOUR BET</h3>
+<h3>🎯 SELECT YOUR BET (RM)</h3>
 <div class="options">
  <button class="option" data-bet="PLAYER">PLAYER 2×</button>
  <button class="option" data-bet="BANKER">BANKER 1.95×</button>
@@ -103,7 +105,7 @@ button:disabled,input:disabled{opacity:.4;cursor:not-allowed}
 </div>
 
 <div class="section">
-<h3>💎 SELECT CHIP VALUE</h3>
+<h3>💎 SELECT CHIP VALUE (RM)</h3>
 <div class="chips">
  <button class="chip active" data-chip="1">1</button>
  <button class="chip" data-chip="5">5</button>
@@ -120,8 +122,8 @@ button:disabled,input:disabled{opacity:.4;cursor:not-allowed}
 <div class="summary">
 Selected bets: <b id="selectedCount">0</b><br>
 Selected: <span id="selectedList">None</span><br>
-Chip value: <b id="stakeDisplay">1</b><br>
-Total points: <b id="totalStake">0</b>
+Chip value: <b id="stakeDisplay">RM 1.00</b><br>
+Total bet: <b id="totalStake">RM 0.00</b>
 </div>
 </div>
 
@@ -131,7 +133,11 @@ Total points: <b id="totalStake">0</b>
 </div>
 
 <button class="back" id="backBtn">🏠 BACK TO HOME</button>
-<div class="notice">Demo points have no cash value. No deposits, withdrawals or cash prizes.</div>
+
+<div class="notice">
+MYR balance display for entertainment purposes only.
+No real-money deposits or withdrawals.
+</div>
 
 </div>
 
@@ -142,7 +148,7 @@ import {onAuthStateChanged} from
 "https://www.gstatic.com/firebasejs/13.2.0/firebase-auth.js";
 
 import {
- ref,get,push,runTransaction,query,orderByChild,limitToLast
+ ref,get,push,runTransaction,query,orderByChild,limitToLast,update
 } from
 "https://www.gstatic.com/firebasejs/13.2.0/firebase-database.js";
 
@@ -168,7 +174,6 @@ let userRecordCache=null;
 
 let selectedBets=new Set();
 let selectedChip=1;
-
 let lastBets=[];
 let lastChip=1;
 
@@ -176,6 +181,13 @@ let bettingOpen=false;
 let playing=false;
 let countdownTimer=null;
 let countdown="20.2";
+
+function formatRM(value){
+ return "RM "+Number(value||0).toLocaleString("en-MY",{
+  minimumFractionDigits:2,
+  maximumFractionDigits:2
+ });
+}
 
 function cardValue(rank){
  if(rank==="A")return 1;
@@ -190,12 +202,7 @@ function handScore(cards){
 function makeCard(){
  const rank=ranks[Math.floor(Math.random()*ranks.length)];
  const suit=suits[Math.floor(Math.random()*suits.length)];
-
- return {
-  rank,
-  suit,
-  value:cardValue(rank)
- };
+ return {rank,suit,value:cardValue(rank)};
 }
 
 function isRed(card){
@@ -209,21 +216,6 @@ function createCardElement(card){
  return el;
 }
 
-function renderHand(id,cards,scoreId){
- const area=$(id);
- area.innerHTML="";
-
- if(!cards.length){
-  area.textContent="-";
- }else{
-  cards.forEach(card=>{
-   area.appendChild(createCardElement(card));
-  });
- }
-
- $(scoreId).textContent=handScore(cards);
-}
-
 function updateSummary(){
  const total=selectedBets.size*selectedChip;
 
@@ -231,8 +223,8 @@ function updateSummary(){
  $("selectedList").textContent=
   [...selectedBets].map(id=>betInfo[id][0]).join(", ")||"None";
 
- $("stakeDisplay").textContent=selectedChip;
- $("totalStake").textContent=total;
+ $("stakeDisplay").textContent=formatRM(selectedChip);
+ $("totalStake").textContent=formatRM(total);
 }
 
 function updateUI(){
@@ -276,7 +268,6 @@ function stopCountdown(){
 
 function startCountdown(duration=ROUND_INTERVAL){
  stopCountdown();
-
  if(!currentUser||playing)return;
 
  const endTime=Date.now()+Math.max(0,duration);
@@ -288,7 +279,6 @@ function startCountdown(duration=ROUND_INTERVAL){
   }
 
   const remaining=Math.max(0,endTime-Date.now());
-
   countdown=(remaining/1000).toFixed(1);
   bettingOpen=remaining>LOCK_TIME;
 
@@ -319,7 +309,7 @@ function getBets(){
  }));
 }
 
-/* BACCARAT GAME RULES */
+/* BACCARAT GAME */
 
 function playBaccarat(){
  const player=[makeCard(),makeCard()];
@@ -329,11 +319,9 @@ function playBaccarat(){
  let b=handScore(banker);
 
  const natural=p>=8||b>=8;
-
  let playerThird=null;
 
  if(!natural){
-
   if(p<=5){
    playerThird=makeCard();
    player.push(playerThird);
@@ -354,22 +342,18 @@ function playBaccarat(){
    else if(b===6)bankerDraw=x===6||x===7;
   }
 
-  if(bankerDraw){
-   banker.push(makeCard());
-  }
+  if(bankerDraw)banker.push(makeCard());
  }
 
  p=handScore(player);
  b=handScore(banker);
-
- const winner=p>b?"PLAYER":b>p?"BANKER":"TIE";
 
  return {
   player,
   banker,
   p,
   b,
-  winner,
+  winner:p>b?"PLAYER":b>p?"BANKER":"TIE",
   playerPair:player[0].rank===player[1].rank,
   bankerPair:banker[0].rank===banker[1].rank
  };
@@ -398,8 +382,6 @@ function calculatePayout(result,bets){
  },0);
 }
 
-/* CARD REVEAL ANIMATION */
-
 function sleep(ms){
  return new Promise(resolve=>setTimeout(resolve,ms));
 }
@@ -420,13 +402,8 @@ async function revealCards(round){
   ["BANKER",round.banker[1]]
  ];
 
- if(round.player[2]){
-  sequence.push(["PLAYER",round.player[2]]);
- }
-
- if(round.banker[2]){
-  sequence.push(["BANKER",round.banker[2]]);
- }
+ if(round.player[2])sequence.push(["PLAYER",round.player[2]]);
+ if(round.banker[2])sequence.push(["BANKER",round.banker[2]]);
 
  for(const [side,card] of sequence){
   if(side==="PLAYER"){
@@ -460,11 +437,19 @@ async function loadBalance(){
  const points=Number(userRecordCache.demoPoints);
 
  if(!Number.isFinite(points)||points<0){
-  throw new Error("Invalid demoPoints in Firebase.");
+  throw new Error("Invalid wallet balance in Firebase.");
+ }
+
+ // MYR currency metadata only; existing balance remains unchanged.
+ if(userRecordCache.currency!=="MYR"){
+  await update(ref(db,"users/"+uid),{
+   currency:"MYR"
+  });
+  userRecordCache.currency="MYR";
  }
 
  balance=points;
- $("balance").textContent=balance;
+ $("balance").textContent=formatRM(balance);
 }
 
 async function saveRound(result,bets,total,payout,user){
@@ -477,9 +462,7 @@ async function saveRound(result,bets,total,payout,user){
  const freshSnap=await get(userRef);
  const baseRecord=freshSnap.exists()?freshSnap.val():userRecordCache;
 
- if(!baseRecord){
-  throw new Error("USER RECORD NOT FOUND");
- }
+ if(!baseRecord)throw new Error("USER RECORD NOT FOUND");
 
  const transactionKey=push(ref(db,"users/"+uid+"/transactions")).key;
  const pointsChange=payout-total;
@@ -493,6 +476,7 @@ async function saveRound(result,bets,total,payout,user){
 
   if(!Number.isFinite(old)||old<total)return;
 
+  current.currency="MYR";
   current.demoPoints=old+pointsChange;
   current.gamePlayed=(Number(current.gamePlayed)||0)+1;
   current.lastGameActivity=now;
@@ -500,6 +484,7 @@ async function saveRound(result,bets,total,payout,user){
 
   current.transactions[transactionKey]={
    type:"BACCARAT_RESULT",
+   currency:"MYR",
    mode:"AUTO",
    uid,
    email,
@@ -514,7 +499,8 @@ async function saveRound(result,bets,total,payout,user){
     label:x.label,
     id:x.id,
     stake:x.stake,
-    multiplier:x.multiplier
+    multiplier:x.multiplier,
+    currency:"MYR"
    })),
    stakeTotal:total,
    payoutTotal:payout,
@@ -532,8 +518,7 @@ async function saveRound(result,bets,total,payout,user){
 
  userRecordCache=resultTx.snapshot.val();
  balance=Number(userRecordCache.demoPoints)||0;
-
- $("balance").textContent=balance;
+ $("balance").textContent=formatRM(balance);
 }
 
 /* HISTORY */
@@ -574,12 +559,14 @@ async function loadHistory(){
    " - Banker "+x.bankerScore;
 
   const detail=document.createElement("div");
-  detail.textContent="Used: "+(x.stakeTotal||0)+
-   " | Won: "+(x.payoutTotal||0)+
-   " | Net: "+(x.pointsChange||0);
+  detail.textContent=
+   "Bet: "+formatRM(x.stakeTotal)+
+   " | Payout: "+formatRM(x.payoutTotal)+
+   " | Net: "+formatRM(x.pointsChange);
 
   const balanceLine=document.createElement("div");
-  balanceLine.textContent="Balance: "+(x.balanceAfter??"-")+
+  balanceLine.textContent=
+   "Balance: "+formatRM(x.balanceAfter)+
    " | "+(x.createdAt?new Date(x.createdAt).toLocaleString():"");
 
   item.append(top,detail,balanceLine);
@@ -604,7 +591,8 @@ async function startRound(){
  let total=bets.reduce((sum,bet)=>sum+bet.stake,0);
 
  if(total>balance){
-  $("roundResult").textContent="Not enough Demo Points. Round will run without bets.";
+  $("roundResult").textContent=
+   "Insufficient MYR balance. Round will run without bets.";
   bets=[];
   total=0;
  }
@@ -620,7 +608,6 @@ async function startRound(){
  updateUI();
 
  $("roundResult").textContent="🃏 DEALING CARDS...";
-
  $("playerCards").textContent="🂠";
  $("bankerCards").textContent="🂠";
  $("playerScore").textContent="0";
@@ -628,9 +615,7 @@ async function startRound(){
 
  try{
   await sleep(700);
-
   await revealCards(round);
-
   await sleep(500);
 
   if(!currentUser||currentUser.uid!==uid){
@@ -649,9 +634,9 @@ async function startRound(){
    " | Player: "+round.p+
    " | Banker: "+round.b+
    (pairText?" | "+pairText:"")+
-   " | Used: "+total+
-   " | Payout: "+payout+
-   " | Net: "+(payout-total);
+   " | Bet: "+formatRM(total)+
+   " | Payout: "+formatRM(payout)+
+   " | Net: "+formatRM(payout-total);
 
   await loadHistory();
 
@@ -668,7 +653,6 @@ async function startRound(){
  }finally{
   playing=false;
   selectedBets.clear();
-
   updateUI();
 
   if(currentUser&&currentUser.uid===uid){
@@ -686,11 +670,8 @@ document.querySelectorAll("[data-bet]").forEach(button=>{
 
   const id=button.dataset.bet;
 
-  if(selectedBets.has(id)){
-   selectedBets.delete(id);
-  }else{
-   selectedBets.add(id);
-  }
+  if(selectedBets.has(id))selectedBets.delete(id);
+  else selectedBets.add(id);
 
   updateUI();
  });
@@ -714,7 +695,6 @@ $("repeatBtn").addEventListener("click",()=>{
 
  selectedBets=new Set(lastBets);
  selectedChip=lastChip;
-
  updateUI();
 });
 
@@ -741,7 +721,6 @@ onAuthStateChanged(auth,async user=>{
  stopCountdown();
  bettingOpen=false;
  playing=false;
-
  selectedBets.clear();
 
  if(!user){
@@ -755,7 +734,7 @@ onAuthStateChanged(auth,async user=>{
   return;
  }
 
- $("roundResult").textContent="Loading wallet...";
+ $("roundResult").textContent="Loading MYR wallet...";
 
  try{
   await loadBalance();

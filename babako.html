@@ -8,353 +8,573 @@
 
 <style>
 *{box-sizing:border-box}
-
 body{
- margin:0;
- background:#102c18;
- color:white;
+ margin:0;padding:15px;
+ background:#101010;color:white;
  font-family:Arial,sans-serif;
- text-align:center;
 }
-
-header{
- background:#174b08;
- padding:16px 8px;
- border-bottom:3px solid #ffc107;
+.container{
+ max-width:520px;margin:20px auto;
+ padding:18px;background:#1c1c1c;
+ border:1px solid #333;border-radius:15px;
 }
-
-header h1{color:#ffc107;margin:0;font-size:24px}
-header p{margin:6px 0 0}
-
-.container{max-width:480px;margin:auto;padding:12px}
-
-.panel{
- background:#292929;
- border:1px solid #ffc107;
- border-radius:12px;
- padding:14px;
- margin:12px 0;
-}
-
+h2{text-align:center;color:#ffc107;margin-top:5px}
 .balance{
- color:#ffc107;
- font-size:24px;
- font-weight:bold;
+ background:#101010;border:1px solid #ffc107;
+ border-radius:12px;padding:15px;
+ text-align:center;margin:15px 0;
 }
-
-.bet-buttons{
- display:grid;
- grid-template-columns:repeat(5,1fr);
- gap:6px;
+.balance strong{display:block;color:#00e676;font-size:25px;margin-top:8px}
+.betbox{
+ display:flex;align-items:center;
+ justify-content:center;gap:18px;margin:20px 0;
 }
-
-button{
- cursor:pointer;
- border:0;
- border-radius:7px;
- font-weight:bold;
+.betbox button{
+ width:45px;height:42px;font-size:23px;
+ border:0;border-radius:8px;background:#ffc107;
 }
-
-.bet-buttons button{
- padding:12px 2px;
- background:#444;
- color:white;
-}
-
-.bet-buttons button.active{
- background:#ffc107;
- color:#111;
-}
-
-.play-btn{
- width:100%;
- padding:13px;
- background:#ffc107;
- color:#111;
- font-size:16px;
- margin-top:12px;
-}
-
+.betvalue{font-size:21px;font-weight:bold}
 .boxes{
- display:grid;
- grid-template-columns:repeat(3,1fr);
- gap:10px;
- margin:20px 0;
+ display:grid;grid-template-columns:repeat(3,1fr);
+ gap:10px;margin:20px 0;
 }
-
-.chest{
- background:linear-gradient(#765019,#422708);
- border:2px solid #ffc107;
- border-radius:12px;
- padding:15px 2px;
- font-size:40px;
+.treasure{
+ min-height:105px;border:2px solid #ffc107;
+ border-radius:12px;background:#292929;
+ color:white;font-size:38px;cursor:pointer;
 }
-
-.chest:disabled{opacity:1}
-
+.treasure:disabled{opacity:.55;cursor:not-allowed}
+.treasure.selected{background:#594400}
+button:disabled{opacity:.5}
 .message{
- color:#ffc107;
- font-size:17px;
- min-height:28px;
+ min-height:48px;text-align:center;
+ padding:12px;margin:12px 0;
+ background:#101010;border-radius:8px;
+ color:#ffc107;line-height:1.5;
 }
-
-.history{text-align:left;font-size:13px}
-.history div{
- padding:8px;
- border-bottom:1px solid #444;
+.mainbtn{
+ width:100%;padding:13px;margin-top:10px;
+ border:0;border-radius:9px;
+ background:#ffc107;color:#111;
+ font-size:16px;font-weight:bold;
 }
-
-.back-btn{
- background:#555;
- color:white;
- padding:11px;
- width:100%;
- margin-top:8px;
+.back{
+ display:block;text-align:center;
+ margin-top:20px;padding:12px;
+ color:#ffc107;text-decoration:none;
+ border:1px solid #ffc107;border-radius:9px;
 }
-
-footer{padding:18px;color:#aaa;font-size:12px}
-
-[hidden]{display:none!important}
+.history{
+ margin-top:22px;border-top:1px solid #444;
+ padding-top:12px;
+}
+.history h3{color:#ffc107}
+.history-item{
+ padding:10px;margin:7px 0;
+ background:#101010;border-radius:7px;
+ font-size:13px;line-height:1.6;
+}
+.small{
+ font-size:12px;color:#aaa;
+ text-align:center;line-height:1.5;
+}
 </style>
 </head>
 
 <body>
 
-<header>
-<h1>🎰 ONLINE CASHINO</h1>
-<p>🎁 बाबाको खजाना 🎁</p>
-</header>
-
 <div class="container">
 
-<div class="panel">
-<h3>MY DEMO POINTS</h3>
-<div class="balance" id="balance">1000.00</div>
+<h2>🎁 बाबाको खजाना</h2>
+
+<div class="balance">
+ MYR WALLET BALANCE
+ <strong id="balance">Loading...</strong>
 </div>
 
-<div class="panel">
-<h3>SELECT BET AMOUNT</h3>
-
-<div class="bet-buttons">
-<button data-bet="1">1</button>
-<button data-bet="5">5</button>
-<button data-bet="25">25</button>
-<button data-bet="100">100</button>
-<button data-bet="500">500</button>
+<div class="betbox">
+ <button id="minusBtn" onclick="changeBet(-10)">−</button>
+ <div class="betvalue" id="betValue">RM 10</div>
+ <button id="plusBtn" onclick="changeBet(10)">+</button>
 </div>
 
-<p>BET AMOUNT: <b id="betAmount">10.00</b></p>
-
-<input id="customBet" type="number"
-min="1" step="0.01"
-placeholder="Custom Bet Amount"
-style="width:100%;padding:12px;border-radius:7px;border:0">
-
-<button class="play-btn" id="startBtn">
-🎁 START GAME
-</button>
-</div>
-
-<div class="panel">
-
-<h3>🎁 SELECT ONE TREASURE BOX</h3>
+<h3 style="text-align:center">🎁 SELECT ONE TREASURE BOX</h3>
 
 <div class="boxes">
-<button class="chest" data-box="1" disabled>🎁</button>
-<button class="chest" data-box="2" disabled>🎁</button>
-<button class="chest" data-box="3" disabled>🎁</button>
+ <button class="treasure" onclick="selectBox(0)">🎁</button>
+ <button class="treasure" onclick="selectBox(1)">🎁</button>
+ <button class="treasure" onclick="selectBox(2)">🎁</button>
 </div>
 
 <div class="message" id="message">
-START GAME गरेर बाकस छान्नुहोस्!
+ आफ्नो खजाना बक्स छान्नुहोस्।
 </div>
 
-<p id="result"></p>
-
-<button class="play-btn" id="againBtn" hidden>
-PLAY AGAIN
+<button class="mainbtn" id="playBtn" onclick="startGame()">
+ PLAY NOW
 </button>
 
-<button class="back-btn" onclick="goHome()">
-⌂ BACK HOME
-</button>
+<div class="history">
+ <h3>📜 GAME HISTORY</h3>
+ <div id="historyList">Loading history...</div>
+</div>
+
+<a class="back" href="index.html">⌂ BACK HOME</a>
+
+<p class="small">
+Demo entertainment balance only. No real-money deposits,
+withdrawals or cash prizes.
+</p>
 
 </div>
 
-<div class="panel">
-<h3>📜 GAME HISTORY</h3>
-<div class="history" id="history">
-<div>अहिलेसम्म कुनै खेल भएको छैन।</div>
-</div>
-</div>
+<script type="module">
 
-</div>
+import {auth,db} from "./firebase-config.js";
 
-<footer>
-ONLINE CASHINO © 2026
-<p>Free Demo Entertainment Only</p>
-</footer>
+import {
+ ref,get,set,update,push,onValue,
+ runTransaction,serverTimestamp
+} from "https://www.gstatic.com/firebasejs/13.2.0/firebase-database.js";
 
-<script>
-
-let balance=1000;
+let currentUser=null;
+let walletRef=null;
+let historyRef=null;
 let bet=10;
-let active=false;
-let winningBox=0;
-let history=[];
+let selectedBox=-1;
+let busy=false;
+let balance=0;
 
 const balanceEl=document.getElementById("balance");
-const betEl=document.getElementById("betAmount");
-const message=document.getElementById("message");
-const result=document.getElementById("result");
-const boxes=document.querySelectorAll(".chest");
+const messageEl=document.getElementById("message");
+const playBtn=document.getElementById("playBtn");
+const historyList=document.getElementById("historyList");
+const treasureButtons=document.querySelectorAll(".treasure");
 
-function updateBalance(){
- balanceEl.textContent=balance.toFixed(2);
+function showMessage(message){
+ messageEl.textContent=message;
 }
 
-function setBet(value){
- value=Number(value);
+function setBusy(value){
+ busy=value;
+ playBtn.disabled=value;
+ document.getElementById("plusBtn").disabled=value;
+ document.getElementById("minusBtn").disabled=value;
+ treasureButtons.forEach(button=>button.disabled=value);
+}
 
- if(!Number.isFinite(value)||value<1){
-  alert("Enter valid bet amount");
-  return;
+function updateBetDisplay(){
+ document.getElementById("betValue").textContent="RM "+bet;
+}
+
+window.changeBet=function(amount){
+ if(busy)return;
+
+ bet+=amount;
+
+ if(bet<10)bet=10;
+ if(bet>10000)bet=10000;
+
+ updateBetDisplay();
+};
+
+window.selectBox=function(index){
+ if(busy)return;
+
+ selectedBox=index;
+
+ treasureButtons.forEach((button,i)=>{
+  button.classList.toggle("selected",i===index);
+ });
+
+ showMessage("तपाईंले बक्स "+(index+1)+" छान्नुभयो। PLAY NOW थिच्नुहोस्।");
+};
+
+/*
+ WALLET MIGRATION:
+ पुरानो demoPoints रकमलाई myr मा सार्छ।
+ पुरानो demoPoints हटाउँदैन।
+ */
+
+async function migrateWalletToMYR(uid){
+
+ const userRef=ref(db,"users/"+uid);
+ const myrRef=ref(db,"users/"+uid+"/myr");
+
+ const snapshot=await get(userRef);
+
+ if(!snapshot.exists()){
+  throw new Error("Firebase user record भेटिएन।");
  }
 
- bet=value;
- betEl.textContent=bet.toFixed(2);
+ const userData=snapshot.val()||{};
 
- document.getElementById("customBet").value="";
+ let oldBalance=userData.demoPoints;
 
- document.querySelectorAll("[data-bet]").forEach(b=>{
-  b.classList.toggle("active",Number(b.dataset.bet)===bet);
- });
-}
+ if(typeof userData.myr==="number"){
+  if(!Number.isFinite(userData.myr)||userData.myr<0){
+   throw new Error("MYR balance सही नम्बर होइन।");
+  }
 
-document.querySelectorAll("[data-bet]").forEach(btn=>{
- btn.addEventListener("click",()=>{
-  if(active)return;
-  setBet(btn.dataset.bet);
- });
-});
-
-document.getElementById("customBet").addEventListener("change",e=>{
- if(active)return;
- if(e.target.value)setBet(e.target.value);
-});
-
-function resetBoxes(){
- boxes.forEach(box=>{
-  box.disabled=true;
-  box.textContent="🎁";
-  box.style.borderColor="#ffc107";
- });
-}
-
-document.getElementById("startBtn").addEventListener("click",()=>{
-
- if(active)return;
-
- if(balance<bet){
-  message.textContent="पर्याप्त Demo Points छैन!";
-  return;
+  await update(userRef,{currency:"MYR"});
+  return userData.myr;
  }
 
- balance-=bet;
- updateBalance();
+ if(typeof oldBalance!=="number"||
+    !Number.isFinite(oldBalance)||
+    oldBalance<0){
 
- active=true;
- winningBox=Math.floor(Math.random()*3)+1;
+  throw new Error("पुरानो demoPoints balance भेटिएन वा गलत छ।");
+ }
 
- resetBoxes();
-
- boxes.forEach(box=>box.disabled=false);
-
- message.textContent="एउटा खजाना बाकस छान्नुहोस्!";
- result.textContent="";
-
- document.getElementById("startBtn").disabled=true;
- document.getElementById("againBtn").hidden=true;
-
-});
-
-boxes.forEach(box=>{
-
- box.addEventListener("click",()=>{
-
-  if(!active)return;
-
-  active=false;
-
-  let choice=Number(box.dataset.box);
-  let won=choice===winningBox;
-
-  boxes.forEach(b=>{
-   b.disabled=true;
-
-   if(Number(b.dataset.box)===winningBox){
-    b.textContent="💎";
-    b.style.borderColor="#00ff88";
-   }else{
-    b.textContent="📦";
+ const result=await runTransaction(
+  myrRef,
+  currentValue=>{
+   if(typeof currentValue==="number"){
+    return currentValue;
    }
+
+   return oldBalance;
+  },
+  {applyLocally:false}
+ );
+
+ if(!result.committed){
+  throw new Error("MYR wallet migration पूरा भएन।");
+ }
+
+ await update(userRef,{currency:"MYR"});
+
+ return result.snapshot.val();
+}
+
+/*
+ BALANCE LOAD
+ */
+
+async function loadBalance(){
+
+ if(!currentUser)return;
+
+ balanceEl.textContent="Loading...";
+
+ try{
+
+  await migrateWalletToMYR(currentUser.uid);
+
+  walletRef=ref(db,"users/"+currentUser.uid+"/myr");
+
+  onValue(walletRef,snapshot=>{
+
+   const value=snapshot.val();
+
+   if(typeof value==="number"&&Number.isFinite(value)){
+    balance=value;
+    balanceEl.textContent="RM "+value.toFixed(2);
+   }else{
+    balance=0;
+    balanceEl.textContent="Invalid balance";
+   }
+
+  },error=>{
+   showMessage("Wallet read error: "+error.message);
   });
+
+  historyRef=ref(db,"users/"+currentUser.uid+"/babaTreasureHistory");
+
+  loadHistory();
+
+ }catch(error){
+
+  balanceEl.textContent="Error";
+  showMessage("Wallet error: "+error.message);
+  console.error(error);
+
+ }
+}
+
+/*
+ ATOMIC WALLET CHANGE
+
+ Win: +bet (2x total payout minus original stake)
+ Loss: -bet
+ */
+
+async function changeBalance(amount){
+
+ if(!currentUser){
+  throw new Error("कृपया पहिले Login गर्नुहोस्।");
+ }
+
+ if(!walletRef){
+  throw new Error("MYR wallet तयार भएको छैन।");
+ }
+
+ const result=await runTransaction(
+  walletRef,
+  currentValue=>{
+
+   if(typeof currentValue!=="number"||
+      !Number.isFinite(currentValue)||
+      currentValue<0){
+    return;
+   }
+
+   if(amount<0&&currentValue<Math.abs(amount)){
+    return;
+   }
+
+   const nextValue=currentValue+amount;
+
+   if(!Number.isFinite(nextValue)||nextValue<0){
+    return;
+   }
+
+   return Number(nextValue.toFixed(2));
+
+  },
+  {applyLocally:false}
+ );
+
+ if(!result.committed){
+
+  const current=result.snapshot.val();
+
+  if(typeof current!=="number"){
+   throw new Error("MYR balance उपलब्ध छैन। Firebase मा myr नम्बर जाँच गर्नुहोस्।");
+  }
+
+  if(amount<0&&current<Math.abs(amount)){
+   throw new Error("पर्याप्त MYR balance छैन।");
+  }
+
+  throw new Error("Firebase transaction abort भयो। MYR Rules र wallet path जाँच गर्नुहोस्।");
+ }
+
+ return result.snapshot.val();
+}
+
+/*
+ SAVE GAME HISTORY AND TRANSACTION
+ */
+
+async function saveGameRecord(won,amount,boxNumber,newBalance){
+
+ const now=Date.now();
+
+ const gameRecord={
+  bet:bet,
+  result:won?"WIN":"LOSE",
+  profit:amount,
+  selectedBox:boxNumber+1,
+  balance:newBalance,
+  currency:"MYR",
+  createdAt:now
+ };
+
+ const transactionRecord={
+  type:won?"BABA_TREASURE_WIN":"BABA_TREASURE_LOSS",
+  amount:amount,
+  balance:newBalance,
+  currency:"MYR",
+  createdAt:now
+ };
+
+ const gameRef=push(
+  ref(db,"users/"+currentUser.uid+"/babaTreasureHistory")
+ );
+
+ const transactionRecordRef=push(
+  ref(db,"users/"+currentUser.uid+"/transactions")
+ );
+
+ await Promise.all([
+  set(gameRef,gameRecord),
+  set(transactionRecordRef,transactionRecord)
+ ]);
+}
+
+/*
+ START GAME
+ */
+
+window.startGame=async function(){
+
+ if(busy)return;
+
+ if(!currentUser){
+  showMessage("कृपया Login गर्नुहोस्।");
+  return;
+ }
+
+ if(selectedBox===-1){
+  showMessage("पहिले एउटा Treasure Box छान्नुहोस्।");
+  return;
+ }
+
+ if(bet<=0){
+  showMessage("Bet रकम सही छैन।");
+  return;
+ }
+
+ setBusy(true);
+ showMessage("खेल सुरु हुँदैछ...");
+
+ try{
+
+  /*
+   3 boxes मध्ये एउटा random winning box
+   */
+
+  const winningBox=Math.floor(Math.random()*3);
+  const won=(selectedBox===winningBox);
+
+  /*
+   Win मा +bet, loss मा -bet
+   */
+
+  const walletChange=won?bet:-bet;
+
+  const newBalance=await changeBalance(walletChange);
+
+  /*
+   Result history save
+   */
+
+  try{
+
+   await saveGameRecord(
+    won,
+    walletChange,
+    selectedBox,
+    newBalance
+   );
+
+  }catch(historyError){
+
+   console.error("History save error:",historyError);
+
+   showMessage(
+    "खेलको रकम अपडेट भयो, तर History save हुन सकेन: "+
+    historyError.message
+   );
+
+   selectedBox=-1;
+   treasureButtons.forEach(button=>button.classList.remove("selected"));
+   return;
+  }
 
   if(won){
 
-   let prize=bet*2;
-   balance+=prize;
-
-   message.textContent="🎉 बधाई छ! तपाईंले जित्नुभयो!";
-   result.textContent="WIN: +"+prize.toFixed(2);
+   showMessage(
+    "🎉 बधाई छ! तपाईंले जित्नुभयो! Prize: RM "+
+    (bet*2).toFixed(2)
+   );
 
   }else{
 
-   message.textContent="😔 यो पटक खजाना भेटिएन!";
-   result.textContent="LOSE: -"+bet.toFixed(2);
+   showMessage(
+    "😔 तपाईं हार्नुभयो। Winning Box: "+
+    (winningBox+1)
+   );
 
   }
 
-  updateBalance();
+  selectedBox=-1;
+  treasureButtons.forEach(button=>button.classList.remove("selected"));
 
-  history.unshift(
-   "Bet: "+bet.toFixed(2)+
-   " | "+(won?"WIN":"LOSE")+
-   " | Box: "+choice
-  );
+ }catch(error){
 
-  history=history.slice(0,10);
+  console.error("Game error:",error);
 
-  document.getElementById("history").innerHTML=
-   history.map(item=>"<div>"+item+"</div>").join("");
+  showMessage("Bet सुरु हुन सकेन: "+error.message);
 
-  document.getElementById("againBtn").hidden=false;
-  document.getElementById("startBtn").disabled=false;
+ }finally{
 
+  setBusy(false);
+
+ }
+
+};
+
+/*
+ LOAD GAME HISTORY
+ */
+
+function loadHistory(){
+
+ if(!currentUser)return;
+
+ const historyPath=ref(
+  db,"users/"+currentUser.uid+"/babaTreasureHistory"
+ );
+
+ onValue(historyPath,snapshot=>{
+
+  if(!snapshot.exists()){
+   historyList.innerHTML="<p>No game history yet.</p>";
+   return;
+  }
+
+  const records=[];
+
+  snapshot.forEach(child=>{
+   records.push(child.val());
+  });
+
+  records.sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
+
+  historyList.innerHTML="";
+
+  records.slice(0,20).forEach(item=>{
+
+   const div=document.createElement("div");
+   div.className="history-item";
+
+   const date=item.createdAt?
+    new Date(item.createdAt).toLocaleString():"";
+
+   div.textContent=
+    (item.result==="WIN"?"🎉 WIN":"😔 LOSE")+
+    " | Bet: RM "+Number(item.bet||0).toFixed(2)+
+    " | Change: RM "+Number(item.profit||0).toFixed(2)+
+    " | Box: "+(item.selectedBox||"-")+
+    " | "+date;
+
+   historyList.appendChild(div);
+
+  });
+
+ },error=>{
+  historyList.textContent="History error: "+error.message;
  });
 
-});
-
-document.getElementById("againBtn").addEventListener("click",()=>{
-
- if(active)return;
-
- resetBoxes();
-
- message.textContent="START GAME गरेर बाकस छान्नुहोस्!";
- result.textContent="";
-
- document.getElementById("againBtn").hidden=true;
-
-});
-
-function goHome(){
- window.location.href="index.html";
 }
 
-resetBoxes();
+/*
+ AUTHENTICATION
+ */
 
-document.querySelector('[data-bet="1"]').classList.remove("active");
+auth.onAuthStateChanged(async user=>{
+
+ currentUser=user;
+
+ if(!user){
+
+  balanceEl.textContent="Login required";
+  showMessage("खेल्नका लागि पहिले Login गर्नुहोस्।");
+  playBtn.disabled=true;
+  return;
+
+ }
+
+ playBtn.disabled=false;
+
+ await loadBalance();
+
+});
+
+updateBetDisplay();
 
 </script>
 

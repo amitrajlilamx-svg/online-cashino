@@ -104,7 +104,7 @@ header button{
 
 <header>
  <button>ONLINE CASHINO</button>
- <div class="balance">POINTS: <span id="balance">LOADING...</span></div>
+ <div class="balance">MYR BALANCE: <span id="balance">LOADING...</span></div>
 </header>
 
 <div class="heading">💣 BOMB GAME 💣</div>
@@ -122,9 +122,9 @@ header button{
 </div>
 
 <div class="panel stats">
- <div class="stat"><small>BET AMOUNT</small><strong id="betShow">0.00</strong></div>
+ <div class="stat"><small>BET AMOUNT</small><strong id="betShow">RM 0.00</strong></div>
  <div class="stat"><small>MULTIPLIER</small><strong id="multiplier">x1.00</strong></div>
- <div class="stat"><small>WIN AMOUNT</small><strong id="winAmount">0.00</strong></div>
+ <div class="stat"><small>WIN AMOUNT</small><strong id="winAmount">RM 0.00</strong></div>
 </div>
 
 <div class="grid" id="grid"></div>
@@ -135,10 +135,10 @@ header button{
 </div>
 
 <div class="panel">
- <div class="label">BET AMOUNT</div>
+ <div class="label">BET AMOUNT (RM)</div>
  <div class="bet-area">
   <button id="betMinus">−</button>
-  <input id="bet" type="number" value="10" min="1" step="0.01">
+  <input id="bet" type="number" value="10" min="0.01" step="0.01">
   <button id="betPlus">+</button>
   <button data-value="1">1</button>
   <button data-value="5">5</button>
@@ -157,7 +157,7 @@ header button{
 </div>
 
 <div style="text-align:center;color:#888;font-size:10px;margin-top:12px">
- DEMO POINTS ONLY • NO REAL MONEY
+ MYR BALANCE DISPLAY FOR ENTERTAINMENT ONLY • NO REAL-MONEY DEPOSITS OR WITHDRAWALS
 </div>
 
 </div>
@@ -178,6 +178,13 @@ const $=id=>document.getElementById(id);
 
 const TOTAL=25;
 
+function formatRM(value){
+ return "RM "+Number(value||0).toLocaleString("en-MY",{
+  minimumFractionDigits:2,
+  maximumFractionDigits:2
+ });
+}
+
 let currentUser=null;
 let balance=0;
 let walletReady=false;
@@ -192,7 +199,11 @@ let multiplier=1;
 let roundKey=null;
 let gameToken=0;
 
+let walletListener=null;
+let historyListener=null;
+
 // BOMB COUNT
+
 function getBombCount(){
  let n=parseInt($("bombCount").value,10);
  if(!Number.isFinite(n))n=3;
@@ -212,6 +223,7 @@ $("bombCount").addEventListener("change",()=>{
 });
 
 // GRID
+
 function makeGrid(){
  const grid=$("grid");
  grid.innerHTML="";
@@ -226,18 +238,18 @@ function makeGrid(){
 }
 
 function updateBalance(){
- $("balance").textContent=balance.toFixed(2);
+ $("balance").textContent=formatRM(balance);
 }
 
 function updateStats(){
 
- $("betShow").textContent=stake.toFixed(2);
+ $("betShow").textContent=formatRM(stake);
  $("multiplier").textContent="x"+multiplier.toFixed(2);
 
  $("winAmount").textContent=
   playing && safeCount>0
-  ? (stake*multiplier).toFixed(2)
-  : "0.00";
+  ? formatRM(stake*multiplier)
+  : formatRM(0);
 
  $("playBtn").disabled=
   !walletReady || !currentUser || playing || pending;
@@ -253,16 +265,23 @@ function updateStats(){
  });
 
  $("bombCount").disabled=playing || pending;
-
  $("bet").disabled=playing || pending;
 
  document.querySelectorAll("[data-value]").forEach(button=>{
   button.disabled=playing || pending;
  });
+
+ $("betMinus").disabled=playing||pending;
+ $("betPlus").disabled=playing||pending;
+ $("bombMinus").disabled=playing||pending;
+ $("bombPlus").disabled=playing||pending;
 }
 
 // WALLET UPDATE
+
 async function changeBalance(amount){
+
+ if(!currentUser)throw new Error("User not logged in.");
 
  const balanceRef=ref(
   db,"users/"+currentUser.uid+"/demoPoints"
@@ -313,6 +332,7 @@ async function changeBalance(amount){
 }
 
 // SAVE WALLET TRANSACTION
+
 async function saveWalletTransaction(type,pointsChange){
 
  const uid=currentUser.uid;
@@ -327,8 +347,10 @@ async function saveWalletTransaction(type,pointsChange){
  changes["users/"+uid+"/transactions/"+transactionRef.key]={
   type:type,
   game:"BOMB",
-  pointsChange:pointsChange,
-  balanceAfter:balance,
+  currency:"MYR",
+  amount:Number(Math.abs(pointsChange).toFixed(2)),
+  pointsChange:Number(pointsChange.toFixed(2)),
+  balanceAfter:Number(balance.toFixed(2)),
   createdAt:now
  };
 
@@ -342,12 +364,15 @@ async function saveWalletTransaction(type,pointsChange){
 }
 
 // SAVE GAME HISTORY
+
 async function saveGameData(data){
 
  if(!roundKey)throw new Error("Game history ID missing.");
 
  const uid=currentUser.uid;
  const changes={};
+
+ changes["users/"+uid+"/bombHistory/"+roundKey+"/currency"]="MYR";
 
  Object.entries(data).forEach(([key,value])=>{
   changes["users/"+uid+"/bombHistory/"+roundKey+"/"+key]=value;
@@ -357,6 +382,7 @@ async function saveGameData(data){
 }
 
 // MULTIPLIER
+
 function calculateMultiplier(){
 
  const bombCount=getBombCount();
@@ -373,6 +399,7 @@ function calculateMultiplier(){
 }
 
 // BET
+
 async function startGame(){
 
  if(!walletReady || !currentUser || playing || pending)return;
@@ -385,7 +412,7 @@ async function startGame(){
  }
 
  if(amount>balance){
-  $("status").textContent="NOT ENOUGH DEMO POINTS";
+  $("status").textContent="NOT ENOUGH RM BALANCE";
   return;
  }
 
@@ -398,7 +425,6 @@ async function startGame(){
 
  try{
 
-  // Deduct only when the user presses BET.
   await changeBalance(-stake);
   deducted=true;
 
@@ -460,7 +486,10 @@ async function startGame(){
 
   playing=false;
   roundKey=null;
-  $("status").textContent="BET ERROR: "+error.message;
+
+  if($("status").textContent!=="BET ERROR • CHECK WALLET BALANCE"){
+   $("status").textContent="BET ERROR: "+error.message;
+  }
 
  }finally{
 
@@ -470,6 +499,7 @@ async function startGame(){
 }
 
 // OPEN BOX
+
 async function openBox(i){
 
  if(!playing || pending || opened.includes(i))return;
@@ -490,7 +520,7 @@ async function openBox(i){
   revealAll();
 
   $("status").textContent=
-   "💥 BOOM! YOU LOST "+stake.toFixed(2)+" POINTS";
+   "💥 BOOM! YOU LOST "+formatRM(stake);
 
   try{
 
@@ -525,7 +555,7 @@ async function openBox(i){
 
  $("status").textContent=
   "💎 SAFE BOX! "+safeCount+" OPENED | WIN: "+
-  (stake*multiplier).toFixed(2);
+  formatRM(stake*multiplier);
 
  updateStats();
 
@@ -535,6 +565,7 @@ async function openBox(i){
 }
 
 // RANDOM BOX
+
 function randomBox(){
 
  if(!playing || pending)return;
@@ -552,6 +583,7 @@ function randomBox(){
 }
 
 // CASH OUT
+
 async function cashOut(){
 
  if(!playing || safeCount===0 || pending)return;
@@ -576,7 +608,6 @@ async function cashOut(){
    throw new Error("Game already ended.");
   }
 
-  // Stop this game before crediting its payout.
   playing=false;
 
   await changeBalance(win);
@@ -597,16 +628,13 @@ async function cashOut(){
   revealAll();
 
   $("status").textContent=
-   "🏆 CASH OUT SUCCESS! +"+win.toFixed(2)+" POINTS";
+   "🏆 CASH OUT SUCCESS! +"+formatRM(win);
 
  }catch(error){
 
   console.error("BOMB CASHOUT ERROR:",error);
 
   $("status").textContent="CASH OUT ERROR: "+error.message;
-
-  // Keep the game ended if wallet credit succeeded.
-  // Do not retry credit automatically.
 
  }finally{
 
@@ -616,6 +644,7 @@ async function cashOut(){
 }
 
 // GAME PLAYED COUNT
+
 async function incrementGamePlayed(){
 
  const uid=currentUser.uid;
@@ -631,6 +660,7 @@ async function incrementGamePlayed(){
 }
 
 // REVEAL ALL BOXES
+
 function revealAll(){
 
  const tiles=document.querySelectorAll(".tile");
@@ -650,32 +680,27 @@ function revealAll(){
 }
 
 // END GAME
+
 function endGame(){
 
  playing=false;
  pending=false;
 
  $("playBtn").textContent="▶ BET";
- $("status").textContent=$("status").textContent;
 
  updateStats();
- addLocalHistory();
-}
-
-// LOCAL DISPLAY HISTORY
-function addLocalHistory(){
- // Firebase history listener displays saved records.
 }
 
 // BET CONTROLS
+
 function adjustBet(n){
 
  if(playing || pending)return;
 
  const input=$("bet");
- const value=Math.max(1,Number(input.value||1)+n);
+ const value=Math.max(.01,Math.round((Number(input.value||1)+n)*100)/100);
 
- input.value=value;
+ input.value=value.toFixed(2);
 }
 
 function setBet(n){
@@ -697,6 +722,7 @@ $("randomBtn").addEventListener("click",randomBox);
 $("cashBtn").addEventListener("click",cashOut);
 
 // FIREBASE HISTORY
+
 function showHistory(data){
 
  const box=$("history");
@@ -728,74 +754,108 @@ function showHistory(data){
 
   row.textContent=
    label+
-   " | Bet: "+Number(item.bet||0).toFixed(2)+
+   " | Bet: "+formatRM(item.bet||0)+
    " | Bombs: "+Number(item.bombCount||0)+
    " | Safe: "+Number(item.safeCount||0)+
    " | Multiplier: x"+Number(item.multiplier||1).toFixed(2)+
-   " | Win: "+Number(item.winAmount||0).toFixed(2);
+   " | Win: "+formatRM(item.winAmount||0);
 
   box.appendChild(row);
  });
 }
 
 // LOGIN AND WALLET
-onAuthStateChanged(auth,user=>{
 
- if(!user){
-  window.location.href="index.html";
-  return;
+onAuthStateChanged(auth,async user=>{
+
+ if(walletListener){
+  walletListener();
+  walletListener=null;
+ }
+
+ if(historyListener){
+  historyListener();
+  historyListener=null;
  }
 
  currentUser=user;
+ walletReady=false;
 
- const balanceRef=ref(
-  db,"users/"+user.uid+"/demoPoints"
- );
+ if(!user){
 
- onValue(balanceRef,snapshot=>{
+  playing=false;
+  pending=false;
 
-  if(!snapshot.exists()){
-   walletReady=false;
-   $("status").textContent="WALLET BALANCE NOT FOUND";
-   updateStats();
-   return;
-  }
+  $("balance").textContent="LOGIN REQUIRED";
+  $("status").textContent="PLEASE LOGIN FIRST";
 
-  const value=Number(snapshot.val());
-
-  if(!Number.isFinite(value)){
-   walletReady=false;
-   $("status").textContent="INVALID WALLET BALANCE";
-   updateStats();
-   return;
-  }
-
-  balance=value;
-  walletReady=true;
-
-  updateBalance();
   updateStats();
+  return;
+ }
 
-  if(!playing && !pending){
-   $("status").textContent="WALLET CONNECTED • READY TO BET";
-  }
+ try{
 
- },error=>{
+  // MYR metadata only. Existing demoPoints value is not changed.
+  await dbUpdate(ref(db,"users/"+user.uid),{
+   currency:"MYR"
+  });
 
+  const balanceRef=ref(
+   db,"users/"+user.uid+"/demoPoints"
+  );
+
+  walletListener=onValue(balanceRef,snapshot=>{
+
+   if(!snapshot.exists()){
+    walletReady=false;
+    $("status").textContent="WALLET BALANCE NOT FOUND";
+    updateStats();
+    return;
+   }
+
+   const value=Number(snapshot.val());
+
+   if(!Number.isFinite(value)||value<0){
+    walletReady=false;
+    $("status").textContent="INVALID WALLET BALANCE";
+    updateStats();
+    return;
+   }
+
+   balance=value;
+   walletReady=true;
+
+   updateBalance();
+   updateStats();
+
+   if(!playing && !pending){
+    $("status").textContent="WALLET CONNECTED • READY TO BET";
+   }
+
+  },error=>{
+
+   walletReady=false;
+   $("status").textContent="WALLET ERROR: "+error.message;
+   updateStats();
+  });
+
+  const historyRef=ref(
+   db,"users/"+user.uid+"/bombHistory"
+  );
+
+  historyListener=onValue(historyRef,snapshot=>{
+   showHistory(snapshot.val());
+  },error=>{
+   $("history").textContent="HISTORY ERROR: "+error.message;
+  });
+
+ }catch(error){
+
+  console.error(error);
   walletReady=false;
-  $("status").textContent="WALLET ERROR: "+error.message;
+  $("status").textContent="FIREBASE ERROR: "+error.message;
   updateStats();
- });
-
- const historyRef=ref(
-  db,"users/"+user.uid+"/bombHistory"
- );
-
- onValue(historyRef,snapshot=>{
-  showHistory(snapshot.val());
- },error=>{
-  $("history").textContent="HISTORY ERROR: "+error.message;
- });
+ }
 
 });
 

@@ -42,6 +42,7 @@ body{margin:0;background:#174b08;color:white;font-family:Arial,sans-serif}
 .history{max-width:750px;margin:10px auto;background:#20470a;padding:10px;border-radius:12px;font-size:12px}
 .history-item{padding:7px;border-bottom:1px solid #527c30}
 button:disabled{opacity:.7}
+.notice{font-size:11px;color:#d5e7c4;text-align:center;margin-top:12px}
 @media(max-width:600px){
  .game{padding:4px}
  .top button{padding:7px 9px;font-size:10px}
@@ -90,7 +91,7 @@ button:disabled{opacity:.7}
 <div class="top">
  <button>GOAL ▼</button>
  <button class="help" onclick="alert('Choose one box in each level. Avoid the bomb and cash out before losing.')">ⓘ How to Play?</button>
- <div class="balance"><span id="balance">CONNECTING...</span> USD</div>
+ <div class="balance">💰 MYR BALANCE: <span id="balance">CONNECTING...</span></div>
  <button onclick="alert('ONLINE CASHINO - GOAL GAME')">☰</button>
 </div>
 
@@ -117,7 +118,7 @@ button:disabled{opacity:.7}
 <div class="bottom">
  <div class="betbox">
   <div>
-   <div style="font-size:12px">Bet, USD</div>
+   <div style="font-size:12px">Bet, RM</div>
    <input class="betinput" id="bet" type="number" value="0.30" min="0.01" step="0.10">
   </div>
   <button class="small" onclick="adjust(-0.10)">−</button>
@@ -132,14 +133,32 @@ button:disabled{opacity:.7}
  <b>GAME HISTORY</b>
  <div id="history" style="margin-top:8px">Loading history...</div>
 </div>
+
+<div class="notice">
+MYR balance display is for entertainment purposes only. No real-money deposits, withdrawals or cash prizes.
+</div>
+
 </div>
 
 <script type="module">
 import {auth,db} from "./firebase-config.js";
+
 import {
- ref,onValue,runTransaction,push,set
+ ref,onValue,runTransaction,push,set,update
 } from "https://www.gstatic.com/firebasejs/13.2.0/firebase-database.js";
-import {onAuthStateChanged} from "https://www.gstatic.com/firebasejs/13.2.0/firebase-auth.js";
+
+import {
+ onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/13.2.0/firebase-auth.js";
+
+/* CURRENCY FORMAT */
+
+function money(n){
+ return "RM "+Number(n||0).toLocaleString("en-MY",{
+  minimumFractionDigits:2,
+  maximumFractionDigits:2
+ });
+}
 
 let balance=0;
 let currentUser=null;
@@ -156,6 +175,7 @@ let busy=false;
 let roundPaid=false;
 let walletListener=null;
 let historyListener=null;
+let authVersion=0;
 
 const levels={
  easy:[1.10,1.20,1.35,1.50,1.70,1.95,2.25,2.65,3.20,4.00],
@@ -163,7 +183,6 @@ const levels={
  hard:[1.25,1.50,1.85,2.30,2.90,3.70,4.80,6.20,7.50,9.04]
 };
 
-const money=n=>Number(n).toFixed(2);
 const userPath=path=>"users/"+currentUser.uid+"/"+path;
 
 function status(msg){
@@ -183,12 +202,15 @@ function updateNext(){
 function makeBoard(){
  const board=document.getElementById("board");
  board.innerHTML="";
+
  for(let row=0;row<10;row++){
   const column=document.createElement("div");
   column.className="level-column locked";
   column.id="column"+row;
+
   const boxes=document.createElement("div");
   boxes.className="level-boxes";
+
   for(let col=0;col<5;col++){
    const i=row*5+col;
    const b=document.createElement("button");
@@ -197,6 +219,7 @@ function makeBoard(){
    b.onclick=()=>openTile(i);
    boxes.appendChild(b);
   }
+
   column.appendChild(boxes);
   board.appendChild(column);
  }
@@ -205,11 +228,13 @@ function makeBoard(){
 function updateBoard(){
  const columns=document.querySelectorAll(".level-column");
  const tiles=document.querySelectorAll(".tile");
+
  columns.forEach((column,row)=>{
   column.classList.toggle("locked",row>safeCount);
   column.classList.toggle("current",playing&&row===safeCount);
   column.classList.toggle("completed",row<safeCount);
  });
+
  tiles.forEach((tile,i)=>{
   tile.disabled=!playing||Math.floor(i/5)!==safeCount||opened.includes(i);
  });
@@ -217,6 +242,7 @@ function updateBoard(){
 
 function adjust(n){
  if(playing||busy)return;
+
  const input=document.getElementById("bet");
  input.value=Math.max(.01,Math.round((Number(input.value)+n)*100)/100).toFixed(2);
 }
@@ -248,32 +274,41 @@ function revealAll(){
  });
 }
 
+/* HISTORY */
+
 function showHistory(data){
  const box=document.getElementById("history");
  box.innerHTML="";
+
  if(!data||!Object.keys(data).length){
   box.textContent="No games yet";
   return;
  }
+
  Object.entries(data)
  .sort((a,b)=>(b[1].createdAt||0)-(a[1].createdAt||0))
  .slice(0,30)
  .forEach(([id,item])=>{
   const div=document.createElement("div");
   div.className="history-item";
+
   div.textContent=
-   (item.result||"GAME")+" | Bet: "+money(item.bet||0)+
-   " USD | Win: "+money(item.win||0)+" USD | "+
-   (item.createdAt?new Date(item.createdAt).toLocaleString():"");
+   (item.result||"GAME")+
+   " | Bet: "+money(item.bet||0)+
+   " | Win: "+money(item.win||0)+
+   " | "+(item.createdAt?new Date(item.createdAt).toLocaleString():"");
+
   box.appendChild(div);
  });
 }
 
 async function saveHistory(result,win){
  const historyRef=push(ref(db,userPath("goalHistory")));
+
  await set(historyRef,{
   result:result,
-  bet:stake,
+  currency:"MYR",
+  bet:Number(stake.toFixed(2)),
   win:Number(win.toFixed(2)),
   multiplier:Number(multiplier.toFixed(2)),
   safeCount:safeCount,
@@ -284,48 +319,70 @@ async function saveHistory(result,win){
 
 async function saveTransaction(type,amount){
  const transactionRef=push(ref(db,userPath("transactions")));
+
  await set(transactionRef,{
   type:type,
   game:"GOAL",
+  currency:"MYR",
   amount:Number(amount.toFixed(2)),
   createdAt:Date.now()
  });
 }
 
+/* START BET */
+
 async function betGame(){
+
  if(playing){
   await cashOut();
   return;
  }
+
  if(busy)return;
+
  if(!currentUser||!walletReady){
   status("FIREBASE WALLET NOT READY");
   return;
  }
 
  const amount=Number(document.getElementById("bet").value);
+
  if(!Number.isFinite(amount)||amount<=0){
   alert("Enter a valid bet");
   return;
  }
+
  if(amount>balance){
-  alert("Insufficient demo balance!");
+  alert("Insufficient RM balance!");
   return;
  }
+
+ const thisUser=currentUser;
+ const thisVersion=authVersion;
 
  busy=true;
  document.getElementById("play").disabled=true;
  status("PROCESSING BET...");
 
  try{
-  const walletRef=ref(db,userPath("demoPoints"));
+
+  const walletRef=ref(db,"users/"+thisUser.uid+"/demoPoints");
+
   const result=await runTransaction(walletRef,current=>{
    const currentBalance=Number(current);
+
    if(!Number.isFinite(currentBalance)||currentBalance<amount)return;
+
    return Number((currentBalance-amount).toFixed(2));
   });
 
-  if(!result.committed)throw new Error("Insufficient balance or wallet update failed");
+  if(!result.committed){
+   throw new Error("Insufficient balance or wallet update failed");
+  }
+
+  if(currentUser?.uid!==thisUser.uid||authVersion!==thisVersion){
+   throw new Error("Login changed. Please login again.");
+  }
 
   balance=Number(result.snapshot.val());
   updateBalance();
@@ -348,9 +405,11 @@ async function betGame(){
 
   document.getElementById("play").textContent="CASH OUT";
   document.getElementById("play").classList.add("cashout");
+
   status("GAME STARTED! SELECT ONE BOX IN FIRST COLUMN");
 
   saveTransaction("GOAL BET",amount).catch(console.error);
+
   if(auto)autoPick();
 
  }catch(error){
@@ -362,10 +421,15 @@ async function betGame(){
  }
 }
 
+/* OPEN TILE */
+
 function openTile(i){
+
  if(!playing||busy)return;
+
  const row=Math.floor(i/5);
  const col=i%5;
+
  if(row!==safeCount||opened.includes(i))return;
 
  const tiles=document.querySelectorAll(".tile");
@@ -381,6 +445,7 @@ function openTile(i){
  tiles[i].textContent="⚽";
  tiles[i].classList.add("safe");
  tiles[i].disabled=true;
+
  safeCount++;
 
  const arr=levels[document.getElementById("level").value];
@@ -394,16 +459,24 @@ function openTile(i){
   return;
  }
 
- status("⚽ SAFE! "+safeCount+" / 10 | CASH OUT "+money(stake*multiplier)+" USD");
+ status("⚽ SAFE! "+safeCount+" / 10 | CASH OUT "+money(stake*multiplier));
+
  updateBoard();
 }
 
+/* LOSS */
+
 async function finishLoss(){
+
+ if(!playing||busy)return;
+
  playing=false;
  stopAuto();
  revealAll();
  endButton();
- status("💥 BOOM! YOU LOST "+money(stake)+" USD");
+
+ status("💥 BOOM! YOU LOST "+money(stake));
+
  try{
   await saveHistory("LOST",0);
   await saveTransaction("GOAL LOST",stake);
@@ -413,50 +486,78 @@ async function finishLoss(){
  }
 }
 
+/* RANDOM */
+
 function randomTile(){
+
  if(!playing||busy)return;
+
  const start=safeCount*5;
  const remaining=[];
+
  for(let i=start;i<start+5;i++){
   if(!opened.includes(i))remaining.push(i);
  }
+
  if(remaining.length){
   openTile(remaining[Math.floor(Math.random()*remaining.length)]);
  }
 }
 
+/* CASH OUT */
+
 async function cashOut(){
+
  if(!playing||busy)return;
+
  if(safeCount===0){
   status("OPEN AT LEAST ONE SAFE BOX FIRST");
   return;
  }
+
  if(roundPaid)return;
+
+ const thisUser=currentUser;
+ const thisVersion=authVersion;
 
  busy=true;
  stopAuto();
+
  document.getElementById("play").disabled=true;
  status("PROCESSING CASH OUT...");
 
  const win=Number((stake*multiplier).toFixed(2));
 
  try{
-  const walletRef=ref(db,userPath("demoPoints"));
+
+  const walletRef=ref(db,"users/"+thisUser.uid+"/demoPoints");
+
   const result=await runTransaction(walletRef,current=>{
    const currentBalance=Number(current);
+
    if(!Number.isFinite(currentBalance))return;
+
    return Number((currentBalance+win).toFixed(2));
   });
 
-  if(!result.committed)throw new Error("Wallet credit failed");
+  if(!result.committed){
+   throw new Error("Wallet credit failed");
+  }
+
+  if(currentUser?.uid!==thisUser.uid||authVersion!==thisVersion){
+   throw new Error("Login changed. Please login again.");
+  }
 
   balance=Number(result.snapshot.val());
   updateBalance();
+
   roundPaid=true;
   playing=false;
+
   revealAll();
   endButton();
-  status("🏆 CASH OUT SUCCESS! +"+money(win)+" USD");
+
+  status("🏆 CASH OUT SUCCESS! +"+money(win));
 
   try{
    await saveHistory("CASH OUT",win);
@@ -475,84 +576,163 @@ async function cashOut(){
  }
 }
 
+/* RESET */
+
 function resetGame(){
+
  if(playing){
   status("CASH OUT OR FINISH THE CURRENT ROUND FIRST");
   return;
  }
+
  stopAuto();
+
  safeCount=0;
  multiplier=1;
  opened=[];
  bombs=[];
+
  makeBoard();
  updateNext();
+
  status("SELECT BET AND PRESS BET TO START");
 }
 
+/* AUTO GAME */
+
 function toggleAuto(){
+
  auto=!auto;
+
  document.getElementById("auto").textContent=
   auto?"⟳ Auto Game ON":"⟳ Auto Game OFF";
+
  document.getElementById("auto").classList.toggle("active",auto);
+
  if(auto&&playing)autoPick();
  else stopAuto();
 }
 
 function autoPick(){
+
  if(!auto||!playing||busy)return;
+
  randomTile();
- if(auto&&playing)autoTimer=setTimeout(autoPick,1200);
+
+ if(auto&&playing){
+  autoTimer=setTimeout(autoPick,1200);
+ }
 }
 
+/* FIREBASE CONNECTION */
+
 function connectFirebase(){
- onAuthStateChanged(auth,user=>{
+
+ onAuthStateChanged(auth,async user=>{
+
+  authVersion++;
+
+  stopAuto();
+
+  if(walletListener){
+   walletListener();
+   walletListener=null;
+  }
+
+  if(historyListener){
+   historyListener();
+   historyListener=null;
+  }
+
+  currentUser=user;
+  walletReady=false;
+
   if(!user){
-   currentUser=null;
-   walletReady=false;
+
    document.getElementById("balance").textContent="LOGIN REQUIRED";
+   document.getElementById("history").textContent="Please login first.";
+
+   if(playing){
+    playing=false;
+    busy=false;
+    endButton();
+   }
+
    status("PLEASE LOGIN FIRST");
    return;
   }
 
-  currentUser=user;
-  if(walletListener)walletListener();
-  if(historyListener)historyListener();
+  const thisUser=user;
+  const thisVersion=authVersion;
 
-  walletListener=onValue(ref(db,userPath("demoPoints")),snapshot=>{
-   if(!snapshot.exists()){
-    walletReady=false;
-    document.getElementById("balance").textContent="NOT FOUND";
-    status("WALLET BALANCE NOT FOUND");
-    return;
-   }
-   const value=Number(snapshot.val());
-   if(!Number.isFinite(value)){
-    walletReady=false;
-    status("INVALID WALLET BALANCE");
-    return;
-   }
-   balance=value;
-   walletReady=true;
-   updateBalance();
-   if(!playing)status("WALLET CONNECTED - READY TO PLAY");
-  },error=>{
+  try{
+
+   /* Save currency metadata without changing existing balance */
+   await update(ref(db,"users/"+user.uid),{
+    currency:"MYR"
+   });
+
+   if(currentUser?.uid!==thisUser.uid||authVersion!==thisVersion)return;
+
+   walletListener=onValue(
+    ref(db,"users/"+user.uid+"/demoPoints"),
+    snapshot=>{
+
+     if(!snapshot.exists()){
+      walletReady=false;
+      document.getElementById("balance").textContent="NOT FOUND";
+      status("WALLET BALANCE NOT FOUND");
+      return;
+     }
+
+     const value=Number(snapshot.val());
+
+     if(!Number.isFinite(value)||value<0){
+      walletReady=false;
+      status("INVALID WALLET BALANCE");
+      return;
+     }
+
+     balance=value;
+     walletReady=true;
+     updateBalance();
+
+     if(!playing){
+      status("WALLET CONNECTED - READY TO PLAY");
+     }
+
+    },
+    error=>{
+     walletReady=false;
+     status("WALLET ERROR: "+error.message);
+    }
+   );
+
+   historyListener=onValue(
+    ref(db,"users/"+user.uid+"/goalHistory"),
+    snapshot=>{
+     showHistory(snapshot.val());
+    },
+    error=>{
+     document.getElementById("history").textContent=
+      "HISTORY ERROR: "+error.message;
+    }
+   );
+
+  }catch(error){
+   console.error(error);
    walletReady=false;
-   status("WALLET ERROR: "+error.message);
-  });
+   status("FIREBASE ERROR: "+error.message);
+  }
 
-  historyListener=onValue(ref(db,userPath("goalHistory")),snapshot=>{
-   showHistory(snapshot.val());
-  },error=>{
-   document.getElementById("history").textContent="HISTORY ERROR: "+error.message;
-  });
  },error=>{
   console.error(error);
   status("LOGIN ERROR: "+error.message);
  });
 }
 
-/* CONNECT ALL HTML BUTTONS TO MODULE FUNCTIONS */
+/* CONNECT HTML BUTTONS */
+
 window.betGame=betGame;
 window.cashOut=cashOut;
 window.randomTile=randomTile;
@@ -561,9 +741,12 @@ window.resetGame=resetGame;
 window.adjust=adjust;
 window.changeLevel=changeLevel;
 
+/* START */
+
 makeBoard();
 updateNext();
 connectFirebase();
+
 </script>
 </body>
 </html>

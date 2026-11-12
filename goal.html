@@ -8,272 +8,49 @@
 
 <style>
 *{box-sizing:border-box}
-
-body{
- margin:0;
- background:#174b08;
- color:white;
- font-family:Arial,sans-serif;
-}
-
-.game{
- min-height:100vh;
- background:radial-gradient(ellipse,#559b16,#174408);
- padding:8px;
- width:100%;
- max-width:1100px;
- margin:auto;
- border:3px solid #528e1b;
- border-radius:15px;
-}
-
-.top{
- display:flex;
- justify-content:space-between;
- align-items:center;
- gap:6px;
- flex-wrap:wrap;
-}
-
-.top button{
- background:#3c7909;
- color:white;
- border:2px solid #629d21;
- border-radius:25px;
- padding:8px 15px;
- font-weight:bold;
- font-size:12px;
-}
-
-.balance{
- font-size:16px;
- font-weight:bold;
-}
-
-.help{
- background:#ff9e00!important;
- color:#542b00!important;
-}
-
-.mult{
- display:flex;
- justify-content:space-between;
- align-items:center;
- margin:10px auto;
- max-width:950px;
- gap:8px;
-}
-
-.mult select{
- background:#347509;
- color:white;
- border:0;
- border-radius:20px;
- padding:8px;
- font-size:14px;
- width:50%;
-}
-
-.next{
- background:#ffad00;
- color:#542900;
- border-radius:25px;
- padding:7px 15px;
- font-size:13px;
- font-weight:bold;
-}
-
-/* 10 BOX COLUMNS SIDE BY SIDE */
-.board-wrap{
- width:100%;
- max-width:100%;
- overflow:visible;
- margin:auto;
- padding:4px 0;
-}
-
-.board{
- display:grid;
- grid-template-columns:repeat(10,minmax(0,1fr));
- gap:4px;
- width:100%;
- min-width:0;
-}
-
-.level-column{
- width:100%;
- min-width:0;
- padding:4px;
- background:#315d0b;
- border:2px solid #629d21;
- border-radius:7px;
- text-align:center;
-}
-
-.level-boxes{
- display:grid;
- grid-template-columns:1fr;
- gap:3px;
-}
-
-.tile{
- display:flex;
- align-items:center;
- justify-content:center;
- width:100%;
- aspect-ratio:1;
- padding:0;
- border:2px solid #d2e3bd;
- border-radius:5px;
- background:linear-gradient(145deg,#d4e2b8,#9ebc80);
- box-shadow:0 2px 2px #183d0c;
- font-size:clamp(10px,1.5vw,18px);
- cursor:pointer;
- color:#173b08;
- font-weight:bold;
-}
-
+body{margin:0;background:#174b08;color:white;font-family:Arial,sans-serif}
+.game{min-height:100vh;background:radial-gradient(ellipse,#559b16,#174408);padding:8px;width:100%;max-width:1100px;margin:auto;border:3px solid #528e1b;border-radius:15px}
+.top{display:flex;justify-content:space-between;align-items:center;gap:6px;flex-wrap:wrap}
+.top button{background:#3c7909;color:white;border:2px solid #629d21;border-radius:25px;padding:8px 15px;font-weight:bold;font-size:12px}
+.balance{font-size:16px;font-weight:bold}
+.help{background:#ff9e00!important;color:#542b00!important}
+.mult{display:flex;justify-content:space-between;align-items:center;margin:10px auto;max-width:950px;gap:8px}
+.mult select{background:#347509;color:white;border:0;border-radius:20px;padding:8px;font-size:14px;width:50%}
+.next{background:#ffad00;color:#542900;border-radius:25px;padding:7px 15px;font-size:13px;font-weight:bold}
+.board-wrap{width:100%;max-width:100%;overflow:visible;margin:auto;padding:4px 0}
+.board{display:grid;grid-template-columns:repeat(10,minmax(0,1fr));gap:4px;width:100%;min-width:0}
+.level-column{width:100%;min-width:0;padding:4px;background:#315d0b;border:2px solid #629d21;border-radius:7px;text-align:center}
+.level-boxes{display:grid;grid-template-columns:1fr;gap:3px}
+.tile{display:flex;align-items:center;justify-content:center;width:100%;aspect-ratio:1;padding:0;border:2px solid #d2e3bd;border-radius:5px;background:linear-gradient(145deg,#d4e2b8,#9ebc80);box-shadow:0 2px 2px #183d0c;font-size:clamp(10px,1.5vw,18px);cursor:pointer;color:#173b08;font-weight:bold}
 .tile:active{transform:scale(.95)}
-
-.tile.safe{
- background:linear-gradient(#a8e75e,#4d9b16);
- border-color:#dfffaf;
-}
-
-.tile.bomb{
- background:#a7190c;
- border-color:#ffb7a8;
- color:white;
-}
-
+.tile.safe{background:linear-gradient(#a8e75e,#4d9b16);border-color:#dfffaf}
+.tile.bomb{background:#a7190c;border-color:#ffb7a8;color:white}
 .tile:disabled{cursor:default}
-
 .level-column.locked{opacity:.45}
-
-.level-column.current{
- border:2px solid #ffdf35;
- background:#477c13;
-}
-
+.level-column.current{border:2px solid #ffdf35;background:#477c13}
 .level-column.completed{background:#24570b}
-
-.actions{
- display:flex;
- gap:8px;
- max-width:570px;
- margin:10px auto;
-}
-
-.random,.auto{
- flex:1;
- border:0;
- border-radius:25px;
- padding:11px 5px;
- font-size:13px;
- font-weight:bold;
- background:#397509;
- color:white;
-}
-
+.actions{display:flex;gap:8px;max-width:570px;margin:10px auto}
+.random,.auto{flex:1;border:0;border-radius:25px;padding:11px 5px;font-size:13px;font-weight:bold;background:#397509;color:white}
 .auto.active{background:#246000}
-
-.bottom{
- background:#315d0b;
- padding:10px;
- border-radius:25px;
- display:flex;
- align-items:center;
- justify-content:center;
- gap:7px;
- flex-wrap:wrap;
- margin-top:8px;
-}
-
-.betbox{
- background:#528d0e;
- border-radius:35px;
- padding:7px 10px;
- display:flex;
- align-items:center;
- gap:6px;
-}
-
-.betinput{
- width:100px;
- text-align:center;
- background:#214900;
- color:white;
- border:2px solid #477a0a;
- padding:7px;
- border-radius:20px;
- font-size:17px;
- font-weight:bold;
-}
-
-.small{
- width:40px;
- height:40px;
- border-radius:50%;
- background:#367508;
- color:white;
- border:2px solid #639b27;
- font-size:19px;
-}
-
-.play{
- min-width:110px;
- height:52px;
- border-radius:35px;
- background:#168d00;
- border:3px solid #123d00;
- color:white;
- font-size:17px;
- font-weight:bold;
-}
-
-.cashout{
- background:#ffad00;
- color:#482800;
-}
-
-.status{
- max-width:750px;
- margin:8px auto;
- text-align:center;
- padding:9px;
- background:#214b0b;
- border-radius:12px;
- font-size:13px;
- font-weight:bold;
-}
-
-.history{
- max-width:750px;
- margin:10px auto;
- background:#20470a;
- padding:10px;
- border-radius:12px;
- font-size:12px;
-}
-
-/* MOBILE */
+.bottom{background:#315d0b;padding:10px;border-radius:25px;display:flex;align-items:center;justify-content:center;gap:7px;flex-wrap:wrap;margin-top:8px}
+.betbox{background:#528d0e;border-radius:35px;padding:7px 10px;display:flex;align-items:center;gap:6px}
+.betinput{width:100px;text-align:center;background:#214900;color:white;border:2px solid #477a0a;padding:7px;border-radius:20px;font-size:17px;font-weight:bold}
+.small{width:40px;height:40px;border-radius:50%;background:#367508;color:white;border:2px solid #639b27;font-size:19px}
+.play{min-width:110px;height:52px;border-radius:35px;background:#168d00;border:3px solid #123d00;color:white;font-size:17px;font-weight:bold}
+.cashout{background:#ffad00;color:#482800}
+.status{max-width:750px;margin:8px auto;text-align:center;padding:9px;background:#214b0b;border-radius:12px;font-size:13px;font-weight:bold}
+.history{max-width:750px;margin:10px auto;background:#20470a;padding:10px;border-radius:12px;font-size:12px}
+.history-item{padding:7px;border-bottom:1px solid #527c30}
+button:disabled{opacity:.7}
 @media(max-width:600px){
  .game{padding:4px}
  .top button{padding:7px 9px;font-size:10px}
  .balance{font-size:13px}
  .mult{margin:7px auto}
  .board{gap:2px}
- .level-column{
-  padding:2px;
-  border-width:1px;
-  border-radius:4px;
- }
+ .level-column{padding:2px;border-width:1px;border-radius:4px}
  .level-boxes{gap:2px}
- .tile{
-  border-width:1px;
-  border-radius:3px;
-  font-size:clamp(8px,2.5vw,13px);
- }
+ .tile{border-width:1px;border-radius:3px;font-size:clamp(8px,2.5vw,13px)}
  .actions{margin:7px auto}
  .random,.auto{padding:9px 3px;font-size:11px}
  .bottom{gap:4px;padding:7px}
@@ -282,15 +59,8 @@ body{
  .play{min-width:85px;height:45px;font-size:15px}
  .status{font-size:11px;padding:7px}
 }
-
-/* LANDSCAPE */
 @media(orientation:landscape) and (max-height:600px){
- .game{
-  max-width:100%;
-  min-height:100vh;
-  padding:3px 8px;
-  border-radius:8px;
- }
+ .game{max-width:100%;min-height:100vh;padding:3px 8px;border-radius:8px}
  .top{gap:4px}
  .top button{padding:5px 12px}
  .balance{font-size:13px}
@@ -319,16 +89,8 @@ body{
 
 <div class="top">
  <button>GOAL ▼</button>
-
- <button class="help"
- onclick="alert('Choose one box in each level. Avoid the bomb and cash out before losing.')">
- ⓘ How to Play?
- </button>
-
- <div class="balance">
-  <span id="balance">3000.00</span> USD
- </div>
-
+ <button class="help" onclick="alert('Choose one box in each level. Avoid the bomb and cash out before losing.')">ⓘ How to Play?</button>
+ <div class="balance"><span id="balance">CONNECTING...</span> USD</div>
  <button onclick="alert('ONLINE CASHINO - GOAL GAME')">☰</button>
 </div>
 
@@ -338,10 +100,7 @@ body{
   <option value="medium" selected>Field: Medium</option>
   <option value="hard">Field: Hard</option>
  </select>
-
- <div class="next">
-  Next: <span id="next">1.29</span>x
- </div>
+ <div class="next">Next: <span id="next">1.29</span>x</div>
 </div>
 
 <div class="board-wrap">
@@ -350,56 +109,53 @@ body{
 
 <div class="actions">
  <button class="random" onclick="randomTile()">RANDOM</button>
-
- <button class="auto" id="auto" onclick="toggleAuto()">
-  ⟳ &nbsp; Auto Game OFF
- </button>
+ <button class="auto" id="auto" onclick="toggleAuto()">⟳ &nbsp; Auto Game OFF</button>
 </div>
 
-<div class="status" id="status">
- SELECT BET AND PRESS BET TO START
-</div>
+<div class="status" id="status">CONNECTING FIREBASE WALLET...</div>
 
 <div class="bottom">
-
  <div class="betbox">
   <div>
    <div style="font-size:12px">Bet, USD</div>
-   <input class="betinput"
-    id="bet"
-    type="number"
-    value="0.30"
-    min="0.01"
-    step="0.10">
+   <input class="betinput" id="bet" type="number" value="0.30" min="0.01" step="0.10">
   </div>
-
   <button class="small" onclick="adjust(-0.10)">−</button>
   <button class="small" onclick="adjust(1)">☰</button>
   <button class="small" onclick="adjust(0.10)">+</button>
  </div>
-
  <button class="small" onclick="resetGame()">⟳</button>
-
  <button class="play" id="play" onclick="betGame()">▶ BET</button>
 </div>
 
 <div class="history">
  <b>GAME HISTORY</b>
- <div id="history" style="margin-top:8px">No games yet</div>
+ <div id="history" style="margin-top:8px">Loading history...</div>
+</div>
 </div>
 
-</div>
+<script type="module">
+import {auth,db} from "./firebase-config.js";
+import {
+ ref,onValue,runTransaction,push,set
+} from "https://www.gstatic.com/firebasejs/13.2.0/firebase-database.js";
+import {onAuthStateChanged} from "https://www.gstatic.com/firebasejs/13.2.0/firebase-auth.js";
 
-<script>
-let balance=3000;
+let balance=0;
+let currentUser=null;
+let walletReady=false;
+let playing=false;
 let stake=0;
 let bombs=[];
 let opened=[];
-let playing=false;
 let multiplier=1;
 let safeCount=0;
 let auto=false;
 let autoTimer=null;
+let busy=false;
+let roundPaid=false;
+let walletListener=null;
+let historyListener=null;
 
 const levels={
  easy:[1.10,1.20,1.35,1.50,1.70,1.95,2.25,2.65,3.20,4.00],
@@ -407,365 +163,407 @@ const levels={
  hard:[1.25,1.50,1.85,2.30,2.90,3.70,4.80,6.20,7.50,9.04]
 };
 
+const money=n=>Number(n).toFixed(2);
+const userPath=path=>"users/"+currentUser.uid+"/"+path;
+
+function status(msg){
+ document.getElementById("status").textContent=msg;
+}
+
+function updateBalance(){
+ document.getElementById("balance").textContent=money(balance);
+}
+
+function updateNext(){
+ const arr=levels[document.getElementById("level").value];
+ document.getElementById("next").textContent=
+  arr[Math.min(safeCount,9)].toFixed(2);
+}
+
 function makeBoard(){
- const board=document.getElementById('board');
- board.innerHTML='';
-
+ const board=document.getElementById("board");
+ board.innerHTML="";
  for(let row=0;row<10;row++){
-
-  let column=document.createElement('div');
-  column.className='level-column locked';
-  column.id='column'+row;
-
-  let boxes=document.createElement('div');
-  boxes.className='level-boxes';
-
+  const column=document.createElement("div");
+  column.className="level-column locked";
+  column.id="column"+row;
+  const boxes=document.createElement("div");
+  boxes.className="level-boxes";
   for(let col=0;col<5;col++){
-
-   let i=row*5+col;
-   let b=document.createElement('button');
-
-   b.className='tile';
-   b.textContent='';
+   const i=row*5+col;
+   const b=document.createElement("button");
+   b.className="tile";
    b.disabled=true;
    b.onclick=()=>openTile(i);
-
    boxes.appendChild(b);
   }
-
   column.appendChild(boxes);
   board.appendChild(column);
  }
 }
 
-function changeLevel(){
- if(playing)return;
- updateNext();
-}
-
-function updateNext(){
- let l=document.getElementById('level').value;
- let arr=levels[l];
-
- document.getElementById('next').textContent=
-  arr[Math.min(safeCount,9)].toFixed(2);
+function updateBoard(){
+ const columns=document.querySelectorAll(".level-column");
+ const tiles=document.querySelectorAll(".tile");
+ columns.forEach((column,row)=>{
+  column.classList.toggle("locked",row>safeCount);
+  column.classList.toggle("current",playing&&row===safeCount);
+  column.classList.toggle("completed",row<safeCount);
+ });
+ tiles.forEach((tile,i)=>{
+  tile.disabled=!playing||Math.floor(i/5)!==safeCount||opened.includes(i);
+ });
 }
 
 function adjust(n){
- if(playing)return;
-
- let input=document.getElementById('bet');
-
- input.value=Math.max(
-  .01,
-  Math.round((Number(input.value)+n)*100)/100
- ).toFixed(2);
+ if(playing||busy)return;
+ const input=document.getElementById("bet");
+ input.value=Math.max(.01,Math.round((Number(input.value)+n)*100)/100).toFixed(2);
 }
 
-function updateBalance(){
- document.getElementById('balance').textContent=
-  balance.toFixed(2);
-}
-
-function updateBoard(){
-
- let columns=document.querySelectorAll('.level-column');
- let tiles=document.querySelectorAll('.tile');
-
- columns.forEach((column,row)=>{
-
-  column.classList.toggle('locked',row>safeCount);
-
-  column.classList.toggle(
-   'current',
-   playing&&row===safeCount
-  );
-
-  column.classList.toggle(
-   'completed',
-   row<safeCount
-  );
- });
-
- tiles.forEach((tile,i)=>{
-
-  let row=Math.floor(i/5);
-
-  tile.disabled=
-   !playing||
-   row!==safeCount||
-   opened.includes(i);
- });
-}
-
-function betGame(){
-
- if(playing){
-  cashOut();
-  return;
- }
-
- let amount=Number(
-  document.getElementById('bet').value
- );
-
- if(!Number.isFinite(amount)||amount<=0){
-  alert('Enter a valid bet');
-  return;
- }
-
- if(amount>balance){
-  alert('Insufficient demo balance!');
-  return;
- }
-
- stake=amount;
- balance-=stake;
- updateBalance();
-
- playing=true;
- opened=[];
- safeCount=0;
- multiplier=1;
- bombs=[];
-
- // हर लेवल में एक रैंडम बम
- for(let row=0;row<10;row++){
-  bombs.push(Math.floor(Math.random()*5));
- }
-
- makeBoard();
- updateBoard();
-
- document.getElementById('status').textContent=
-  'GAME STARTED! SELECT ONE BOX IN FIRST COLUMN';
-
- document.getElementById('play').textContent='CASH OUT';
- document.getElementById('play').classList.add('cashout');
-
- updateNext();
-
- if(auto)autoPick();
-}
-
-function openTile(i){
-
- if(!playing)return;
-
- let row=Math.floor(i/5);
- let col=i%5;
-
- if(row!==safeCount)return;
- if(opened.includes(i))return;
-
- let tiles=document.querySelectorAll('.tile');
-
- opened.push(i);
-
- if(col===bombs[row]){
-
-  tiles[i].textContent='💣';
-  tiles[i].classList.add('bomb');
-
-  playing=false;
-  stopAuto();
-  revealAll();
-
-  document.getElementById('status').textContent=
-   '💥 BOOM! YOU LOST '+stake.toFixed(2)+' USD';
-
-  addHistory('💣 LOST | '+stake.toFixed(2)+' USD');
-
-  endButton();
-  return;
- }
-
- tiles[i].textContent='⚽';
- tiles[i].classList.add('safe');
- tiles[i].disabled=true;
-
- safeCount++;
-
- let l=document.getElementById('level').value;
- let arr=levels[l];
-
- multiplier=arr[safeCount-1];
-
- document.getElementById('next').textContent=
-  safeCount<10?arr[safeCount].toFixed(2):'MAX';
-
- if(safeCount===10){
-  cashOut();
-  return;
- }
-
- document.getElementById('status').textContent=
-  '⚽ SAFE! '+safeCount+
-  ' / 10 | CASH OUT '+
-  (stake*multiplier).toFixed(2)+' USD';
-
- updateBoard();
-}
-
-function randomTile(){
-
- if(!playing)return;
-
- let start=safeCount*5;
- let remaining=[];
-
- for(let i=start;i<start+5;i++){
-
-  if(!opened.includes(i)){
-   remaining.push(i);
-  }
- }
-
- if(remaining.length){
-
-  let selected=remaining[
-   Math.floor(Math.random()*remaining.length)
-  ];
-
-  openTile(selected);
- }
-}
-
-function cashOut(){
-
- if(!playing||safeCount===0){
-
-  document.getElementById('status').textContent=
-   'OPEN AT LEAST ONE SAFE BOX FIRST';
-
-  return;
- }
-
- let win=stake*multiplier;
-
- balance+=win;
- updateBalance();
-
- playing=false;
- stopAuto();
- revealAll();
-
- document.getElementById('status').textContent=
-  '🏆 CASH OUT SUCCESS! +'+win.toFixed(2)+' USD';
-
- addHistory(
-  '🏆 '+multiplier.toFixed(2)+'x | '+
-  win.toFixed(2)+' USD'
- );
-
- endButton();
-}
-
-function revealAll(){
-
- let tiles=document.querySelectorAll('.tile');
-
- tiles.forEach((tile,i)=>{
-
-  let row=Math.floor(i/5);
-  let col=i%5;
-
-  if(col===bombs[row]){
-   tile.textContent='💣';
-   tile.classList.add('bomb');
-  }
-
-  tile.disabled=true;
- });
-}
-
-function endButton(){
-
- document.getElementById('play').textContent='▶ BET';
-
- document.getElementById('play').classList.remove('cashout');
-
- updateBoard();
-}
-
-function resetGame(){
-
- if(playing){
-
-  document.getElementById('status').textContent=
-   'CASH OUT OR FINISH THE CURRENT ROUND FIRST';
-
-  return;
- }
-
- stopAuto();
-
- safeCount=0;
- multiplier=1;
- opened=[];
- bombs=[];
-
- makeBoard();
- updateNext();
-
- document.getElementById('status').textContent=
-  'SELECT BET AND PRESS BET TO START';
-}
-
-function addHistory(value){
-
- let h=document.getElementById('history');
-
- if(h.textContent==='No games yet'){
-  h.innerHTML='';
- }
-
- h.innerHTML=
-  '<div style="padding:6px;border-bottom:1px solid #527c30">'+
-  value+'</div>'+h.innerHTML;
+function changeLevel(){
+ if(!playing)updateNext();
 }
 
 function stopAuto(){
-
  if(autoTimer){
   clearTimeout(autoTimer);
   autoTimer=null;
  }
 }
 
-function toggleAuto(){
+function endButton(){
+ document.getElementById("play").textContent="▶ BET";
+ document.getElementById("play").classList.remove("cashout");
+ updateBoard();
+}
 
- auto=!auto;
+function revealAll(){
+ document.querySelectorAll(".tile").forEach((tile,i)=>{
+  if(bombs[Math.floor(i/5)]===i%5){
+   tile.textContent="💣";
+   tile.classList.add("bomb");
+  }
+  tile.disabled=true;
+ });
+}
 
- document.getElementById('auto').textContent=
-  auto?'⟳ Auto Game ON':'⟳ Auto Game OFF';
-
- document.getElementById('auto').classList.toggle(
-  'active',auto
- );
-
- if(auto&&playing){
-  autoPick();
- }else{
-  stopAuto();
+function showHistory(data){
+ const box=document.getElementById("history");
+ box.innerHTML="";
+ if(!data||!Object.keys(data).length){
+  box.textContent="No games yet";
+  return;
  }
+ Object.entries(data)
+ .sort((a,b)=>(b[1].createdAt||0)-(a[1].createdAt||0))
+ .slice(0,30)
+ .forEach(([id,item])=>{
+  const div=document.createElement("div");
+  div.className="history-item";
+  div.textContent=
+   (item.result||"GAME")+" | Bet: "+money(item.bet||0)+
+   " USD | Win: "+money(item.win||0)+" USD | "+
+   (item.createdAt?new Date(item.createdAt).toLocaleString():"");
+  box.appendChild(div);
+ });
+}
+
+async function saveHistory(result,win){
+ const historyRef=push(ref(db,userPath("goalHistory")));
+ await set(historyRef,{
+  result:result,
+  bet:stake,
+  win:Number(win.toFixed(2)),
+  multiplier:Number(multiplier.toFixed(2)),
+  safeCount:safeCount,
+  difficulty:document.getElementById("level").value,
+  createdAt:Date.now()
+ });
+}
+
+async function saveTransaction(type,amount){
+ const transactionRef=push(ref(db,userPath("transactions")));
+ await set(transactionRef,{
+  type:type,
+  game:"GOAL",
+  amount:Number(amount.toFixed(2)),
+  createdAt:Date.now()
+ });
+}
+
+async function betGame(){
+ if(playing){
+  await cashOut();
+  return;
+ }
+ if(busy)return;
+ if(!currentUser||!walletReady){
+  status("FIREBASE WALLET NOT READY");
+  return;
+ }
+
+ const amount=Number(document.getElementById("bet").value);
+ if(!Number.isFinite(amount)||amount<=0){
+  alert("Enter a valid bet");
+  return;
+ }
+ if(amount>balance){
+  alert("Insufficient demo balance!");
+  return;
+ }
+
+ busy=true;
+ document.getElementById("play").disabled=true;
+ status("PROCESSING BET...");
+
+ try{
+  const walletRef=ref(db,userPath("demoPoints"));
+  const result=await runTransaction(walletRef,current=>{
+   const currentBalance=Number(current);
+   if(!Number.isFinite(currentBalance)||currentBalance<amount)return;
+   return Number((currentBalance-amount).toFixed(2));
+  });
+
+  if(!result.committed)throw new Error("Insufficient balance or wallet update failed");
+
+  balance=Number(result.snapshot.val());
+  updateBalance();
+
+  stake=amount;
+  playing=true;
+  roundPaid=false;
+  opened=[];
+  safeCount=0;
+  multiplier=1;
+  bombs=[];
+
+  for(let row=0;row<10;row++){
+   bombs.push(Math.floor(Math.random()*5));
+  }
+
+  makeBoard();
+  updateBoard();
+  updateNext();
+
+  document.getElementById("play").textContent="CASH OUT";
+  document.getElementById("play").classList.add("cashout");
+  status("GAME STARTED! SELECT ONE BOX IN FIRST COLUMN");
+
+  saveTransaction("GOAL BET",amount).catch(console.error);
+  if(auto)autoPick();
+
+ }catch(error){
+  console.error(error);
+  status("BET ERROR: "+error.message);
+ }finally{
+  busy=false;
+  document.getElementById("play").disabled=false;
+ }
+}
+
+function openTile(i){
+ if(!playing||busy)return;
+ const row=Math.floor(i/5);
+ const col=i%5;
+ if(row!==safeCount||opened.includes(i))return;
+
+ const tiles=document.querySelectorAll(".tile");
+ opened.push(i);
+
+ if(col===bombs[row]){
+  tiles[i].textContent="💣";
+  tiles[i].classList.add("bomb");
+  finishLoss();
+  return;
+ }
+
+ tiles[i].textContent="⚽";
+ tiles[i].classList.add("safe");
+ tiles[i].disabled=true;
+ safeCount++;
+
+ const arr=levels[document.getElementById("level").value];
+ multiplier=arr[safeCount-1];
+
+ document.getElementById("next").textContent=
+  safeCount<10?arr[safeCount].toFixed(2):"MAX";
+
+ if(safeCount===10){
+  cashOut();
+  return;
+ }
+
+ status("⚽ SAFE! "+safeCount+" / 10 | CASH OUT "+money(stake*multiplier)+" USD");
+ updateBoard();
+}
+
+async function finishLoss(){
+ playing=false;
+ stopAuto();
+ revealAll();
+ endButton();
+ status("💥 BOOM! YOU LOST "+money(stake)+" USD");
+ try{
+  await saveHistory("LOST",0);
+  await saveTransaction("GOAL LOST",stake);
+ }catch(error){
+  console.error(error);
+  status("LOST. HISTORY SAVE ERROR: "+error.message);
+ }
+}
+
+function randomTile(){
+ if(!playing||busy)return;
+ const start=safeCount*5;
+ const remaining=[];
+ for(let i=start;i<start+5;i++){
+  if(!opened.includes(i))remaining.push(i);
+ }
+ if(remaining.length){
+  openTile(remaining[Math.floor(Math.random()*remaining.length)]);
+ }
+}
+
+async function cashOut(){
+ if(!playing||busy)return;
+ if(safeCount===0){
+  status("OPEN AT LEAST ONE SAFE BOX FIRST");
+  return;
+ }
+ if(roundPaid)return;
+
+ busy=true;
+ stopAuto();
+ document.getElementById("play").disabled=true;
+ status("PROCESSING CASH OUT...");
+
+ const win=Number((stake*multiplier).toFixed(2));
+
+ try{
+  const walletRef=ref(db,userPath("demoPoints"));
+  const result=await runTransaction(walletRef,current=>{
+   const currentBalance=Number(current);
+   if(!Number.isFinite(currentBalance))return;
+   return Number((currentBalance+win).toFixed(2));
+  });
+
+  if(!result.committed)throw new Error("Wallet credit failed");
+
+  balance=Number(result.snapshot.val());
+  updateBalance();
+  roundPaid=true;
+  playing=false;
+  revealAll();
+  endButton();
+  status("🏆 CASH OUT SUCCESS! +"+money(win)+" USD");
+
+  try{
+   await saveHistory("CASH OUT",win);
+   await saveTransaction("GOAL CASH OUT",win);
+  }catch(error){
+   console.error(error);
+   status("CASH OUT SUCCESS! HISTORY SAVE ERROR");
+  }
+
+ }catch(error){
+  console.error(error);
+  status("CASH OUT ERROR: "+error.message);
+ }finally{
+  busy=false;
+  document.getElementById("play").disabled=false;
+ }
+}
+
+function resetGame(){
+ if(playing){
+  status("CASH OUT OR FINISH THE CURRENT ROUND FIRST");
+  return;
+ }
+ stopAuto();
+ safeCount=0;
+ multiplier=1;
+ opened=[];
+ bombs=[];
+ makeBoard();
+ updateNext();
+ status("SELECT BET AND PRESS BET TO START");
+}
+
+function toggleAuto(){
+ auto=!auto;
+ document.getElementById("auto").textContent=
+  auto?"⟳ Auto Game ON":"⟳ Auto Game OFF";
+ document.getElementById("auto").classList.toggle("active",auto);
+ if(auto&&playing)autoPick();
+ else stopAuto();
 }
 
 function autoPick(){
-
- if(!auto||!playing)return;
-
+ if(!auto||!playing||busy)return;
  randomTile();
-
- if(auto&&playing){
-  autoTimer=setTimeout(autoPick,1200);
- }
+ if(auto&&playing)autoTimer=setTimeout(autoPick,1200);
 }
 
-makeBoard();
-updateBalance();
-updateNext();
-</script>
+function connectFirebase(){
+ onAuthStateChanged(auth,user=>{
+  if(!user){
+   currentUser=null;
+   walletReady=false;
+   document.getElementById("balance").textContent="LOGIN REQUIRED";
+   status("PLEASE LOGIN FIRST");
+   return;
+  }
 
+  currentUser=user;
+  if(walletListener)walletListener();
+  if(historyListener)historyListener();
+
+  walletListener=onValue(ref(db,userPath("demoPoints")),snapshot=>{
+   if(!snapshot.exists()){
+    walletReady=false;
+    document.getElementById("balance").textContent="NOT FOUND";
+    status("WALLET BALANCE NOT FOUND");
+    return;
+   }
+   const value=Number(snapshot.val());
+   if(!Number.isFinite(value)){
+    walletReady=false;
+    status("INVALID WALLET BALANCE");
+    return;
+   }
+   balance=value;
+   walletReady=true;
+   updateBalance();
+   if(!playing)status("WALLET CONNECTED - READY TO PLAY");
+  },error=>{
+   walletReady=false;
+   status("WALLET ERROR: "+error.message);
+  });
+
+  historyListener=onValue(ref(db,userPath("goalHistory")),snapshot=>{
+   showHistory(snapshot.val());
+  },error=>{
+   document.getElementById("history").textContent="HISTORY ERROR: "+error.message;
+  });
+ },error=>{
+  console.error(error);
+  status("LOGIN ERROR: "+error.message);
+ });
+}
+
+/* CONNECT ALL HTML BUTTONS TO MODULE FUNCTIONS */
+window.betGame=betGame;
+window.cashOut=cashOut;
+window.randomTile=randomTile;
+window.toggleAuto=toggleAuto;
+window.resetGame=resetGame;
+window.adjust=adjust;
+window.changeLevel=changeLevel;
+
+makeBoard();
+updateNext();
+connectFirebase();
+</script>
 </body>
 </html>

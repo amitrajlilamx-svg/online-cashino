@@ -5,6 +5,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>ONLINE CASHINO - Dragon Tiger</title>
+
 <style>
 *{box-sizing:border-box}
 body{margin:0;padding:12px;background:#101010;color:white;font-family:Arial,sans-serif}
@@ -32,41 +33,49 @@ button:disabled,input:disabled{opacity:.4;cursor:not-allowed}
 .result{text-align:center}
 .history-item{margin-bottom:8px;border-left:3px solid #ffc107}
 .history-top{font-weight:bold;color:#ffc107}
-.back{width:100%;padding:14px;margin-top:12px;background:#2196f3;color:white;border:0;border-radius:8px;font-size:16px}
+.back{width:100%;padding:14px;margin-top:12px;background:#2196f3;color:white;border:0;border-radius:8px;font-size:16px;cursor:pointer}
 .notice{font-size:12px;color:#aaa;margin-top:20px}
 </style>
 </head>
+
 <body>
 <div class="container">
 
 <h1>🎰 ONLINE CASHINO</h1>
 <h2>🐉 DRAGON TIGER 🐯</h2>
-<p>DEMO POINTS DRAGON TIGER</p>
 
-<div class="balance">MY DEMO POINTS: <span id="balance">Loading...</span></div>
+<div class="balance">
+ 💰 MYR BALANCE:
+ <span id="balance">Loading...</span>
+</div>
+
 <div class="auto-status" id="autoStatus">🟢 AUTO ROUND READY</div>
 <div class="countdown" id="countdown">20.2</div>
 <div class="betting-status" id="bettingStatus">LOGIN REQUIRED</div>
 
 <div class="section">
 <h3>🐉 DRAGON TIGER TABLE 🐯</h3>
+
 <div class="table">
  <div class="hand">
   <h3>🐉 DRAGON</h3>
   <div class="card-area" id="dragonCard">-</div>
   <div class="score" id="dragonScore">0</div>
  </div>
+
  <div class="hand">
   <h3>🐯 TIGER</h3>
   <div class="card-area" id="tigerCard">-</div>
   <div class="score" id="tigerScore">0</div>
  </div>
 </div>
+
 <div class="result" id="roundResult">Please login first!</div>
 </div>
 
 <div class="section">
-<h3>🎯 SELECT YOUR BET</h3>
+<h3>🎯 SELECT YOUR BET (RM)</h3>
+
 <div class="options">
  <button class="option" data-bet="DRAGON">🐉 DRAGON 2×</button>
  <button class="option" data-bet="TIGER">🐯 TIGER 2×</button>
@@ -75,13 +84,16 @@ button:disabled,input:disabled{opacity:.4;cursor:not-allowed}
 </div>
 
 <div class="section">
-<h3>💎 POINTS PER SELECTION</h3>
-<input class="stake-input" id="stakeInput" type="number" min="1" step="1" value="1">
+<h3>💎 BET AMOUNT (RM)</h3>
+
+<input class="stake-input" id="stakeInput"
+ type="number" min="1" step="1" value="1">
+
 <div class="summary">
 Selected bets: <b id="selectedCount">0</b><br>
 Selected: <span id="selectedList">None</span><br>
-Points per selection: <b id="stakeDisplay">1</b><br>
-Total points: <b id="totalStake">0</b>
+Amount per selection: <b id="stakeDisplay">RM 1.00</b><br>
+Total bet: <b id="totalStake">RM 0.00</b>
 </div>
 </div>
 
@@ -91,17 +103,27 @@ Total points: <b id="totalStake">0</b>
 </div>
 
 <button class="back" id="backBtn">🏠 BACK TO HOME</button>
-<div class="notice">Demo points have no cash value. No deposits, withdrawals or cash prizes.</div>
+
+<div class="notice">
+MYR balance display for entertainment purposes only.
+No real-money deposits or withdrawals.
+</div>
+
 </div>
 
 <script type="module">
 import {auth,db} from "./firebase-config.js";
-import {onAuthStateChanged} from "https://www.gstatic.com/firebasejs/13.2.0/firebase-auth.js";
+
+import {onAuthStateChanged} from
+"https://www.gstatic.com/firebasejs/13.2.0/firebase-auth.js";
+
 import {
- ref,get,push,runTransaction,query,orderByChild,limitToLast
-} from "https://www.gstatic.com/firebasejs/13.2.0/firebase-database.js";
+ ref,get,push,runTransaction,query,orderByChild,limitToLast,update
+} from
+"https://www.gstatic.com/firebasejs/13.2.0/firebase-database.js";
 
 const $=id=>document.getElementById(id);
+
 const ROUND_INTERVAL=20200;
 const LOCK_TIME=3000;
 
@@ -123,6 +145,13 @@ let playing=false;
 let countdownTimer=null;
 let countdown="20.2";
 let roundId=0;
+
+function formatRM(value){
+ return "RM "+Number(value||0).toLocaleString("en-MY",{
+  minimumFractionDigits:2,
+  maximumFractionDigits:2
+ });
+}
 
 function cardValue(rank){
  if(rank==="A")return 1;
@@ -151,13 +180,14 @@ function showCards(dragon,tiger){
 }
 
 function playRound(){
- // One standard 52-card deck, without replacement
  const deck=[];
+
  suits.forEach(suit=>{
   ranks.forEach(rank=>{
    deck.push({rank,suit,value:cardValue(rank)});
   });
  });
+
  for(let i=deck.length-1;i>0;i--){
   const j=Math.floor(Math.random()*(i+1));
   [deck[i],deck[j]]=[deck[j],deck[i]];
@@ -176,24 +206,31 @@ function updateSummary(){
  const stake=Number($("stakeInput").value);
  const valid=Number.isSafeInteger(stake)&&stake>0;
  const total=valid?selectedBets.size*stake:0;
+
  $("selectedCount").textContent=selectedBets.size;
- $("selectedList").textContent=[...selectedBets].map(k=>betInfo[k][0]).join(", ")||"None";
- $("stakeDisplay").textContent=$("stakeInput").value||0;
- $("totalStake").textContent=total;
+
+ $("selectedList").textContent=
+  [...selectedBets].map(k=>betInfo[k][0]).join(", ")||"None";
+
+ $("stakeDisplay").textContent=formatRM(valid?stake:0);
+ $("totalStake").textContent=formatRM(total);
 }
 
 function updateUI(){
  const locked=!currentUser||!bettingOpen||playing;
+
  $("countdown").textContent=countdown;
  $("countdown").classList.toggle("locked",locked);
 
- $("autoStatus").textContent=!currentUser?"🔴 LOGIN REQUIRED":
- playing?"🃏 DEALING CARDS...":
- bettingOpen?"🟢 AUTO ROUND ACTIVE":"🔒 BETTING CLOSED";
+ $("autoStatus").textContent=!currentUser?
+  "🔴 LOGIN REQUIRED":
+  playing?"🃏 DEALING CARDS...":
+  bettingOpen?"🟢 AUTO ROUND ACTIVE":"🔒 BETTING CLOSED";
 
- $("bettingStatus").textContent=!currentUser?"Please login first.":
- playing?"🔒 ROUND IN PROGRESS":
- bettingOpen?"🟢 BETTING OPEN":"🔒 LAST 3 SECONDS - BETTING LOCKED";
+ $("bettingStatus").textContent=!currentUser?
+  "Please login first.":
+  playing?"🔒 ROUND IN PROGRESS":
+  bettingOpen?"🟢 BETTING OPEN":"🔒 LAST 3 SECONDS - BETTING LOCKED";
 
  document.querySelectorAll("[data-bet]").forEach(button=>{
   button.disabled=locked;
@@ -201,6 +238,7 @@ function updateUI(){
  });
 
  $("stakeInput").disabled=locked;
+
  updateSummary();
 }
 
@@ -213,6 +251,7 @@ function stopCountdown(){
 
 function startCountdown(duration=ROUND_INTERVAL){
  stopCountdown();
+
  if(!currentUser||playing)return;
 
  const endTime=Date.now()+Math.max(0,duration);
@@ -224,8 +263,10 @@ function startCountdown(duration=ROUND_INTERVAL){
   }
 
   const remaining=Math.max(0,endTime-Date.now());
+
   countdown=(remaining/1000).toFixed(1);
   bettingOpen=remaining>LOCK_TIME;
+
   updateUI();
 
   if(remaining<=0){
@@ -238,12 +279,17 @@ function startCountdown(duration=ROUND_INTERVAL){
  }
 
  tick();
- if(endTime>Date.now())countdownTimer=setInterval(tick,100);
+
+ if(endTime>Date.now()){
+  countdownTimer=setInterval(tick,100);
+ }
 }
 
 function getBets(){
  const stake=Number($("stakeInput").value);
+
  if(!Number.isSafeInteger(stake)||stake<1)return [];
+
  return [...selectedBets].map(id=>({
   id,
   label:betInfo[id][0],
@@ -258,41 +304,63 @@ function calculatePayout(winner,bets){
  },0);
 }
 
+/* LOAD MYR BALANCE */
+
 async function loadBalance(){
  if(!currentUser)throw new Error("Please login first.");
 
- const snap=await get(ref(db,"users/"+currentUser.uid));
- if(!snap.exists())throw new Error("USER RECORD NOT FOUND IN FIREBASE");
+ const uid=currentUser.uid;
+ const userRef=ref(db,"users/"+uid);
+ const snap=await get(userRef);
+
+ if(!snap.exists()){
+  throw new Error("USER RECORD NOT FOUND IN FIREBASE");
+ }
 
  userRecordCache=snap.val();
+
  const points=Number(userRecordCache.demoPoints);
 
  if(!Number.isFinite(points)||points<0){
-  throw new Error("Invalid demoPoints in Firebase.");
+  throw new Error("Invalid wallet balance in Firebase.");
+ }
+
+ // Save MYR metadata without changing the existing balance.
+ if(userRecordCache.currency!=="MYR"){
+  await update(userRef,{currency:"MYR"});
+  userRecordCache.currency="MYR";
  }
 
  balance=points;
- $("balance").textContent=balance;
+ $("balance").textContent=formatRM(balance);
 }
 
-async function saveRound(result,bets,total,payout){
- const uid=currentUser.uid;
+/* SAVE GAME RESULT */
+
+async function saveRound(result,bets,total,payout,user){
+ const uid=user.uid;
  const now=Date.now();
+
  const userRef=ref(db,"users/"+uid);
  const transactionKey=push(ref(db,"users/"+uid+"/transactions")).key;
 
  const freshSnap=await get(userRef);
  const baseRecord=freshSnap.exists()?freshSnap.val():userRecordCache;
+
  if(!baseRecord)throw new Error("USER RECORD NOT FOUND");
 
  const pointsChange=payout-total;
 
  const resultTx=await runTransaction(userRef,current=>{
-  if(current===null)current=JSON.parse(JSON.stringify(baseRecord));
+  if(current===null){
+   current=JSON.parse(JSON.stringify(baseRecord));
+  }
 
   const old=Number(current.demoPoints);
+
   if(!Number.isFinite(old)||old<total)return;
 
+  current.currency="MYR";
   current.demoPoints=old+pointsChange;
   current.gamePlayed=(Number(current.gamePlayed)||0)+1;
   current.lastGameActivity=now;
@@ -300,17 +368,26 @@ async function saveRound(result,bets,total,payout){
 
   current.transactions[transactionKey]={
    type:"DRAGON_TIGER_RESULT",
+   currency:"MYR",
    mode:"AUTO",
    uid,
-   email:currentUser.email||"",
+   email:user.email||"",
    winner:result.winner,
+
    dragonCard:result.dragon,
    tigerCard:result.tiger,
+
    dragonValue:result.dragon.value,
    tigerValue:result.tiger.value,
+
    bets:bets.map(b=>({
-    label:b.label,id:b.id,stake:b.stake,multiplier:b.multiplier
+    label:b.label,
+    id:b.id,
+    stake:b.stake,
+    multiplier:b.multiplier,
+    currency:"MYR"
    })),
+
    stakeTotal:total,
    payoutTotal:payout,
    pointsChange,
@@ -327,18 +404,26 @@ async function saveRound(result,bets,total,payout){
 
  userRecordCache=resultTx.snapshot.val();
  balance=Number(userRecordCache.demoPoints)||0;
- $("balance").textContent=balance;
+
+ $("balance").textContent=formatRM(balance);
 }
+
+/* LOAD HISTORY */
 
 async function loadHistory(){
  if(!currentUser)return;
 
  const r=ref(db,"users/"+currentUser.uid+"/transactions");
- const snap=await get(query(r,orderByChild("createdAt"),limitToLast(50)));
+
+ const snap=await get(
+  query(r,orderByChild("createdAt"),limitToLast(50))
+ );
 
  const entries=Object.entries(snap.val()||{})
  .filter(x=>x[1].type==="DRAGON_TIGER_RESULT")
- .sort((a,b)=>(Number(b[1].createdAt)||0)-(Number(a[1].createdAt)||0))
+ .sort((a,b)=>
+  (Number(b[1].createdAt)||0)-(Number(a[1].createdAt)||0)
+ )
  .slice(0,50);
 
  const area=$("historyList");
@@ -355,24 +440,40 @@ async function loadHistory(){
 
   const top=document.createElement("div");
   top.className="history-top";
-  top.textContent="🏆 "+x.winner+" | Dragon "+x.dragonValue+" - Tiger "+x.tigerValue;
+
+  top.textContent=
+   "🏆 "+x.winner+
+   " | Dragon "+x.dragonValue+
+   " - Tiger "+x.tigerValue;
 
   const detail=document.createElement("div");
-  detail.textContent="Used: "+(x.stakeTotal||0)+" | Won: "+(x.payoutTotal||0)+" | Net: "+(x.pointsChange||0);
+
+  detail.textContent=
+   "Bet: "+formatRM(x.stakeTotal)+
+   " | Payout: "+formatRM(x.payoutTotal)+
+   " | Net: "+formatRM(x.pointsChange);
 
   const balanceLine=document.createElement("div");
-  balanceLine.textContent="Balance: "+(x.balanceAfter??"-")+" | "+(x.createdAt?new Date(x.createdAt).toLocaleString():"");
+
+  balanceLine.textContent=
+   "Balance: "+formatRM(x.balanceAfter)+
+   " | "+(x.createdAt?new Date(x.createdAt).toLocaleString():"");
 
   item.append(top,detail,balanceLine);
   area.appendChild(item);
  });
 }
 
+/* START AUTOMATIC ROUND */
+
 async function startRound(){
  if(!currentUser||playing)return;
 
+ const user=currentUser;
+ const uid=user.uid;
  const thisRound=++roundId;
  const started=Date.now();
+
  stopCountdown();
  bettingOpen=false;
  playing=true;
@@ -381,7 +482,9 @@ async function startRound(){
  let total=bets.reduce((sum,b)=>sum+b.stake,0);
 
  if(total>balance){
-  $("roundResult").textContent="Not enough Demo Points. Round will run without bets.";
+  $("roundResult").textContent=
+   "Insufficient MYR balance. Round will run without bets.";
+
   bets.length=0;
   total=0;
  }
@@ -390,6 +493,7 @@ async function startRound(){
  const payout=calculatePayout(result.winner,bets);
 
  updateUI();
+
  $("roundResult").textContent="🃏 DEALING...";
  $("dragonCard").textContent="🂠";
  $("tigerCard").textContent="🂠";
@@ -398,62 +502,94 @@ async function startRound(){
 
  try{
   await new Promise(resolve=>setTimeout(resolve,1200));
+
   if(thisRound!==roundId)return;
 
   showCards(result.dragon,result.tiger);
+
   await new Promise(resolve=>setTimeout(resolve,500));
+
   if(thisRound!==roundId)return;
 
-  await saveRound(result,bets,total,payout);
+  if(!currentUser||currentUser.uid!==uid){
+   throw new Error("User session changed.");
+  }
+
+  await saveRound(result,bets,total,payout,user);
 
   $("roundResult").textContent=
    "🏆 WINNER: "+result.winner+
    " | Dragon: "+result.dragon.value+
    " | Tiger: "+result.tiger.value+
-   " | Used: "+total+
-   " | Payout: "+payout+
-   " | Net: "+(payout-total);
+   " | Bet: "+formatRM(total)+
+   " | Payout: "+formatRM(payout)+
+   " | Net: "+formatRM(payout-total);
 
   await loadHistory();
 
  }catch(e){
   console.error("DRAGON TIGER ERROR:",e);
   $("roundResult").textContent="❌ ERROR: "+e.message;
+
+  try{
+   await loadBalance();
+  }catch(refreshError){
+   console.error(refreshError);
+  }
+
  }finally{
   if(thisRound===roundId){
    playing=false;
    selectedBets.clear();
    updateUI();
+
    const elapsed=Date.now()-started;
+
    startCountdown(Math.max(0,ROUND_INTERVAL-elapsed));
   }
  }
 }
+
+/* BET BUTTONS */
 
 document.querySelectorAll("[data-bet]").forEach(button=>{
  button.addEventListener("click",()=>{
   if(!currentUser||!bettingOpen||playing)return;
 
   const id=button.dataset.bet;
-  if(selectedBets.has(id))selectedBets.delete(id);
-  else selectedBets.add(id);
+
+  if(selectedBets.has(id)){
+   selectedBets.delete(id);
+  }else{
+   selectedBets.add(id);
+  }
 
   updateUI();
  });
 });
 
+/* BET AMOUNT */
+
 $("stakeInput").addEventListener("input",()=>{
- if(bettingOpen&&!playing)updateSummary();
+ if(bettingOpen&&!playing){
+  updateSummary();
+ }
 });
+
+/* BACK HOME */
 
 $("backBtn").addEventListener("click",()=>{
  window.location.href="index.html";
 });
 
+/* FIREBASE LOGIN */
+
 onAuthStateChanged(auth,async user=>{
  currentUser=user;
+
  roundId++;
  stopCountdown();
+
  bettingOpen=false;
  playing=false;
  selectedBets.clear();
@@ -461,21 +597,28 @@ onAuthStateChanged(auth,async user=>{
  if(!user){
   balance=0;
   userRecordCache=null;
+
   $("balance").textContent="Login Required";
   $("roundResult").textContent="Please login first!";
+
   updateUI();
   return;
  }
 
- $("roundResult").textContent="Loading wallet...";
+ $("roundResult").textContent="Loading MYR wallet...";
 
  try{
   await loadBalance();
   await loadHistory();
-  $("roundResult").textContent="Place your bets. Auto Round starts in 20.2 seconds.";
+
+  $("roundResult").textContent=
+   "Place your bets. Auto Round starts in 20.2 seconds.";
+
   startCountdown(ROUND_INTERVAL);
+
  }catch(e){
   console.error(e);
+
   $("roundResult").textContent="Wallet Error: "+e.message;
   updateUI();
  }

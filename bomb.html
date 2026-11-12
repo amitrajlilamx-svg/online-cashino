@@ -1,0 +1,646 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ONLINE CASHINO - BOMB GAME</title>
+
+<style>
+*{box-sizing:border-box}
+
+body{
+ margin:0;
+ background:#101010;
+ color:white;
+ font-family:Arial,sans-serif;
+}
+
+.game{
+ max-width:600px;
+ min-height:100vh;
+ margin:auto;
+ padding:10px;
+ background:linear-gradient(145deg,#202020,#080808);
+ border:2px solid #d99b18;
+}
+
+header{
+ display:flex;
+ justify-content:space-between;
+ align-items:center;
+ gap:6px;
+ flex-wrap:wrap;
+}
+
+header button{
+ background:#333;
+ color:white;
+ border:1px solid #d99b18;
+ border-radius:20px;
+ padding:8px 12px;
+ font-weight:bold;
+ font-size:12px;
+}
+
+.balance{
+ color:#ffd34d;
+ font-weight:bold;
+ font-size:14px;
+}
+
+.heading{
+ text-align:center;
+ color:#ffcc33;
+ margin:12px 0;
+ font-size:22px;
+ font-weight:bold;
+}
+
+.panel{
+ background:#252525;
+ border:1px solid #555;
+ border-radius:12px;
+ padding:10px;
+ margin:8px 0;
+}
+
+.label{
+ color:#bbb;
+ font-size:12px;
+ margin-bottom:7px;
+}
+
+.bomb-select{
+ display:flex;
+ align-items:center;
+ justify-content:space-between;
+ gap:10px;
+}
+
+.bomb-select button{
+ width:38px;
+ height:34px;
+ background:#444;
+ color:white;
+ border:1px solid #d99b18;
+ border-radius:8px;
+ font-size:19px;
+}
+
+#bombCount{
+ width:70px;
+ background:#111;
+ color:#ffd34d;
+ border:1px solid #d99b18;
+ border-radius:8px;
+ padding:7px;
+ text-align:center;
+ font-size:17px;
+ font-weight:bold;
+}
+
+.stats{
+ display:grid;
+ grid-template-columns:repeat(3,1fr);
+ gap:5px;
+ text-align:center;
+}
+
+.stat{
+ background:#111;
+ padding:8px 3px;
+ border-radius:8px;
+}
+
+.stat small{
+ display:block;
+ color:#aaa;
+ font-size:10px;
+ margin-bottom:5px;
+}
+
+.stat strong{
+ color:#ffd34d;
+ font-size:15px;
+}
+
+.grid{
+ display:grid;
+ grid-template-columns:repeat(5,minmax(0,1fr));
+ gap:5px;
+ width:100%;
+ max-width:340px;
+ margin:12px auto;
+}
+
+.tile{
+ width:100%;
+ aspect-ratio:1;
+ padding:0;
+ border:1px solid #777;
+ border-radius:6px;
+ background:linear-gradient(145deg,#555,#292929);
+ box-shadow:0 3px 4px #000;
+ color:white;
+ font-size:22px;
+ font-weight:bold;
+ cursor:pointer;
+}
+
+.tile:active{
+ transform:scale(.95);
+}
+
+.tile.safe{
+ background:linear-gradient(#37b86b,#087b37);
+ border-color:#8affb2;
+}
+
+.tile.bomb{
+ background:linear-gradient(#fa4939,#8c1009);
+ border-color:#ff9b8e;
+}
+
+.tile:disabled{
+ cursor:default;
+}
+
+.controls{
+ display:grid;
+ grid-template-columns:1fr 1fr;
+ gap:7px;
+ max-width:340px;
+ margin:10px auto;
+}
+
+.controls button{
+ padding:11px 5px;
+ border:0;
+ border-radius:10px;
+ font-size:14px;
+ font-weight:bold;
+}
+
+.random{
+ background:#555;
+ color:white;
+}
+
+.cashout{
+ background:#e5a500;
+ color:#241600;
+}
+
+.bet-area{
+ display:flex;
+ align-items:center;
+ justify-content:center;
+ gap:6px;
+ flex-wrap:wrap;
+}
+
+#bet{
+ width:85px;
+ padding:8px;
+ border-radius:8px;
+ border:1px solid #d99b18;
+ background:#111;
+ color:white;
+ text-align:center;
+ font-size:16px;
+}
+
+.bet-area button{
+ padding:8px 11px;
+ border:1px solid #d99b18;
+ border-radius:8px;
+ background:#333;
+ color:white;
+ font-size:15px;
+}
+
+.play{
+ width:100%;
+ max-width:340px;
+ display:block;
+ margin:9px auto 0;
+ padding:12px;
+ border:0;
+ border-radius:10px;
+ background:#168d39;
+ color:white;
+ font-size:17px;
+ font-weight:bold;
+}
+
+.play.cash-active{
+ background:#e5a500;
+ color:#241600;
+}
+
+.status{
+ background:#151515;
+ border:1px solid #555;
+ border-radius:10px;
+ padding:10px;
+ margin:8px 0;
+ text-align:center;
+ font-size:12px;
+ font-weight:bold;
+ color:#ffdc70;
+}
+
+.history{
+ background:#222;
+ padding:10px;
+ border-radius:10px;
+ margin-top:10px;
+ font-size:12px;
+}
+
+.history div{
+ padding:6px 2px;
+ border-bottom:1px solid #444;
+}
+
+/* SMALL MOBILE */
+@media(max-width:380px){
+ .game{padding:6px}
+ .grid{
+  max-width:300px;
+  gap:4px;
+ }
+ .tile{font-size:19px}
+ .panel{padding:8px}
+}
+
+/* LANDSCAPE MOBILE */
+@media(orientation:landscape) and (max-height:600px){
+ .game{
+  max-width:100%;
+  padding:5px 10px;
+ }
+ .heading{margin:5px;font-size:18px}
+ .panel{margin:5px 0;padding:6px}
+ .grid{
+  max-width:280px;
+  gap:4px;
+  margin:6px auto;
+ }
+ .tile{font-size:18px}
+ .controls{margin:5px auto}
+ .controls button{padding:8px}
+ .status{margin:5px 0;padding:6px}
+ .history{margin-top:5px;padding:6px}
+}
+</style>
+</head>
+
+<body>
+<div class="game">
+
+<header>
+ <button>ONLINE CASHINO</button>
+ <div class="balance">
+  POINTS: <span id="balance">3000.00</span>
+ </div>
+</header>
+
+<div class="heading">💣 BOMB GAME 💣</div>
+
+<div class="panel">
+ <div class="label">SELECT NUMBER OF BOMBS</div>
+
+ <div class="bomb-select">
+  <button onclick="changeBomb(-1)">−</button>
+  <input id="bombCount" type="number" value="3" min="1" max="24">
+  <button onclick="changeBomb(1)">+</button>
+ </div>
+
+ <div style="color:#aaa;font-size:10px;margin-top:6px">
+  Choose between 1 and 24 bombs
+ </div>
+</div>
+
+<div class="panel stats">
+ <div class="stat">
+  <small>BET AMOUNT</small>
+  <strong id="betShow">10.00</strong>
+ </div>
+
+ <div class="stat">
+  <small>MULTIPLIER</small>
+  <strong id="multiplier">x1.00</strong>
+ </div>
+
+ <div class="stat">
+  <small>WIN AMOUNT</small>
+  <strong id="winAmount">0.00</strong>
+ </div>
+</div>
+
+<div class="grid" id="grid"></div>
+
+<div class="controls">
+ <button class="random" onclick="randomBox()">🎲 RANDOM</button>
+ <button class="cashout" onclick="cashOut()">💰 CASH OUT</button>
+</div>
+
+<div class="panel">
+ <div class="label">BET AMOUNT</div>
+
+ <div class="bet-area">
+  <button onclick="adjustBet(-1)">−</button>
+  <input id="bet" type="number" value="10" min="1" step="1">
+  <button onclick="adjustBet(1)">+</button>
+  <button onclick="setBet(1)">1</button>
+  <button onclick="setBet(5)">5</button>
+  <button onclick="setBet(25)">25</button>
+  <button onclick="setBet(100)">100</button>
+  <button onclick="setBet(500)">500</button>
+ </div>
+
+ <button class="play" id="play" onclick="startGame()">▶ BET</button>
+</div>
+
+<div class="status" id="status">
+ SELECT BOMBS AND PRESS BET TO START
+</div>
+
+<div class="history">
+ <b>GAME HISTORY</b>
+ <div id="history">No games yet</div>
+</div>
+
+</div>
+
+<script>
+let balance=3000;
+let playing=false;
+let stake=0;
+let bombs=[];
+let opened=[];
+let safeCount=0;
+let multiplier=1;
+
+const TOTAL=25;
+
+function getBombCount(){
+ let n=parseInt(document.getElementById('bombCount').value,10);
+ if(!Number.isFinite(n))n=3;
+ return Math.max(1,Math.min(24,n));
+}
+
+function changeBomb(n){
+ if(playing)return;
+
+ let input=document.getElementById('bombCount');
+ input.value=Math.max(1,Math.min(24,getBombCount()+n));
+}
+
+function makeGrid(){
+ const grid=document.getElementById('grid');
+ grid.innerHTML='';
+
+ for(let i=0;i<TOTAL;i++){
+  let b=document.createElement('button');
+  b.className='tile';
+  b.disabled=true;
+  b.onclick=()=>openBox(i);
+  grid.appendChild(b);
+ }
+}
+
+function updateBalance(){
+ document.getElementById('balance').textContent=balance.toFixed(2);
+}
+
+function updateStats(){
+ document.getElementById('betShow').textContent=stake.toFixed(2);
+ document.getElementById('multiplier').textContent='x'+multiplier.toFixed(2);
+
+ document.getElementById('winAmount').textContent=
+  playing&&safeCount>0?(stake*multiplier).toFixed(2):'0.00';
+}
+
+function updateGrid(){
+ let tiles=document.querySelectorAll('.tile');
+
+ tiles.forEach((tile,i)=>{
+  tile.disabled=!playing||opened.includes(i);
+ });
+}
+
+function calculateMultiplier(){
+ let bombCount=getBombCount();
+
+ if(safeCount===0)return 1;
+
+ let chance=1;
+
+ for(let i=0;i<safeCount;i++){
+  chance*= (TOTAL-bombCount-i)/(TOTAL-i);
+ }
+
+ return Math.max(1,0.96/chance);
+}
+
+function startGame(){
+
+ if(playing){
+  cashOut();
+  return;
+ }
+
+ let amount=Number(document.getElementById('bet').value);
+
+ if(!Number.isFinite(amount)||amount<=0){
+  alert('Enter a valid bet');
+  return;
+ }
+
+ if(amount>balance){
+  alert('Insufficient demo points!');
+  return;
+ }
+
+ stake=amount;
+ balance-=stake;
+ updateBalance();
+
+ let bombCount=getBombCount();
+
+ bombs=[];
+ opened=[];
+ safeCount=0;
+ multiplier=1;
+
+ let positions=Array.from({length:TOTAL},(_,i)=>i);
+
+ for(let i=positions.length-1;i>0;i--){
+  let j=Math.floor(Math.random()*(i+1));
+  [positions[i],positions[j]]=[positions[j],positions[i]];
+ }
+
+ bombs=positions.slice(0,bombCount);
+
+ playing=true;
+
+ makeGrid();
+ updateGrid();
+
+ document.getElementById('play').textContent='💰 CASH OUT';
+ document.getElementById('play').classList.add('cash-active');
+
+ document.getElementById('status').textContent=
+  'GAME STARTED! SELECT A BOX';
+
+ updateStats();
+}
+
+function openBox(i){
+
+ if(!playing||opened.includes(i))return;
+
+ opened.push(i);
+
+ let tiles=document.querySelectorAll('.tile');
+ let isBomb=bombs.includes(i);
+
+ if(isBomb){
+
+  tiles[i].textContent='💣';
+  tiles[i].classList.add('bomb');
+
+  playing=false;
+  revealAll();
+
+  document.getElementById('status').textContent=
+   '💥 BOOM! YOU LOST '+stake.toFixed(2)+' POINTS';
+
+  addHistory('💣 LOST | '+stake.toFixed(2));
+  endGame();
+  return;
+ }
+
+ tiles[i].textContent='💎';
+ tiles[i].classList.add('safe');
+
+ safeCount++;
+ multiplier=calculateMultiplier();
+
+ document.getElementById('status').textContent=
+  '💎 SAFE BOX! '+safeCount+' OPENED | WIN: '+
+  (stake*multiplier).toFixed(2);
+
+ updateStats();
+ updateGrid();
+
+ if(safeCount===TOTAL-getBombCount()){
+  cashOut();
+ }
+}
+
+function randomBox(){
+
+ if(!playing)return;
+
+ let remaining=[];
+
+ for(let i=0;i<TOTAL;i++){
+  if(!opened.includes(i))remaining.push(i);
+ }
+
+ if(remaining.length){
+  let i=remaining[Math.floor(Math.random()*remaining.length)];
+  openBox(i);
+ }
+}
+
+function cashOut(){
+
+ if(!playing||safeCount===0){
+  document.getElementById('status').textContent=
+   'OPEN AT LEAST ONE SAFE BOX FIRST';
+  return;
+ }
+
+ let win=stake*multiplier;
+
+ balance+=win;
+ updateBalance();
+
+ playing=false;
+ revealAll();
+
+ document.getElementById('status').textContent=
+  '🏆 CASH OUT SUCCESS! +'+win.toFixed(2)+' POINTS';
+
+ addHistory('🏆 '+multiplier.toFixed(2)+'x | '+win.toFixed(2));
+ endGame();
+}
+
+function revealAll(){
+
+ let tiles=document.querySelectorAll('.tile');
+
+ tiles.forEach((tile,i)=>{
+
+  if(bombs.includes(i)){
+   tile.textContent='💣';
+   tile.classList.add('bomb');
+  }else if(!opened.includes(i)){
+   tile.textContent='💎';
+   tile.classList.add('safe');
+  }
+
+  tile.disabled=true;
+ });
+}
+
+function endGame(){
+
+ document.getElementById('play').textContent='▶ BET';
+ document.getElementById('play').classList.remove('cash-active');
+
+ updateStats();
+}
+
+function adjustBet(n){
+
+ if(playing)return;
+
+ let input=document.getElementById('bet');
+ let value=Math.max(1,Number(input.value||1)+n);
+
+ input.value=value;
+}
+
+function setBet(n){
+
+ if(playing)return;
+
+ document.getElementById('bet').value=n;
+}
+
+function addHistory(value){
+
+ let h=document.getElementById('history');
+
+ if(h.textContent==='No games yet'){
+  h.innerHTML='';
+ }
+
+ let row=document.createElement('div');
+ row.textContent=value;
+ h.prepend(row);
+}
+
+makeGrid();
+updateBalance();
+updateStats();
+</script>
+
+</body>
+</html>

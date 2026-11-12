@@ -1,0 +1,553 @@
+
+<!DOCTYPE html>
+<html lang="ne">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ONLINE CASHINO</title>
+
+<link rel="stylesheet" href="style.css">
+
+<style>
+*{box-sizing:border-box}
+
+body{
+ margin:0;
+ background:#101010;
+ color:white;
+ font-family:Arial,sans-serif;
+}
+
+header{
+ background:#174b08;
+ text-align:center;
+ padding:15px 8px;
+ border-bottom:3px solid #ffc107;
+}
+
+header h1{
+ margin:0;
+ color:#ffc107;
+ font-size:25px;
+}
+
+header h2{
+ margin:5px;
+ font-size:17px;
+}
+
+main{
+ max-width:650px;
+ margin:auto;
+ padding:12px;
+}
+
+button{
+ cursor:pointer;
+}
+
+.account,.user-panel,.game-card,.game-screen{
+ background:#292929;
+ border:1px solid #444;
+ border-radius:12px;
+ padding:14px;
+ margin:12px 0;
+}
+
+.account input{
+ width:100%;
+ padding:12px;
+ margin:6px 0;
+ border:0;
+ border-radius:7px;
+}
+
+.account button,.user-panel button{
+ padding:11px;
+ border:0;
+ border-radius:7px;
+ background:#ffc107;
+ font-weight:bold;
+ margin:4px;
+}
+
+#message{
+ color:#ffc107;
+ font-size:13px;
+}
+
+.user-panel{
+ text-align:center;
+}
+
+.game-heading{
+ text-align:center;
+ color:#ffc107;
+ margin-top:25px;
+}
+
+.game-grid{
+ display:grid;
+ grid-template-columns:repeat(2,minmax(0,1fr));
+ gap:10px;
+}
+
+.game-card{
+ text-align:center;
+ border:2px solid #a67c00;
+ margin:0;
+ padding:12px 8px;
+ min-width:0;
+}
+
+.game-icon{
+ font-size:36px;
+ display:block;
+ margin-bottom:7px;
+}
+
+.game-card h3{
+ color:#ffc107;
+ font-size:15px;
+ margin:5px 0;
+}
+
+.game-card p{
+ color:#ccc;
+ font-size:12px;
+ min-height:28px;
+}
+
+.game-card button{
+ width:100%;
+ padding:10px 3px;
+ border:0;
+ border-radius:7px;
+ font-weight:bold;
+ margin-top:5px;
+ font-size:12px;
+}
+
+.inside-btn{
+ background:#ffc107;
+ color:#111;
+}
+
+.external-btn{
+ background:#237d39;
+ color:white;
+}
+
+.game-screen{
+ text-align:center;
+}
+
+.treasure-boxes{
+ display:flex;
+ justify-content:center;
+ gap:10px;
+}
+
+.chest{
+ font-size:35px;
+ padding:12px;
+ background:#444;
+ border:1px solid #ffc107;
+ border-radius:8px;
+}
+
+#gameFrame{
+ width:100%;
+ height:75vh;
+ min-height:450px;
+ border:0;
+ border-radius:10px;
+ background:#111;
+}
+
+.frame-header{
+ display:flex;
+ justify-content:space-between;
+ align-items:center;
+ gap:8px;
+ margin-bottom:10px;
+}
+
+.frame-header button{
+ background:#ffc107;
+ color:#111;
+ border:0;
+ padding:10px 12px;
+ border-radius:7px;
+ font-weight:bold;
+}
+
+#gameViewer{
+ background:#202020;
+ padding:10px;
+ border-radius:12px;
+ margin-top:15px;
+}
+
+footer{
+ text-align:center;
+ color:#aaa;
+ padding:20px 8px;
+ font-size:12px;
+}
+
+[hidden]{display:none!important}
+
+@media(max-width:350px){
+ .game-grid{gap:6px}
+ .game-card{padding:9px 5px}
+ .game-card h3{font-size:13px}
+ .game-card button{font-size:11px}
+}
+</style>
+</head>
+
+<body>
+
+<header>
+ <h1>🎰 ONLINE CASHINO</h1>
+ <h2>बाबाको खजाना</h2>
+</header>
+
+<main>
+
+<h2>स्वागत छ!</h2>
+<p>तपाईंको मनोरञ्जन संसारमा स्वागत छ।</p>
+
+<!-- ACCOUNT -->
+<div class="account" id="accountBox">
+
+<h3>USER ACCOUNT</h3>
+
+<input type="email" id="email"
+placeholder="Enter Email">
+
+<input type="password" id="password"
+placeholder="Enter Password">
+
+<button id="registerBtn">CREATE ACCOUNT</button>
+<button id="loginBtn">LOGIN</button>
+<button id="logoutBtn" hidden>LOGOUT</button>
+
+<p id="message">Please Login or Create Account</p>
+
+</div>
+
+<!-- USER MENU -->
+<div class="user-panel" id="userMenu" hidden>
+
+<h3>👤 USER MENU</h3>
+
+<button id="profileBtn">👤 MY PROFILE</button>
+<button id="walletBtn">🎁 MY WALLET</button>
+<button id="logoutMenuBtn">LOGOUT</button>
+
+</div>
+
+<!-- ALL GAMES -->
+<section id="allGames" hidden>
+
+<h2 class="game-heading">🎮 ALL GAMES</h2>
+
+<div class="game-grid">
+
+<!-- BABAKO KHAJANA -->
+<div class="game-card">
+ <span class="game-icon">🎁</span>
+ <h3>BABAKO KHAJANA</h3>
+ <p>Treasure Demo Game</p>
+ <button class="inside-btn"
+ onclick="playTreasure()">PLAY INSIDE</button>
+ <button class="external-btn"
+ onclick="openExternal('babako.html')">
+ OPEN PAGE
+ </button>
+</div>
+
+<!-- ROULETTE -->
+<div class="game-card">
+ <span class="game-icon">🎡</span>
+ <h3>ROULETTE</h3>
+ <p>Free Demo Points Roulette</p>
+ <button class="inside-btn"
+ onclick="playInside('roulette.html','ROULETTE')">
+ PLAY INSIDE
+ </button>
+ <button class="external-btn"
+ onclick="openExternal('roulette.html')">
+ OPEN PAGE
+ </button>
+</div>
+
+<!-- BACCARAT -->
+<div class="game-card">
+ <span class="game-icon">🃏</span>
+ <h3>BACCARAT</h3>
+ <p>Card Demo Game</p>
+ <button class="inside-btn"
+ onclick="playInside('baccarat.html','BACCARAT')">
+ PLAY INSIDE
+ </button>
+ <button class="external-btn"
+ onclick="openExternal('baccarat.html')">
+ OPEN PAGE
+ </button>
+</div>
+
+<!-- DRAGON TIGER -->
+<div class="game-card">
+ <span class="game-icon">🐉🐯</span>
+ <h3>DRAGON TIGER</h3>
+ <p>Dragon Tiger Demo Game</p>
+ <button class="inside-btn"
+ onclick="playInside('dragon-tiger.html','DRAGON TIGER')">
+ PLAY INSIDE
+ </button>
+ <button class="external-btn"
+ onclick="openExternal('dragon-tiger.html')">
+ OPEN PAGE
+ </button>
+</div>
+
+<!-- AVIATOR -->
+<div class="game-card">
+ <span class="game-icon">✈️</span>
+ <h3>AVIATOR</h3>
+ <p>Flying Plane Demo Game</p>
+ <button class="inside-btn"
+ onclick="playInside('aviator.html','AVIATOR')">
+ PLAY INSIDE
+ </button>
+ <button class="external-btn"
+ onclick="openExternal('aviator.html')">
+ OPEN PAGE
+ </button>
+</div>
+
+<!-- GOAL -->
+<div class="game-card">
+ <span class="game-icon">⚽</span>
+ <h3>GOAL GAME</h3>
+ <p>Football Goal Demo Game</p>
+ <button class="inside-btn"
+ onclick="playInside('goal.html','GOAL GAME')">
+ PLAY INSIDE
+ </button>
+ <button class="external-btn"
+ onclick="openExternal('goal.html')">
+ OPEN PAGE
+ </button>
+</div>
+
+<!-- BOMB -->
+<div class="game-card">
+ <span class="game-icon">💣</span>
+ <h3>BOMB GAME</h3>
+ <p>Bomb Demo Game</p>
+ <button class="inside-btn"
+ onclick="playInside('bomb.html','BOMB GAME')">
+ PLAY INSIDE
+ </button>
+ <button class="external-btn"
+ onclick="openExternal('bomb.html')">
+ OPEN PAGE
+ </button>
+</div>
+
+</div>
+</section>
+
+<!-- BABAKO KHAJANA INLINE GAME -->
+<section id="treasureScreen" class="game-screen" hidden>
+
+<h2>🎁 बाबाको खजाना</h2>
+<p>आफ्नो मनपर्ने खजाना बाकस छान्नुहोस्!</p>
+
+<div class="treasure-boxes">
+ <button class="chest" data-chest="1">🎁</button>
+ <button class="chest" data-chest="2">🎁</button>
+ <button class="chest" data-chest="3">🎁</button>
+</div>
+
+<h3 id="gameMessage">एउटा बाकस छान्नुहोस्!</h3>
+<p id="demoPoints">Demo Points: 0</p>
+
+<button id="againBtn"
+style="padding:12px;background:#ffc107;border:0;border-radius:7px">
+ PLAY AGAIN
+</button>
+
+<button onclick="backHome()"
+style="padding:12px;background:#555;color:white;border:0;border-radius:7px">
+ BACK HOME
+</button>
+
+</section>
+
+<!-- OTHER GAME INSIDE PAGE -->
+<section id="gameViewer" hidden>
+
+<div class="frame-header">
+ <strong id="frameTitle">GAME</strong>
+ <button onclick="backHome()">✖ CLOSE GAME</button>
+</div>
+
+<iframe id="gameFrame"
+title="ONLINE CASHINO GAME"
+allow="fullscreen">
+</iframe>
+
+</section>
+
+</main>
+
+<footer>
+ ONLINE CASHINO © 2026
+ <p>बाबाको खजाना</p>
+ <p>Free demo only. No real money or cash prizes.</p>
+</footer>
+
+<!-- EXISTING SCRIPTS -->
+<script type="module" src="auth.js"></script>
+<script type="module" src="game.js"></script>
+
+<!-- NAVIGATION -->
+<script type="module">
+
+import {auth} from "./firebase-config.js";
+
+import {
+ onAuthStateChanged,
+ signOut
+} from "https://www.gstatic.com/firebasejs/13.2.0/firebase-auth.js";
+
+const userMenu=document.getElementById("userMenu");
+const allGames=document.getElementById("allGames");
+const accountBox=document.getElementById("accountBox");
+
+const treasureScreen=document.getElementById("treasureScreen");
+const gameViewer=document.getElementById("gameViewer");
+
+const gameFrame=document.getElementById("gameFrame");
+const frameTitle=document.getElementById("frameTitle");
+
+let loggedIn=false;
+
+onAuthStateChanged(auth,user=>{
+
+ loggedIn=!!user;
+
+ userMenu.hidden=!loggedIn;
+ allGames.hidden=!loggedIn;
+
+ document.getElementById("logoutBtn").hidden=!loggedIn;
+ document.getElementById("loginBtn").hidden=loggedIn;
+ document.getElementById("registerBtn").hidden=loggedIn;
+
+ if(!loggedIn){
+  accountBox.hidden=false;
+  treasureScreen.hidden=true;
+  gameViewer.hidden=true;
+ }else{
+  accountBox.hidden=true;
+ }
+
+});
+
+function checkLogin(){
+ if(!auth.currentUser){
+  alert("Please Login First");
+  return false;
+ }
+ return true;
+}
+
+// PLAY INSIDE
+window.playInside=function(filename,name){
+
+ if(!checkLogin())return;
+
+ treasureScreen.hidden=true;
+ gameViewer.hidden=false;
+
+ frameTitle.textContent="🎮 "+name;
+ gameFrame.src=filename;
+
+ window.scrollTo({top:0,behavior:"smooth"});
+};
+
+// OPEN SEPARATE PAGE
+window.openExternal=function(filename){
+
+ if(!checkLogin())return;
+
+ window.open(filename,"_blank");
+
+};
+
+// BABAKO KHAJANA INSIDE
+window.playTreasure=function(){
+
+ if(!checkLogin())return;
+
+ gameViewer.hidden=true;
+ gameFrame.src="about:blank";
+
+ treasureScreen.hidden=false;
+
+ window.scrollTo({top:0,behavior:"smooth"});
+};
+
+// BACK HOME
+window.backHome=function(){
+
+ treasureScreen.hidden=true;
+ gameViewer.hidden=true;
+
+ gameFrame.src="about:blank";
+
+ window.scrollTo({top:0,behavior:"smooth"});
+};
+
+// PROFILE
+document.getElementById("profileBtn")
+.addEventListener("click",()=>{
+
+ if(checkLogin()){
+  window.location.href="profile.html";
+ }
+
+});
+
+// WALLET
+document.getElementById("walletBtn")
+.addEventListener("click",()=>{
+
+ if(checkLogin()){
+  window.location.href="wallet.html";
+ }
+
+});
+
+// LOGOUT
+document.getElementById("logoutMenuBtn")
+.addEventListener("click",async()=>{
+
+ try{
+  await signOut(auth);
+  backHome();
+ }catch(error){
+  alert(error.message);
+ }
+
+});
+
+</script>
+
+</body>
+</html>

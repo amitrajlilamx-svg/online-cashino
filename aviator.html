@@ -609,3 +609,110 @@ function showHistory(data){
  box.innerHTML="";
 
  if(!data || Object.keys(data).length===0){
+  box.innerHTML='<div class="history-item">No game history yet</div>';
+  return;
+ }
+
+ const records=Object.entries(data)
+  .map(([id,item])=>({id,...item}))
+  .sort((a,b)=>
+   (Number(b.createdAt)||0)-(Number(a.createdAt)||0)
+  )
+  .slice(0,20);
+
+ records.forEach(item=>{
+
+  const card=document.createElement("div");
+
+  let label;
+
+  if(item.status==="RUNNING" || item.status==="WAITING"){
+   card.className="history-item running";
+   label="✈ RUNNING";
+  }else if(item.cashedOut){
+   card.className="history-item";
+   label="✓ WIN";
+  }else{
+   card.className="history-item low";
+   label="✕ LOST";
+  }
+
+  const crashText=Number(item.crashMultiplier)>0
+   ? Number(item.crashMultiplier).toFixed(2)+"x"
+   : "Waiting";
+
+  const cashText=item.cashedOut
+   ? " | Cash Out: "+Number(item.cashoutMultiplier).toFixed(2)+"x"
+   : "";
+
+  card.textContent=
+   label+
+   " | Bet: "+Number(item.bet||0).toFixed(2)+
+   " | Crash: "+crashText+
+   cashText;
+
+  box.appendChild(card);
+ });
+}
+
+// BUTTONS
+$("betBtn").addEventListener("click",placeBet);
+$("cashBtn").addEventListener("click",cashOut);
+
+// LOGIN
+onAuthStateChanged(auth,user=>{
+
+ if(!user){
+  window.location.href="index.html";
+  return;
+ }
+
+ currentUser=user;
+
+ const balanceRef=ref(db,"users/"+user.uid+"/demoPoints");
+
+ onValue(balanceRef,snapshot=>{
+
+  const value=Number(snapshot.val());
+
+  if(!snapshot.exists() || !Number.isFinite(value)){
+   walletReady=false;
+   $("status").textContent="WALLET BALANCE INVALID";
+   updateDisplay();
+   return;
+  }
+
+  balance=value;
+  walletReady=true;
+
+  updateDisplay();
+
+  if(roundPhase==="WAITING" &&
+     !countdownTimer &&
+     !flightTimer){
+   startNewRound();
+  }
+
+ },error=>{
+
+  walletReady=false;
+  $("status").textContent="WALLET ERROR: "+error.message;
+  updateDisplay();
+ });
+
+ const historyRef=ref(
+  db,"users/"+user.uid+"/aviatorHistory"
+ );
+
+ onValue(historyRef,snapshot=>{
+  showHistory(snapshot.val());
+ },error=>{
+  $("history").textContent="HISTORY ERROR: "+error.message;
+ });
+
+});
+
+updateDisplay();
+</script>
+</body>
+</html>

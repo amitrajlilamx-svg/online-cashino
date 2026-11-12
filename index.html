@@ -11,28 +11,23 @@
 html,body{
  margin:0;padding:0;width:100%;min-height:100%;
  background:#080f1c;color:white;
- font-family:Arial,sans-serif;
- overflow-x:hidden;
+ font-family:Arial,sans-serif;overflow-x:hidden;
 }
 body{max-width:500px;margin:auto;padding-bottom:75px}
 
-/* HEADER */
 .topbar{
  display:flex;align-items:center;justify-content:space-between;
- padding:13px 12px;
- background:#101d30;
+ padding:13px 12px;background:#101d30;
  border-bottom:1px solid #263c56;
  position:sticky;top:0;z-index:20;
 }
 .logo{font-size:19px;font-weight:900;color:#ffd34d}
 .logo small{display:block;font-size:9px;color:#aab9ca;letter-spacing:2px;margin-top:3px}
-.top-actions{display:flex;align-items:center;gap:7px}
 .top-btn{
  background:#263c56;color:white;border:1px solid #49617c;
  border-radius:8px;padding:9px;font-size:11px;font-weight:bold;
 }
 
-/* WALLET */
 .wallet-card{
  margin:12px;padding:14px;border-radius:12px;
  background:linear-gradient(110deg,#174b37,#102c38);
@@ -46,7 +41,6 @@ body{max-width:500px;margin:auto;padding-bottom:75px}
  padding:10px 12px;font-weight:bold;color:#171717;
 }
 
-/* LOGIN */
 .account{
  margin:13px;padding:15px;border-radius:12px;
  background:#142237;border:1px solid #344a65;
@@ -64,7 +58,6 @@ body{max-width:500px;margin:auto;padding-bottom:75px}
 }
 #message{font-size:12px;color:#ffe16a}
 
-/* PROFILE */
 .user-panel{
  margin:12px;padding:12px;border-radius:10px;
  background:#142237;border:1px solid #344a65;
@@ -77,12 +70,11 @@ body{max-width:500px;margin:auto;padding-bottom:75px}
  background:#263c56;color:white;font-weight:bold;font-size:11px;
 }
 
-/* BANNER */
 .banner{
  margin:12px;padding:19px 15px;border-radius:13px;
  background:linear-gradient(120deg,#703d12,#b57b20,#3c2814);
- border:1px solid #e4b54c;
- min-height:125px;position:relative;overflow:hidden;
+ border:1px solid #e4b54c;min-height:125px;
+ position:relative;overflow:hidden;
 }
 .banner:after{
  content:"🎰";position:absolute;right:13px;top:20px;
@@ -92,10 +84,26 @@ body{max-width:500px;margin:auto;padding-bottom:75px}
 .banner p{font-size:12px;color:#fff1c4;margin:8px 0}
 .banner strong{font-size:10px;color:#fff}
 
-/* CATEGORY */
+.quick-grid{
+ display:grid;grid-template-columns:repeat(3,1fr);
+ gap:8px;padding:0 12px;
+}
+.quick-item{
+ background:#15243a;border:1px solid #304760;
+ border-radius:9px;text-align:center;padding:12px 4px;
+ color:white;font-size:11px;font-weight:bold;
+}
+.quick-item span{display:block;font-size:22px;margin-bottom:6px}
+
+.section-head{
+ display:flex;justify-content:space-between;align-items:center;
+ margin:17px 12px 10px;
+}
+.section-head h2{font-size:16px;margin:0;color:#ffd34d}
+.section-head span{font-size:10px;color:#9db0c6}
+
 .category-row{
- display:flex;gap:8px;overflow-x:auto;
- padding:4px 12px 12px;
+ display:flex;gap:8px;overflow-x:auto;padding:4px 12px 12px;
 }
 .category-row button{
  flex:0 0 auto;background:#17273c;color:#dce8f5;
@@ -103,13 +111,6 @@ body{max-width:500px;margin:auto;padding-bottom:75px}
  padding:9px 15px;font-size:11px;font-weight:bold;
 }
 
-/* GAME LIST */
-.section-head{
- display:flex;justify-content:space-between;align-items:center;
- margin:13px 12px 10px;
-}
-.section-head h2{font-size:16px;margin:0;color:#ffd34d}
-.section-head span{font-size:10px;color:#9db0c6}
 .game-grid{
  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
  gap:10px;padding:0 12px;
@@ -126,34 +127,14 @@ body{max-width:500px;margin:auto;padding-bottom:75px}
  font-size:34px;
 }
 .game-card h3{font-size:13px;color:#ffdc64;margin:7px 0}
-.game-card p{
- color:#aebed0;font-size:10px;margin:5px 0 10px;
- min-height:23px;
-}
+.game-card p{color:#aebed0;font-size:10px;margin:5px 0 10px;min-height:23px}
 .game-card button{
  width:100%;padding:11px 3px;border:0;border-radius:6px;
  background:linear-gradient(90deg,#ffcf43,#f5a900);
  color:#171717;font-weight:bold;font-size:11px;
 }
 .game-card button:active{transform:scale(.97)}
-.game-card .open-btn{
- margin-top:6px;background:#263e58;color:white;
- border:1px solid #4d6682;
-}
 
-/* QUICK MENU */
-.quick-grid{
- display:grid;grid-template-columns:repeat(3,1fr);
- gap:8px;padding:0 12px;
-}
-.quick-item{
- background:#15243a;border:1px solid #304760;
- border-radius:9px;text-align:center;padding:12px 4px;
- color:white;font-size:11px;font-weight:bold;
-}
-.quick-item span{display:block;font-size:22px;margin-bottom:6px}
-
-/* GAME VIEWER */
 #gameViewer{
  margin:12px;padding:9px;background:#142237;
  border:1px solid #d8a72e;border-radius:10px;
@@ -172,13 +153,11 @@ body{max-width:500px;margin:auto;padding-bottom:75px}
  border:0;border-radius:7px;background:#080f1c;
 }
 
-/* BOTTOM NAV */
 .bottom-nav{
  position:fixed;bottom:0;left:50%;transform:translateX(-50%);
  width:100%;max-width:500px;height:64px;
  background:#101d30;border-top:1px solid #344b67;
- display:grid;grid-template-columns:repeat(4,1fr);
- z-index:30;
+ display:grid;grid-template-columns:repeat(4,1fr);z-index:30;
 }
 .bottom-nav button{
  border:0;background:transparent;color:#aebed0;
@@ -197,18 +176,14 @@ footer{
 
 <body>
 
-<!-- TOP HEADER -->
 <header class="topbar">
  <div class="logo">
   🎰 ONLINE CASHINO
   <small>GAMING ENTERTAINMENT</small>
  </div>
- <div class="top-actions">
-  <button class="top-btn" id="headerProfile">👤 PROFILE</button>
- </div>
+ <button class="top-btn" id="headerProfile">👤 PROFILE</button>
 </header>
 
-<!-- WALLET -->
 <div class="wallet-card" id="walletCard" hidden>
  <div>
   <div class="wallet-label">MY DEMO WALLET</div>
@@ -228,7 +203,6 @@ footer{
  <p id="message">Please Login or Create Account</p>
 </div>
 
-<!-- USER INFO -->
 <div class="user-panel" id="userMenu" hidden>
  <div class="user-info">
   <strong>WELCOME TO ONLINE CASHINO</strong>
@@ -237,7 +211,6 @@ footer{
  <button id="logoutMenuBtn">LOGOUT</button>
 </div>
 
-<!-- HOME CONTENT -->
 <section id="homeContent" hidden>
 
  <div class="banner">
@@ -265,73 +238,66 @@ footer{
 
  <div class="category-row">
   <button onclick="showGames()">ALL GAMES</button>
-  <button onclick="openGame('goal.html','GOAL GAME')">SPORTS</button>
-  <button onclick="openGame('aviator.html','AVIATOR')">CRASH</button>
-  <button onclick="openGame('bomb.html','BOMB GAME')">ARCADE</button>
+  <button onclick="filterGame('SPORTS')">SPORTS</button>
+  <button onclick="filterGame('CRASH')">CRASH</button>
+  <button onclick="filterGame('ARCADE')">ARCADE</button>
  </div>
 
  <div class="game-grid" id="gameGrid">
 
-  <div class="game-card">
+  <div class="game-card" data-category="ARCADE">
    <div class="game-icon">🎁</div>
    <h3>BABAKO KHAJANA</h3>
    <p>Treasure Demo Game</p>
    <button onclick="openGame('babako.html','BABAKO KHAJANA')">PLAY NOW</button>
-   <button class="open-btn" onclick="openPage('babako.html')">OPEN PAGE</button>
   </div>
 
-  <div class="game-card">
+  <div class="game-card" data-category="ARCADE">
    <div class="game-icon">🎡</div>
    <h3>ROULETTE</h3>
    <p>Free Demo Points Roulette</p>
    <button onclick="openGame('roulette.html','ROULETTE')">PLAY NOW</button>
-   <button class="open-btn" onclick="openPage('roulette.html')">OPEN PAGE</button>
   </div>
 
-  <div class="game-card">
+  <div class="game-card" data-category="ARCADE">
    <div class="game-icon">🃏</div>
    <h3>BACCARAT</h3>
    <p>Card Demo Game</p>
    <button onclick="openGame('baccarat.html','BACCARAT')">PLAY NOW</button>
-   <button class="open-btn" onclick="openPage('baccarat.html')">OPEN PAGE</button>
   </div>
 
-  <div class="game-card">
+  <div class="game-card" data-category="ARCADE">
    <div class="game-icon">🐉</div>
    <h3>DRAGON TIGER</h3>
    <p>Dragon Tiger Demo Game</p>
    <button onclick="openGame('dragon-tiger.html','DRAGON TIGER')">PLAY NOW</button>
-   <button class="open-btn" onclick="openPage('dragon-tiger.html')">OPEN PAGE</button>
   </div>
 
-  <div class="game-card">
+  <div class="game-card" data-category="CRASH">
    <div class="game-icon">✈️</div>
    <h3>AVIATOR</h3>
    <p>Flying Plane Demo Game</p>
    <button onclick="openGame('aviator.html','AVIATOR')">PLAY NOW</button>
-   <button class="open-btn" onclick="openPage('aviator.html')">OPEN PAGE</button>
   </div>
 
-  <div class="game-card">
+  <div class="game-card" data-category="SPORTS">
    <div class="game-icon">⚽</div>
    <h3>GOAL GAME</h3>
    <p>Football Goal Game</p>
    <button onclick="openGame('goal.html','GOAL GAME')">PLAY NOW</button>
-   <button class="open-btn" onclick="openPage('goal.html')">OPEN PAGE</button>
   </div>
 
-  <div class="game-card">
+  <div class="game-card" data-category="ARCADE">
    <div class="game-icon">💣</div>
    <h3>BOMB GAME</h3>
    <p>Find safe boxes Demo Game</p>
    <button onclick="openGame('bomb.html','BOMB GAME')">PLAY NOW</button>
-   <button class="open-btn" onclick="openPage('bomb.html')">OPEN PAGE</button>
   </div>
 
  </div>
 </section>
 
-<!-- GAME VIEWER -->
+<!-- GAME OPEN INSIDE HOME PAGE -->
 <section id="gameViewer" hidden>
  <div class="frame-header">
   <strong id="frameTitle">🎮 GAME</strong>
@@ -346,7 +312,6 @@ footer{
  Free demo only. No real money or cash prizes.
 </footer>
 
-<!-- BOTTOM NAV -->
 <nav class="bottom-nav" id="bottomNav" hidden>
  <button class="active" onclick="backHome()">
   <span>🏠</span>HOME
@@ -362,7 +327,6 @@ footer{
  </button>
 </nav>
 
-<!-- EXISTING AUTH AND GAME SCRIPTS -->
 <script type="module" src="auth.js"></script>
 <script type="module" src="game.js"></script>
 
@@ -370,8 +334,7 @@ footer{
 import {auth,db} from "./firebase-config.js";
 
 import {
- onAuthStateChanged,
- signOut
+ onAuthStateChanged,signOut
 } from "https://www.gstatic.com/firebasejs/13.2.0/firebase-auth.js";
 
 import {
@@ -396,14 +359,6 @@ function checkLogin(){
  }
  return true;
 }
-
-function showGames(){
- document.getElementById("gameGrid").scrollIntoView({
-  behavior:"smooth",block:"start"
- });
-}
-
-window.showGames=showGames;
 
 onAuthStateChanged(auth,user=>{
 
@@ -440,33 +395,49 @@ onAuthStateChanged(auth,user=>{
 
 });
 
-// PLAY INSIDE
+// PLAY GAME INSIDE HOME PAGE
 window.openGame=function(filename,name){
 
  if(!checkLogin())return;
 
+ homeContent.hidden=true;
  gameViewer.hidden=false;
- gameFrame.src=filename;
  frameTitle.textContent="🎮 "+name;
+ gameFrame.src=filename;
 
  window.scrollTo({top:0,behavior:"smooth"});
 };
 
-// OPEN PAGE
-window.openPage=function(filename){
-
- if(!checkLogin())return;
-
- window.open(filename,"_blank");
-};
-
-// BACK HOME
+// BACK TO HOME
 window.backHome=function(){
 
  gameViewer.hidden=true;
  gameFrame.src="about:blank";
+ homeContent.hidden=!auth.currentUser;
 
  window.scrollTo({top:0,behavior:"smooth"});
+};
+
+// FILTER GAMES
+window.filterGame=function(category){
+
+ if(!checkLogin())return;
+
+ homeContent.hidden=false;
+ gameViewer.hidden=true;
+
+ document.querySelectorAll(".game-card").forEach(card=>{
+  card.hidden=category!=="ALL" &&
+   card.dataset.category!==category;
+ });
+
+ document.getElementById("gameGrid").scrollIntoView({
+  behavior:"smooth"
+ });
+};
+
+window.showGames=function(){
+ window.filterGame("ALL");
 };
 
 // WALLET
@@ -496,18 +467,15 @@ window.goHistory=goHistory;
 document.getElementById("quickHistory").onclick=goHistory;
 
 // LOGOUT
-async function logout(){
+document.getElementById("logoutMenuBtn").onclick=async()=>{
  try{
   await signOut(auth);
   window.backHome();
  }catch(error){
   alert("Logout Error: "+error.message);
  }
-}
-
-document.getElementById("logoutMenuBtn").onclick=logout;
+};
 
 </script>
-
 </body>
 </html>

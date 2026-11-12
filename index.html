@@ -13,7 +13,7 @@ html,body{
  background:#080f1c;color:white;
  font-family:Arial,sans-serif;overflow-x:hidden;
 }
-body{max-width:500px;margin:auto;padding-bottom:75px}
+body{max-width:500px;margin:auto;padding-bottom:80px}
 
 .topbar{
  display:flex;align-items:center;justify-content:space-between;
@@ -65,10 +65,6 @@ body{max-width:500px;margin:auto;padding-bottom:75px}
 }
 .user-info{font-size:12px;color:#c4d3e5}
 .user-info strong{display:block;color:#ffd34d;font-size:14px;margin-bottom:4px}
-.user-panel button{
- border:0;border-radius:7px;padding:10px;
- background:#263c56;color:white;font-weight:bold;font-size:11px;
-}
 
 .banner{
  margin:12px;padding:19px 15px;border-radius:13px;
@@ -155,16 +151,18 @@ body{max-width:500px;margin:auto;padding-bottom:75px}
 
 .bottom-nav{
  position:fixed;bottom:0;left:50%;transform:translateX(-50%);
- width:100%;max-width:500px;height:64px;
+ width:100%;max-width:500px;height:66px;
  background:#101d30;border-top:1px solid #344b67;
- display:grid;grid-template-columns:repeat(4,1fr);z-index:30;
+ display:grid;grid-template-columns:repeat(5,1fr);
+ z-index:30;
 }
 .bottom-nav button{
  border:0;background:transparent;color:#aebed0;
- font-size:10px;font-weight:bold;
+ font-size:9px;font-weight:bold;padding:4px 0;
 }
-.bottom-nav span{display:block;font-size:21px;margin-bottom:3px}
+.bottom-nav span{display:block;font-size:20px;margin-bottom:3px}
 .bottom-nav button.active{color:#ffd34d}
+.bottom-nav button.logout{color:#ff7777}
 
 footer{
  text-align:center;padding:20px 5px;color:#8192a6;
@@ -176,6 +174,7 @@ footer{
 
 <body>
 
+<!-- HEADER -->
 <header class="topbar">
  <div class="logo">
   🎰 ONLINE CASHINO
@@ -184,6 +183,7 @@ footer{
  <button class="top-btn" id="headerProfile">👤 PROFILE</button>
 </header>
 
+<!-- WALLET -->
 <div class="wallet-card" id="walletCard" hidden>
  <div>
   <div class="wallet-label">MY DEMO WALLET</div>
@@ -199,18 +199,18 @@ footer{
  <input type="password" id="password" placeholder="Enter Password">
  <button id="registerBtn">CREATE ACCOUNT</button>
  <button id="loginBtn">LOGIN</button>
- <button id="logoutBtn" hidden>LOGOUT</button>
  <p id="message">Please Login or Create Account</p>
 </div>
 
+<!-- USER INFO -->
 <div class="user-panel" id="userMenu" hidden>
  <div class="user-info">
   <strong>WELCOME TO ONLINE CASHINO</strong>
   <span id="userEmail">User Account</span>
  </div>
- <button id="logoutMenuBtn">LOGOUT</button>
 </div>
 
+<!-- HOME -->
 <section id="homeContent" hidden>
 
  <div class="banner">
@@ -237,7 +237,7 @@ footer{
  </div>
 
  <div class="category-row">
-  <button onclick="showGames()">ALL GAMES</button>
+  <button onclick="filterGame('ALL')">ALL GAMES</button>
   <button onclick="filterGame('SPORTS')">SPORTS</button>
   <button onclick="filterGame('CRASH')">CRASH</button>
   <button onclick="filterGame('ARCADE')">ARCADE</button>
@@ -297,7 +297,7 @@ footer{
  </div>
 </section>
 
-<!-- GAME OPEN INSIDE HOME PAGE -->
+<!-- GAME VIEWER -->
 <section id="gameViewer" hidden>
  <div class="frame-header">
   <strong id="frameTitle">🎮 GAME</strong>
@@ -312,21 +312,32 @@ footer{
  Free demo only. No real money or cash prizes.
 </footer>
 
+<!-- BOTTOM NAVIGATION -->
 <nav class="bottom-nav" id="bottomNav" hidden>
+
  <button class="active" onclick="backHome()">
   <span>🏠</span>HOME
  </button>
+
  <button onclick="goWallet()">
   <span>💰</span>WALLET
  </button>
+
  <button onclick="goHistory()">
   <span>📜</span>HISTORY
  </button>
+
  <button onclick="goProfile()">
   <span>👤</span>PROFILE
  </button>
+
+ <button class="logout" onclick="logoutUser()">
+  <span>🚪</span>LOGOUT
+ </button>
+
 </nav>
 
+<!-- EXISTING PROJECT SCRIPTS -->
 <script type="module" src="auth.js"></script>
 <script type="module" src="game.js"></script>
 
@@ -334,7 +345,8 @@ footer{
 import {auth,db} from "./firebase-config.js";
 
 import {
- onAuthStateChanged,signOut
+ onAuthStateChanged,
+ signOut
 } from "https://www.gstatic.com/firebasejs/13.2.0/firebase-auth.js";
 
 import {
@@ -348,7 +360,6 @@ const walletCard=document.getElementById("walletCard");
 const bottomNav=document.getElementById("bottomNav");
 const gameViewer=document.getElementById("gameViewer");
 const gameFrame=document.getElementById("gameFrame");
-const frameTitle=document.getElementById("frameTitle");
 
 let walletListener=null;
 
@@ -360,6 +371,7 @@ function checkLogin(){
  return true;
 }
 
+// LOGIN STATUS
 onAuthStateChanged(auth,user=>{
 
  const loggedIn=!!user;
@@ -395,25 +407,30 @@ onAuthStateChanged(auth,user=>{
 
 });
 
-// PLAY GAME INSIDE HOME PAGE
+// OPEN GAME INSIDE HOME PAGE
 window.openGame=function(filename,name){
 
  if(!checkLogin())return;
 
  homeContent.hidden=true;
  gameViewer.hidden=false;
- frameTitle.textContent="🎮 "+name;
+
+ document.getElementById("frameTitle").textContent="🎮 "+name;
  gameFrame.src=filename;
 
  window.scrollTo({top:0,behavior:"smooth"});
 };
 
-// BACK TO HOME
+// BACK HOME
 window.backHome=function(){
 
  gameViewer.hidden=true;
  gameFrame.src="about:blank";
  homeContent.hidden=!auth.currentUser;
+
+ document.querySelectorAll(".game-card").forEach(card=>{
+  card.hidden=false;
+ });
 
  window.scrollTo({top:0,behavior:"smooth"});
 };
@@ -436,46 +453,48 @@ window.filterGame=function(category){
  });
 };
 
-window.showGames=function(){
- window.filterGame("ALL");
+// WALLET
+window.goWallet=function(){
+ if(checkLogin())window.location.href="wallet.html";
 };
 
-// WALLET
-function goWallet(){
- if(checkLogin())window.location.href="wallet.html";
-}
-window.goWallet=goWallet;
-
-document.getElementById("walletBtn").onclick=goWallet;
-document.getElementById("quickWallet").onclick=goWallet;
+document.getElementById("walletBtn").onclick=window.goWallet;
+document.getElementById("quickWallet").onclick=window.goWallet;
 
 // PROFILE
-function goProfile(){
+window.goProfile=function(){
  if(checkLogin())window.location.href="profile.html";
-}
-window.goProfile=goProfile;
+};
 
-document.getElementById("headerProfile").onclick=goProfile;
-document.getElementById("quickProfile").onclick=goProfile;
+document.getElementById("headerProfile").onclick=window.goProfile;
+document.getElementById("quickProfile").onclick=window.goProfile;
 
 // HISTORY
-function goHistory(){
+window.goHistory=function(){
  if(checkLogin())window.location.href="history.html";
-}
-window.goHistory=goHistory;
+};
 
-document.getElementById("quickHistory").onclick=goHistory;
+document.getElementById("quickHistory").onclick=window.goHistory;
 
-// LOGOUT
-document.getElementById("logoutMenuBtn").onclick=async()=>{
+// LOGOUT - ONLY BOTTOM NAVIGATION
+window.logoutUser=async function(){
+
+ if(!auth.currentUser)return;
+
+ const confirmed=confirm("Are you sure you want to logout?");
+ if(!confirmed)return;
+
  try{
   await signOut(auth);
-  window.backHome();
+  gameViewer.hidden=true;
+  gameFrame.src="about:blank";
+  window.scrollTo({top:0,behavior:"smooth"});
  }catch(error){
   alert("Logout Error: "+error.message);
  }
 };
 
 </script>
+
 </body>
 </html>
